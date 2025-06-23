@@ -31,6 +31,17 @@ const routes = [
     },
     component: () => import('@/view/error/index.vue')
   },
+  {
+    path: '/demo',
+    name: 'Demo',
+    meta: { title: 'Demo管理', icon: 'example' },
+    children: [{
+      path: 'record',
+      name: 'DemoRecord',
+      component: () => import('@/view/example/demo/record.vue'),
+      meta: { title: '记录管理', icon: 'table' }
+    }]
+  },
 ]
 
 const router = createRouter({

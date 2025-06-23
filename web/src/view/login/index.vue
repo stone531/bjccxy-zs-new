@@ -79,6 +79,7 @@
                   >登 录</el-button
                 >
               </el-form-item>
+              <!--
               <el-form-item class="mb-6">
                 <el-button
                   class="shadow shadow-active h-11 w-full"
@@ -88,6 +89,7 @@
                   >前往初始化</el-button
                 >
               </el-form-item>
+              -->
             </el-form>
           </div>
         </div>
@@ -102,6 +104,7 @@
     </div>
 
     <BottomInfo class="left-0 right-0 absolute bottom-3 mx-auto w-full z-20">
+      <!--
       <div class="links items-center justify-center gap-2 hidden md:flex">
         <a href="https://www.gin-vue-admin.com/" target="_blank">
           <img src="@/assets/docs.png" class="w-8 h-8" alt="文档" />
@@ -119,6 +122,7 @@
           <img src="@/assets/video.png" class="w-8 h-8" alt="视频站" />
         </a>
       </div>
+      -->
     </BottomInfo>
   </div>
 </template>
