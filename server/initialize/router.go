@@ -107,6 +107,7 @@ func Routers() *gin.Engine {
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup)         // 文件上传下载功能路由
 		exampleRouter.InitAttachmentCategoryRouterRouter(PrivateGroup)      // 文件上传下载分类
 
+		exampleRouter.InitDemoRecordRouter(PrivateGroup) //测试demorecord
 	}
 
 	//插件路由安装
