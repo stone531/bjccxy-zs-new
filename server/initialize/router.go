@@ -53,6 +53,7 @@ func Routers() *gin.Engine {
 
 	systemRouter := router.RouterGroupApp.System
 	exampleRouter := router.RouterGroupApp.Example
+	businessRouter := router.RouterGroupApp.Business
 	// 如果想要不使用nginx代理前端网页，可以修改 web/.env.production 下的
 	// VUE_APP_BASE_API = /
 	// VUE_APP_BASE_PATH = http://localhost
@@ -107,7 +108,8 @@ func Routers() *gin.Engine {
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup)         // 文件上传下载功能路由
 		exampleRouter.InitAttachmentCategoryRouterRouter(PrivateGroup)      // 文件上传下载分类
 
-		exampleRouter.InitDemoRecordRouter(PrivateGroup) //测试demorecord
+		exampleRouter.InitDemoRecordRouter(PrivateGroup)  //测试demorecord
+		businessRouter.InitBsZhengshuRouter(PrivateGroup) //业务
 	}
 
 	//插件路由安装

@@ -1,5 +1,8 @@
 {
   "/src/view/about/index.vue": "About",
+  "/src/view/business/certificate/certificateAdd.vue": "CertificateAdd",
+  "/src/view/business/certificate/certificateQuery.vue": "CertificateQuery",
+  "/src/view/business/index.vue": "business",
   "/src/view/dashboard/components/banner.vue": "Banner",
   "/src/view/dashboard/components/card.vue": "Card",
   "/src/view/dashboard/components/charts-content-numbers.vue": "ChartsContentNumbers",
