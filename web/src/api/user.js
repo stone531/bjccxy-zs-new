@@ -179,3 +179,16 @@ export const resetPassword = (data) => {
     data: data
   })
 }
+
+
+// @Summary insertzhengshu
+// @Produce  application/json
+// @Param data body {username:"string",password:"string"}
+// @Router /base/resige [post]
+export const insertzhengshu = (data) => {
+  return service({
+    url: '/bszhengshu/create',
+    method: 'post',
+    data: data
+  })
+}
