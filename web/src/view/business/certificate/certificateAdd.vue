@@ -30,8 +30,26 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="头像" prop="pic">
-          <SelectImage v-model="userInfo.pic" />
+        <el-form-item label="证件照片" prop="pic">
+          <el-form label-width="80px" class="upload-form">
+            <el-form-item label="上传图片">
+              <input ref="fileInput" type="file" accept="image/*" @change="handleFileChange" />
+
+              <div class="preview-container" v-if="previewUrl">
+                <div class="preview-title">
+                  图片预览
+                  <span class="close-btn" @click="clearPreview">✖</span>
+                </div>
+                <div class="preview-box">
+                  <img :src="previewUrl" class="preview-image" />
+                </div>
+              </div>
+            </el-form-item>
+
+            <el-form-item>
+              <el-button type="primary" @click="uploadImage" :disabled="!selectedFile">上传</el-button>
+            </el-form-item>
+          </el-form>
         </el-form-item>
 
         <el-form-item label="籍贯" prop="nativeplace">
@@ -111,6 +129,32 @@ import { insertzhengshu } from '@/api/user.js'
 defineOptions({ name: 'certificateAdd' })
 
 const appStore = useAppStore()
+
+const selectedFile = ref(null)
+const fileInput = ref(null)
+const previewUrl = ref('')
+
+// 选择图片文件
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  if (!file || !file.type.startsWith('image/')) {
+    ElMessage.error('请选择图片文件')
+    return
+  }
+  selectedFile.value = file
+  previewUrl.value = URL.createObjectURL(file)
+}
+
+// 清除图片预览
+const clearPreview = () => {
+  selectedFile.value = null
+  previewUrl.value = ''
+
+  // 👇 清空 input 的值，防止选择同一文件无法再次触发 change
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+}
 
 const userInfo = ref({
   name: '',
@@ -208,5 +252,54 @@ const formatDateToMonth = (date) => {
 <style lang="scss" scoped>
 .header-img-box {
   @apply w-52 h-52 border border-solid border-gray-300 rounded-xl flex justify-center items-center cursor-pointer;
+}
+.upload-form {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.preview-container {
+  width: 200px;
+  text-align: center;
+  position: relative;
+}
+
+.preview-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+  font-size: 16px;
+  color: #999;
+  padding: 0 6px;
+  transition: color 0.2s;
+}
+.close-btn:hover {
+  color: red;
+}
+
+.preview-box {
+  width: 200px;
+  height: 200px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 </style>
