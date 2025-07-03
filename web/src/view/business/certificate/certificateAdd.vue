@@ -1,23 +1,22 @@
-
 <template>
   <div>
     <warning-bar title="提示：为了你的信息通过审核，请仔细填写下表" />
     <div class="gva-adduser-box">
       <el-form ref="userForm" :rules="rules" :model="userInfo" label-width="80px">
-        <el-form-item label="姓名" prop="userName">
-          <el-input v-model="userInfo.userName" style="width: 200px" />
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="userInfo.name" style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="性别" prop="gender">
-          <el-radio-group v-model="userInfo.gender">
-            <el-radio label="男">男</el-radio>
-            <el-radio label="女">女</el-radio>
+        <el-form-item label="性别" prop="sex">
+          <el-radio-group v-model="userInfo.sex">
+            <el-radio :label="1">男</el-radio>
+            <el-radio :label="2">女</el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="出生年月" prop="birthDate">
+        <el-form-item label="出生年月" prop="age">
           <el-date-picker
-            v-model="userInfo.birthDate"
+            v-model="userInfo.age"
             type="month"
             placeholder="选择出生年月"
             style="width: 200px"
@@ -31,8 +30,8 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="头像" prop="headerImg">
-          <SelectImage v-model="userInfo.headerImg" />
+        <el-form-item label="头像" prop="pic">
+          <SelectImage v-model="userInfo.pic" />
         </el-form-item>
 
         <el-form-item label="籍贯" prop="nativeplace">
@@ -62,7 +61,11 @@
         </el-form-item>
 
         <el-form-item label="毕业院校" prop="graduschool2">
-          <el-input v-model="userInfo.graduschool2" style="width: 200px" />
+          <el-input
+            v-model="userInfo.graduschool2"
+            style="width: 200px"
+            disabled
+          />
         </el-form-item>
 
         <el-form-item label="毕业时间" prop="bysj">
@@ -100,7 +103,8 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/pinia'
-import SelectImage from '@/components/selectImage/selectImage.vue'
+//import SelectImage from '@/components/selectImage/selectImage.vue'
+import SelectImage from '@/components/upload/common.vue'
 import WarningBar from '@/components/warningBar/warningBar.vue'
 import { insertzhengshu } from '@/api/user.js'
 
@@ -109,11 +113,11 @@ defineOptions({ name: 'certificateAdd' })
 const appStore = useAppStore()
 
 const userInfo = ref({
-  userName: '',
-  gender: '男',
-  birthDate: '',
+  name: '',
+  sex: 1,
+  age: '',
   mz: '汉族',
-  headerImg: '',
+  pic: '',
   nativeplace: '',
   zzmm: '',
   chengchi: '',
@@ -133,7 +137,6 @@ const nations = [
   "塔吉克族", "怒族", "乌孜别克族", "俄罗斯族", "鄂温克族", "德昂族", "保安族", "裕固族", "京族", "塔塔尔族",
   "独龙族", "鄂伦春族", "赫哲族", "门巴族", "珞巴族", "基诺族"
 ]
-
 const nativeplaces = [
   "北京", "上海", "天津", "重庆", "河北", "山西", "辽宁", "吉林", "黑龙江", "江苏", "浙江", "安徽",
   "福建", "江西", "山东", "河南", "湖北", "湖南", "广东", "海南", "四川", "贵州", "云南", "陕西",
@@ -141,9 +144,9 @@ const nativeplaces = [
 ]
 
 const rules = ref({
-  userName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
-  birthDate: [{ required: true, message: '请选择出生年月', trigger: 'change' }],
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
+  age: [{ required: true, message: '请选择出生年月', trigger: 'change' }],
   mz: [{ required: true, message: '请选择民族', trigger: 'change' }],
   certificatenumber2: [
     { required: true, message: '请输入身份证号', trigger: 'blur' },
@@ -153,18 +156,19 @@ const rules = ref({
       trigger: 'blur'
     }
   ],
-  headerImg: [{ required: true, message: '请上传证件照', trigger: 'change' }],
+  pic: [{ required: true, message: '请上传证件照', trigger: 'change' }],
   nativeplace: [{ required: true, message: '请选择籍贯', trigger: 'change' }],
   zhuanye: [{ required: true, message: '请输入专业', trigger: 'blur' }],
   bysj: [{ required: true, message: '请选择毕业时间', trigger: 'change' }]
 })
 
 const addUserFunc = async () => {
+  //userInfo.value.age = formatDateToMonth(userInfo.value.age)
+  //userInfo.value.bysj =formatDateToMonth(userInfo.value.bysj)
   try {
     const res = await insertzhengshu(userInfo.value)
     if (res.code === 0) {
       ElMessage.success('创建成功')
-      resetUserFunc()
     }
   } catch (error) {
     ElMessage.error('提交失败，请重试')
@@ -173,11 +177,11 @@ const addUserFunc = async () => {
 
 const resetUserFunc = () => {
   Object.assign(userInfo.value, {
-    userName: '',
-    gender: '男',
-    birthDate: '',
+    name: '',
+    sex: 1,
+    age: '',
     mz: '汉族',
-    headerImg: '',
+    pic: '',
     nativeplace: '',
     zzmm: '',
     chengchi: '',
@@ -189,6 +193,16 @@ const resetUserFunc = () => {
     demo: ''
   })
 }
+
+const formatDateToMonth = (date) => {
+  if (!date) return ''
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = (d.getMonth() + 1).toString().padStart(2, '0')
+  return `${year}-${month}`
+}
+
+
 </script>
 
 <style lang="scss" scoped>
