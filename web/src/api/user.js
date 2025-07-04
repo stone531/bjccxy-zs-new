@@ -185,9 +185,25 @@ export const resetPassword = (data) => {
 // @Produce  application/json
 // @Param data body {username:"string",password:"string"}
 // @Router /base/resige [post]
-export const insertzhengshu = (data) => {
+export const insertZhengshu = (data) => {
   return service({
     url: '/bszhengshu/create',
+    method: 'post',
+    data: data
+  })
+}
+
+// @Tags User
+// @Summary 分页证书学生信息列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body modelInterface.PageInfo true "分页获取用户列表"
+// @Success 200 {string} json "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /user/getUserList [post]
+export const getZhengshuList = (data) => {
+  return service({
+    url: '/bszhengshu/getZhengshuList',
     method: 'post',
     data: data
   })

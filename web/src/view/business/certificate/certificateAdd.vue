@@ -1,6 +1,9 @@
 <template>
   <div>
-    <warning-bar title="提示：为了你的信息通过审核，请仔细填写下表" />
+    <warning-bar
+  :title="`温馨提示：为了你的信息通过审核，请仔细填写下表。\n1、上传照片要求：照片必须是近期正面免冠彩色头像，不小于295像素(宽)x413像素(高)，头部占尺寸的2/3，白色背景无边框，图像清晰、层次丰富、神态自然、无明显畸变。\n2、系统将对所填姓名、证件类型、证件号码、个人照片进行实名认证，请填写个人真实信息，上传个人真实照片。\n3、上传的照片用于考生报名及合格人员证书制作。`"
+  style="color: red; white-space: pre-line"
+/>
     <div class="gva-adduser-box">
       <el-form ref="userForm" :rules="rules" :model="userInfo" label-width="80px">
         <el-form-item label="姓名" prop="name">
@@ -20,7 +23,7 @@
             type="month"
             placeholder="选择出生年月"
             style="width: 200px"
-            value-format="yyyy-MM"
+            value-format="YYYY-MM"
           />
         </el-form-item>
 
@@ -30,26 +33,8 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="证件照片" prop="pic">
-          <el-form label-width="80px" class="upload-form">
-            <el-form-item label="上传图片">
-              <input ref="fileInput" type="file" accept="image/*" @change="handleFileChange" />
-
-              <div class="preview-container" v-if="previewUrl">
-                <div class="preview-title">
-                  图片预览
-                  <span class="close-btn" @click="clearPreview">✖</span>
-                </div>
-                <div class="preview-box">
-                  <img :src="previewUrl" class="preview-image" />
-                </div>
-              </div>
-            </el-form-item>
-
-            <el-form-item>
-              <el-button type="primary" @click="uploadImage" :disabled="!selectedFile">上传</el-button>
-            </el-form-item>
-          </el-form>
+        <el-form-item label="证件照片" prop="pic" label-width="80px">
+          <SelectImage v-model="userInfo.pic" />
         </el-form-item>
 
         <el-form-item label="籍贯" prop="nativeplace">
@@ -92,7 +77,7 @@
             type="month"
             placeholder="选择毕业年月"
             style="width: 200px"
-            value-format="yyyy-MM"
+            value-format="YYYY-MM"
           />
         </el-form-item>
 
@@ -122,39 +107,14 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/pinia'
 //import SelectImage from '@/components/selectImage/selectImage.vue'
-import SelectImage from '@/components/upload/common.vue'
+//import SelectImage from '@/components/upload/common.vue'
+import SelectImage from '@/components/upload/zsCommon.vue'
 import WarningBar from '@/components/warningBar/warningBar.vue'
-import { insertzhengshu } from '@/api/user.js'
+import { insertZhengshu } from '@/api/user.js'
 
 defineOptions({ name: 'certificateAdd' })
 
 const appStore = useAppStore()
-
-const selectedFile = ref(null)
-const fileInput = ref(null)
-const previewUrl = ref('')
-
-// 选择图片文件
-const handleFileChange = (event) => {
-  const file = event.target.files[0]
-  if (!file || !file.type.startsWith('image/')) {
-    ElMessage.error('请选择图片文件')
-    return
-  }
-  selectedFile.value = file
-  previewUrl.value = URL.createObjectURL(file)
-}
-
-// 清除图片预览
-const clearPreview = () => {
-  selectedFile.value = null
-  previewUrl.value = ''
-
-  // 👇 清空 input 的值，防止选择同一文件无法再次触发 change
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
-}
 
 const userInfo = ref({
   name: '',
@@ -210,9 +170,10 @@ const addUserFunc = async () => {
   //userInfo.value.age = formatDateToMonth(userInfo.value.age)
   //userInfo.value.bysj =formatDateToMonth(userInfo.value.bysj)
   try {
-    const res = await insertzhengshu(userInfo.value)
+    const res = await insertZhengshu(userInfo.value)
     if (res.code === 0) {
       ElMessage.success('创建成功')
+      resetUserFunc()
     }
   } catch (error) {
     ElMessage.error('提交失败，请重试')
@@ -246,60 +207,15 @@ const formatDateToMonth = (date) => {
   return `${year}-${month}`
 }
 
-
 </script>
 
 <style lang="scss" scoped>
 .header-img-box {
   @apply w-52 h-52 border border-solid border-gray-300 rounded-xl flex justify-center items-center cursor-pointer;
 }
-.upload-form {
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
-}
 
-.preview-container {
-  width: 200px;
-  text-align: center;
-  position: relative;
-}
-
-.preview-title {
-  font-weight: bold;
-  margin-bottom: 10px;
-  position: relative;
-}
-
-.close-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
-  cursor: pointer;
-  font-size: 16px;
-  color: #999;
-  padding: 0 6px;
-  transition: color 0.2s;
-}
-.close-btn:hover {
+.warning-bar-text {
   color: red;
-}
-
-.preview-box {
-  width: 200px;
-  height: 200px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #f5f5f5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.preview-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  white-space: pre-line;
 }
 </style>
