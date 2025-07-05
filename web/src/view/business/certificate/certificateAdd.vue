@@ -27,8 +27,8 @@
           />
         </el-form-item>
 
-        <el-form-item label="民族" prop="mz">
-          <el-select v-model="userInfo.mz" placeholder="请选择民族" style="width: 200px">
+        <el-form-item label="民族" prop="mingzhu">
+          <el-select v-model="userInfo.mingzhu" placeholder="请选择民族" style="width: 200px">
             <el-option v-for="item in nations" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
@@ -111,16 +111,18 @@ import { useAppStore } from '@/pinia'
 import SelectImage from '@/components/upload/zsCommon.vue'
 import WarningBar from '@/components/warningBar/warningBar.vue'
 import { insertZhengshu } from '@/api/user.js'
+import { useUserStore } from '@/pinia/modules/user'
 
 defineOptions({ name: 'certificateAdd' })
 
 const appStore = useAppStore()
+const userStore = useUserStore()
 
 const userInfo = ref({
   name: '',
   sex: 1,
   age: '',
-  mz: '汉族',
+  mingzhu: '汉族',
   pic: '',
   nativeplace: '',
   zzmm: '',
@@ -130,7 +132,8 @@ const userInfo = ref({
   graduschool2: '北京长城学院',
   bysj: '',
   zwjd: '',
-  demo: ''
+  demo: '',
+  editer:userStore.userInfo.userName
 })
 
 const nations = [
@@ -151,7 +154,7 @@ const rules = ref({
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
   age: [{ required: true, message: '请选择出生年月', trigger: 'change' }],
-  mz: [{ required: true, message: '请选择民族', trigger: 'change' }],
+  mingzhu: [{ required: true, message: '请选择民族', trigger: 'change' }],
   certificatenumber2: [
     { required: true, message: '请输入身份证号', trigger: 'blur' },
     {
@@ -169,6 +172,7 @@ const rules = ref({
 const addUserFunc = async () => {
   //userInfo.value.age = formatDateToMonth(userInfo.value.age)
   //userInfo.value.bysj =formatDateToMonth(userInfo.value.bysj)
+  
   try {
     const res = await insertZhengshu(userInfo.value)
     if (res.code === 0) {
@@ -185,7 +189,7 @@ const resetUserFunc = () => {
     name: '',
     sex: 1,
     age: '',
-    mz: '汉族',
+    mingzhu: '汉族',
     pic: '',
     nativeplace: '',
     zzmm: '',

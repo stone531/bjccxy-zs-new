@@ -11,5 +11,6 @@ func (e *BsZhengshuRouter) InitBsZhengshuRouter(Router *gin.RouterGroup) {
 	{
 		BsZhengshuRouter.POST("create", BsZhengShuApi.CreateBsZhengshu)           //
 		BsZhengshuRouter.POST("getZhengshuList", BsZhengShuApi.GetBsZhengshuList) //
+		BsZhengshuRouter.DELETE("delZhengshuById", BsZhengShuApi.DelZhengshuById) // 删除用户
 	}
 }

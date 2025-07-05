@@ -1,20 +1,56 @@
 <template>
   <div>
-    <warning-bar title="注：右上角头像下拉可切换角色" />
     <div class="gva-search-box">
       <el-form ref="searchForm" :inline="true" :model="searchInfo">
-        <el-form-item label="用户名">
-          <el-input v-model="searchInfo.username" placeholder="用户名" />
+        
+        <el-form-item label="创建日期" prop="createdAt">
+          <template #label>
+            <span>
+              创建日期
+              <el-tooltip
+                content="搜索范围是开始日期（包含）至结束日期（不包含）"
+              >
+                <el-icon><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </span>
+          </template>
+          <el-date-picker
+            v-model="searchInfo.startCreatedAt"
+            type="datetime"
+            placeholder="开始日期"
+            :disabled-date="
+              (time) =>
+                searchInfo.endCreatedAt
+                  ? time.getTime() > searchInfo.endCreatedAt.getTime()
+                  : false
+            "
+          ></el-date-picker>
+          —
+          <el-date-picker
+            v-model="searchInfo.endCreatedAt"
+            type="datetime"
+            placeholder="结束日期"
+            :disabled-date="
+              (time) =>
+                searchInfo.startCreatedAt
+                  ? time.getTime() < searchInfo.startCreatedAt.getTime()
+                  : false
+            "
+          ></el-date-picker>
         </el-form-item>
-        <el-form-item label="昵称">
-          <el-input v-model="searchInfo.nickname" placeholder="昵称" />
+        
+        
+        <el-form-item label="姓名">
+          <el-input v-model="searchInfo.username" placeholder="姓名" />
         </el-form-item>
-        <el-form-item label="手机号">
-          <el-input v-model="searchInfo.phone" placeholder="手机号" />
+        <el-form-item label="毕业证书编号">
+          <el-input v-model="searchInfo.nickname" placeholder="毕业证书编号" />
         </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="searchInfo.email" placeholder="邮箱" />
+        <el-form-item label="录入人员">
+          <el-input v-model="searchInfo.phone" placeholder="录入人员" />
         </el-form-item>
+
+
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">
             查询
@@ -23,87 +59,60 @@
         </el-form-item>
       </el-form>
     </div>
+
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="addUser"
           >新增用户</el-button
         >
       </div>
+
       <el-table :data="tableData" row-key="ID">
-        <el-table-column align="left" label="头像" min-width="75">
-          <template #default="scope">
-            <CustomPic style="margin-top: 8px" :pic-src="scope.row.headerImg" />
-          </template>
-        </el-table-column>
         <el-table-column align="left" label="ID" min-width="50" prop="ID" />
         <el-table-column
           align="left"
-          label="用户名"
+          label="学员姓名"
           min-width="150"
-          prop="userName"
+          prop="name"
         />
         <el-table-column
           align="left"
-          label="昵称"
-          min-width="150"
-          prop="nickName"
+          label="性别"
+          min-width="100"
+          prop="sex"
         />
         <el-table-column
           align="left"
-          label="手机号"
+          label="籍贯"
           min-width="180"
-          prop="phone"
+          prop="nativeplace"
         />
         <el-table-column
           align="left"
-          label="邮箱"
+          label="身份证号"
           min-width="180"
-          prop="email"
+          prop="certificatenumber2"
         />
-        <el-table-column align="left" label="用户角色" min-width="200">
-          <template #default="scope">
-            <el-cascader
-              v-model="scope.row.authorityIds"
-              :options="authOptions"
-              :show-all-levels="false"
-              collapse-tags
-              :props="{
-                multiple: true,
-                checkStrictly: true,
-                label: 'authorityName',
-                value: 'authorityId',
-                disabled: 'disabled',
-                emitPath: false
-              }"
-              :clearable="false"
-              @visible-change="
-                (flag) => {
-                  changeAuthority(scope.row, flag, 0)
-                }
-              "
-              @remove-tag="
-                (removeAuth) => {
-                  changeAuthority(scope.row, false, removeAuth)
-                }
-              "
-            />
-          </template>
-        </el-table-column>
-        <el-table-column align="left" label="启用" min-width="150">
-          <template #default="scope">
-            <el-switch
-              v-model="scope.row.enable"
-              inline-prompt
-              :active-value="1"
-              :inactive-value="2"
-              @change="
-                () => {
-                  switchEnable(scope.row)
-                }
-              "
-            />
-          </template>
-        </el-table-column>
+        <el-table-column
+          align="left"
+          label="毕业证号"
+          min-width="180"
+          prop="graduschool"
+        />
+        <el-table-column
+          align="left"
+          label="录入日期"
+          min-width="180"
+          prop="date"
+        />
+        <el-table-column
+          align="left"
+          label="录入人员"
+          min-width="180"
+          prop="editer"
+        />
+        
+        
 
         <el-table-column label="操作" :min-width="appStore.operateMinWith" fixed="right">
           <template #default="scope">
@@ -126,7 +135,7 @@
               link
               icon="magic-stick"
               @click="resetPasswordFunc(scope.row)"
-              >重置密码</el-button
+              >详情</el-button
             >
           </template>
         </el-table-column>
@@ -143,37 +152,9 @@
         />
       </div>
     </div>
+    
     <!-- 重置密码对话框 -->
-    <el-dialog
-      v-model="resetPwdDialog"
-      title="重置密码"
-      width="500px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
-      <el-form :model="resetPwdInfo" ref="resetPwdForm" label-width="100px">
-        <el-form-item label="用户账号">
-          <el-input v-model="resetPwdInfo.userName" disabled />
-        </el-form-item>
-        <el-form-item label="用户昵称">
-          <el-input v-model="resetPwdInfo.nickName" disabled />
-        </el-form-item>
-        <el-form-item label="新密码">
-          <div class="flex w-full">
-            <el-input class="flex-1" v-model="resetPwdInfo.password" placeholder="请输入新密码" show-password />
-            <el-button type="primary" @click="generateRandomPassword" style="margin-left: 10px">
-              生成随机密码
-            </el-button>
-          </div>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="closeResetPwdDialog">取 消</el-button>
-          <el-button type="primary" @click="confirmResetPassword">确 定</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    
     
     <el-drawer
       v-model="addUserDialog"
@@ -200,53 +181,8 @@
         :model="userInfo"
         label-width="80px"
       >
-        <el-form-item
-          v-if="dialogFlag === 'add'"
-          label="用户名"
-          prop="userName"
-        >
-          <el-input v-model="userInfo.userName" />
-        </el-form-item>
-        <el-form-item v-if="dialogFlag === 'add'" label="密码" prop="password">
-          <el-input v-model="userInfo.password" />
-        </el-form-item>
-        <el-form-item label="昵称" prop="nickName">
-          <el-input v-model="userInfo.nickName" />
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="userInfo.phone" />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="userInfo.email" />
-        </el-form-item>
-        <el-form-item label="用户角色" prop="authorityId">
-          <el-cascader
-            v-model="userInfo.authorityIds"
-            style="width: 100%"
-            :options="authOptions"
-            :show-all-levels="false"
-            :props="{
-              multiple: true,
-              checkStrictly: true,
-              label: 'authorityName',
-              value: 'authorityId',
-              disabled: 'disabled',
-              emitPath: false
-            }"
-            :clearable="false"
-          />
-        </el-form-item>
-        <el-form-item label="启用" prop="disabled">
-          <el-switch
-            v-model="userInfo.enable"
-            inline-prompt
-            :active-value="1"
-            :inactive-value="2"
-          />
-        </el-form-item>
-        <el-form-item label="头像" label-width="80px">
-          <SelectImage v-model="userInfo.headerImg" />
-        </el-form-item>
+        
+        
       </el-form>
     </el-drawer>
   </div>
@@ -257,17 +193,16 @@
     getUserList,
     setUserAuthorities,
     register,
-    deleteUser
+    deleteUser,
+    getZhengshuList,
+    delZhengshuById
   } from '@/api/user'
 
   import { getAuthorityList } from '@/api/authority'
-  import CustomPic from '@/components/customPic/index.vue'
-  import WarningBar from '@/components/warningBar/warningBar.vue'
   import { setUserInfo, resetPassword } from '@/api/user.js'
 
   import { nextTick, ref, watch } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import SelectImage from '@/components/selectImage/selectImage.vue'
   import { useAppStore } from "@/pinia";
 
   defineOptions({
@@ -375,26 +310,6 @@
   })
   
   // 生成随机密码
-  const generateRandomPassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
-    let password = ''
-    for (let i = 0; i < 12; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    resetPwdInfo.value.password = password
-    // 复制到剪贴板
-    navigator.clipboard.writeText(password).then(() => {
-      ElMessage({
-        type: 'success',
-        message: '密码已复制到剪贴板'
-      })
-    }).catch(() => {
-      ElMessage({
-        type: 'error',
-        message: '复制失败，请手动复制'
-      })
-    })
-  }
   
   // 打开重置密码对话框
   const resetPasswordFunc = (row) => {
@@ -406,55 +321,6 @@
   }
   
   // 确认重置密码
-  const confirmResetPassword = async () => {
-    if (!resetPwdInfo.value.password) {
-      ElMessage({
-        type: 'warning',
-        message: '请输入或生成密码'
-      })
-      return
-    }
-    
-    const res = await resetPassword({
-      ID: resetPwdInfo.value.ID,
-      password: resetPwdInfo.value.password
-    })
-    
-    if (res.code === 0) {
-      ElMessage({
-        type: 'success',
-        message: res.msg || '密码重置成功'
-      })
-      resetPwdDialog.value = false
-    } else {
-      ElMessage({
-        type: 'error',
-        message: res.msg || '密码重置失败'
-      })
-    }
-  }
-  
-  // 关闭重置密码对话框
-  const closeResetPwdDialog = () => {
-    resetPwdInfo.value.password = ''
-    resetPwdDialog.value = false
-  }
-  const setAuthorityIds = () => {
-    tableData.value &&
-      tableData.value.forEach((user) => {
-        user.authorityIds =
-          user.authorities &&
-          user.authorities.map((i) => {
-            return i.authorityId
-          })
-      })
-  }
-
-  const authOptions = ref([])
-  const setOptions = (authData) => {
-    authOptions.value = []
-    setAuthorityOptions(authData, authOptions.value)
-  }
 
   const deleteUserFunc = async (row) => {
     ElMessageBox.confirm('确定要删除吗?', '提示', {

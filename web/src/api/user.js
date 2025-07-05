@@ -208,3 +208,10 @@ export const getZhengshuList = (data) => {
     data: data
   })
 }
+export const delZhengshuById = (data) => {
+  return service({
+    url: '/bszhengshu/delZhengshuById',
+    method: 'delete',
+    data: data
+  })
+}

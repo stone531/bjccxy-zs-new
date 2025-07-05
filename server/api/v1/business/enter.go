@@ -7,9 +7,11 @@ type ApiGroup struct {
 }
 
 var (
-	customerService              = service.ServiceGroupApp.ExampleServiceGroup.CustomerService
-	fileUploadAndDownloadService = service.ServiceGroupApp.ExampleServiceGroup.FileUploadAndDownloadService
-	attachmentCategoryService    = service.ServiceGroupApp.ExampleServiceGroup.AttachmentCategoryService
+	//customerService              = service.ServiceGroupApp.ExampleServiceGroup.CustomerService
+	//fileUploadAndDownloadService = service.ServiceGroupApp.ExampleServiceGroup.FileUploadAndDownloadService
+	//attachmentCategoryService    = service.ServiceGroupApp.ExampleServiceGroup.AttachmentCategoryService
 
 	//demoRecordService = service.ServiceGroupApp.ExampleServiceGroup.DemoRecordService
+	//bsZhengshuService = service.ServiceGroup.BusinessServiceGroup.BsZhengshuService
+	bsZhengshuService = service.ServiceGroupApp.BusinessServiceGroup.BsZhengshuService
 )

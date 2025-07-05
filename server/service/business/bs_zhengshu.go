@@ -15,11 +15,11 @@ import (
 //@param: u model.SysUser
 //@return: userInter system.SysUser, err error
 
-type bsZhengshuService struct{}
+type BsZhengshuService struct{}
 
-var UserServiceApp = new(bsZhengshuService)
+var UserServiceApp = new(BsZhengshuService)
 
-func (bzs *bsZhengshuService) Register(u business.BsZhengshu) (userInter business.BsZhengshu, err error) {
+func (bzs *BsZhengshuService) Register(u business.BsZhengshu) (userInter business.BsZhengshu, err error) {
 	var user business.BsZhengshu
 	if !errors.Is(global.GVA_DB.Where("username = ?", u.Name).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
 		return userInter, errors.New("用户名已注册")
@@ -29,6 +29,44 @@ func (bzs *bsZhengshuService) Register(u business.BsZhengshu) (userInter busines
 	//u.UUID = uuid.New()
 	err = global.GVA_DB.Create(&u).Error
 	return u, err
+}
+
+func (bzs *BsZhengshuService) DeleteUser(id int) (err error) {
+	//fmt.Println("DeleteUser id:%d:", id)
+	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("ID = ?", id).Delete(&business.BsZhengshu{}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	/*var record business.BsZhengshu
+	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("id = ?", id).First(&record).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("记录不存在")
+			}
+			return fmt.Errorf("查询失败: %v", err)
+		}
+
+		// 2. 执行删除（打印生成的SQL用于调试）
+		stmt := tx.Session(&gorm.Session{DryRun: true}).Where("ID = ?", id).Delete(&business.BsZhengshu{})
+		fmt.Println("删除SQL:", stmt.Statement.SQL.String())
+		fmt.Println("参数:", stmt.Statement.Vars)
+
+		// 3. 实际执行删除
+		result := tx.Where("ID = ?", id).Delete(&business.BsZhengshu{})
+		if result.Error != nil {
+			return fmt.Errorf("删除失败: %v", result.Error)
+		}
+
+		// 4. 检查影响的行数
+		if result.RowsAffected == 0 {
+			return fmt.Errorf("删除未影响任何行，可能条件不匹配")
+		}
+		return nil
+	})*/
+
+	//return nil
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)

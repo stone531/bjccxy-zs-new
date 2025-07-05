@@ -47,3 +47,6 @@ type BsZhegnshuSearch struct {
 	Editer      string    `json:"editer"`
 	common.PageInfo
 }
+
+type GetById struct {
+}
