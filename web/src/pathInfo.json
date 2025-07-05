@@ -1,6 +1,7 @@
 {
   "/src/view/about/index.vue": "About",
   "/src/view/business/certificate/certificateAdd.vue": "certificateAdd",
+  "/src/view/business/certificate/certificateInfo.vue": "CertificateInfo",
   "/src/view/business/certificate/certificateQuery.vue": "certificateQuery",
   "/src/view/business/index.vue": "business",
   "/src/view/dashboard/components/banner.vue": "Banner",
