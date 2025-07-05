@@ -20,10 +20,10 @@
         <el-form-item label="出生年月" prop="age">
           <el-date-picker
             v-model="userInfo.age"
-            type="month"
-            placeholder="选择出生年月"
+            type="date"
+            placeholder="选择出生年月日"
             style="width: 200px"
-            value-format="YYYY-MM"
+            value-format="YYYY-MM-DD"
           />
         </el-form-item>
 
@@ -117,7 +117,6 @@ defineOptions({ name: 'certificateAdd' })
 
 const appStore = useAppStore()
 const userStore = useUserStore()
-
 const userInfo = ref({
   name: '',
   sex: 1,

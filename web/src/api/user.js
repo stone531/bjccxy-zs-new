@@ -215,3 +215,11 @@ export const delZhengshuById = (data) => {
     data: data
   })
 }
+
+export const setZhengshuInfo = (data) => {
+  return service({
+    url: '/bszhengshu/setZhengshuInfo',
+    method: 'put',
+    data: data
+  })
+}

@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+
+	common "github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 )
 
 type BsZhengshu struct {
@@ -51,4 +53,15 @@ func (s *BsZhengshu) GetNickname() string {
 
 func (s *BsZhengshu) GetUserId() uint {
 	return s.ID
+}
+
+type GetUserList struct {
+	common.PageInfo
+	Name               string `json:"name" form:"name"`
+	Sex                string `json:"sex" form:"sex"`
+	NativePlace        string `json:"nativeplace" form:"nativeplace"`
+	CertificateNumber2 string `json:"certificatenumber2" form:"certificatenumber2"`
+	Graduschool        string `json:"graduschool" form:"graduschool"`
+	Date               string `json:"date" form:"date"`
+	Editer             string `json:"editer" form:"editer"`
 }

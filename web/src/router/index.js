@@ -42,6 +42,16 @@ const routes = [
       meta: { title: '记录管理', icon: 'table' }
     }]
   },
+  {
+    path: '/layout/business/certificate/certificateInfo',
+    name: 'certificateInfo',
+    component: () => import('@/view/business/certificate/certificateInfo.vue'),
+    meta: { 
+      title: '证书详情', 
+      keepAlive: false,
+      noLogin: true // gin-vue-admin 默认支持这个字段跳过权限验证
+    } 
+  },
 ]
 
 const router = createRouter({
