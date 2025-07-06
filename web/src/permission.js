@@ -122,6 +122,11 @@ router.beforeEach(async (to, from) => {
     return to.matched.length ? true : { path: '/layout/404' }
   }
 
+   // lrl 新增加的无需登录
+  if (to.meta?.noLogin) {
+    return true
+  }
+
   // 未登录跳转登录页
   return {
     name: 'Login',

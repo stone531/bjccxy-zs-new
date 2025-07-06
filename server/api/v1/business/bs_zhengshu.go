@@ -1,11 +1,13 @@
 package business
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	//"gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
@@ -100,26 +102,53 @@ func (api *BsZhengShuApi) GetBsSearchZhengshuList(c *gin.Context) {
 	}, "获取成功", c)
 }
 
-func (api *BsZhengShuApi) GetBsZhengshuList(c *gin.Context) {
-	var pageInfo request.GetUserList
-	if err := c.ShouldBindQuery(&pageInfo); err != nil {
+func (api *BsZhengShuApi) GetOneBsZhengshu(c *gin.Context) {
+
+	var reqInfo request.BsZhegnshuOneSearch
+	if err := c.ShouldBindJSON(&reqInfo); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 
-	var records []business.BsZhengshu
+	var record business.BsZhengshu
 	db := global.GVA_DB.Model(&business.BsZhengshu{})
 
-	if pageInfo.Name != "" {
-		db = db.Where("title LIKE ?", "%"+pageInfo.Name+"%")
-	}
-
-	if err := db.Find(&records).Error; err != nil {
-		response.FailWithMessage("query fail", c)
+	// 根据不同条件构建查询
+	if reqInfo.ID != 0 {
+		if err := db.Where("id = ?", reqInfo.ID).First(&record).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				response.FailWithMessage("记录不存在", c)
+			} else {
+				response.FailWithMessage("查询失败: "+err.Error(), c)
+			}
+			return
+		}
+	} else if reqInfo.Graduschool != "" && reqInfo.Name != "" {
+		if err := db.Where("graduschool = ? AND name = ?", reqInfo.Graduschool, reqInfo.Name).
+			First(&record).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				response.FailWithMessage("记录不存在", c)
+			} else {
+				response.FailWithMessage("查询失败: "+err.Error(), c)
+			}
+			return
+		}
+	} else if reqInfo.CertificateNumber2 != "" && reqInfo.Name != "" {
+		if err := db.Where("certificatenumber2 = ? AND name = ?", reqInfo.CertificateNumber2, reqInfo.Name).
+			First(&record).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				response.FailWithMessage("记录不存在", c)
+			} else {
+				response.FailWithMessage("查询失败: "+err.Error(), c)
+			}
+			return
+		}
+	} else {
+		response.FailWithMessage("请提供查询条件(ID 或 Graduschool+Name)", c)
 		return
 	}
 
-	response.OkWithData(records, c)
+	response.OkWithData(record, c)
 }
 
 func (api *BsZhengShuApi) DelZhengshuById(c *gin.Context) {

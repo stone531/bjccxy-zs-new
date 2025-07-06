@@ -35,7 +35,7 @@
       
       <el-col :xs="24" :sm="6" class="avatar-box">
         <el-image
-          :src="student.pic "
+          :src="getFullImageUrl(student.pic)"
           fit="cover"
           class="student-avatar"
         />
@@ -48,6 +48,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getZhengshuList } from '@/api/user'
+import { getBaseUrl } from '@/utils/format'
 //import defaultAvatar from '@/assets/default-avatar.png' // 添加默认头像
 
 const route = useRoute()
@@ -76,6 +77,7 @@ const getStudentData = async () => {
     })
     
     if (res.code === 0 && res.data?.list?.length) {
+      //console.log("Composition API 调试信息pic:",res.data.list[0].pic);
       Object.assign(student, res.data.list[0])
     }
   } catch (error) {
@@ -84,6 +86,12 @@ const getStudentData = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const getFullImageUrl = (url) => {
+  if (!url) return '' // 防止空值报错
+  if (/^https?:\/\//.test(url)) return url
+  return `${getBaseUrl()}/` + url
 }
 
 onMounted(() => {

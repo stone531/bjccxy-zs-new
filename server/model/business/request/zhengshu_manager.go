@@ -2,8 +2,6 @@ package request
 
 //import "time"
 import (
-	"time"
-
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	common "github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	//"github.com/flipped-aurora/gin-vue-admin/server/model/business"
@@ -52,13 +50,12 @@ type GetUserList struct {
 	Editer             string `json:"editer" form:"editer"`
 }
 
-type BsZhegnshuSearch struct {
-	Name        string    `json:"name"`
-	Graduschool string    `json:"graduschool"`
-	SDate       time.Time `json:"sdate"`
-	EDate       time.Time `json:"edate"`
-	Editer      string    `json:"editer"`
-	common.PageInfo
+type BsZhegnshuOneSearch struct {
+	//global.GVA_MODEL
+	ID                 uint   `json:"ID" form:"ID"`
+	Name               string `json:"name" form:"name"`
+	Graduschool        string `json:"graduschool" form:"graduschool"`
+	CertificateNumber2 string `json:"certificatenumber2" form:"certificatenumber2"`
 }
 
 type GetById struct {

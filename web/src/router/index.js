@@ -52,6 +52,17 @@ const routes = [
       noLogin: true // gin-vue-admin 默认支持这个字段跳过权限验证
     } 
   },
+  {
+    path: '/external-query',
+    name: 'external-query',
+    component: () => import('@/view/external/zsQuery.vue'),
+    meta: {
+      title: '外部证书查询入口',
+      hidden: true, // 不在菜单显示
+      noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
+    }
+  },
+
 ]
 
 const router = createRouter({
