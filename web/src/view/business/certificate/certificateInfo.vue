@@ -33,7 +33,7 @@
         </el-descriptions>
       </el-col>
       
-      <el-col :xs="24" :sm="6" class="avatar-box">
+      <el-col :xs="24" :sm="6" :md="6" class="avatar-box">
         <el-image
           :src="getFullImageUrl(student.pic)"
           fit="cover"
@@ -47,7 +47,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getZhengshuList } from '@/api/user'
+import { getOneZhengshu } from '@/api/user'
 import { getBaseUrl } from '@/utils/format'
 //import defaultAvatar from '@/assets/default-avatar.png' // 添加默认头像
 
@@ -55,7 +55,7 @@ const route = useRoute()
 const student = reactive({ /* 初始化字段保持不变 */ })
 const loading = ref(true)
 const searchInfo = ref({
-  id: route.query.id || '',  // 优先使用路由参数
+  id: route.query.id || 0,  // 优先使用路由参数
   name: route.query.name || '',
   graduschool: route.query.certificateNo || '',
   certificatenumber2: route.query.idCard || ''
@@ -70,15 +70,17 @@ const formatGender = (val) => {
 const getStudentData = async () => {
   try {
     loading.value = true
-    const res = await getZhengshuList({
-      page: 1,
-      pageSize: 1,
-      ...searchInfo.value
+    const res = await getOneZhengshu({
+      //page: 1,
+      //pageSize: 1,
+      ...searchInfo.value,
+      id: Number(searchInfo.value.id) || 0
     })
     
-    if (res.code === 0 && res.data?.list?.length) {
+    if (res.code === 0 ) {
       //console.log("Composition API 调试信息pic:",res.data.list[0].pic);
-      Object.assign(student, res.data.list[0])
+      //Object.assign(student, res.data.list[0])
+      Object.assign(student, res.data)
     }
   } catch (error) {
     console.error('获取证书信息失败:', error)
@@ -142,13 +144,14 @@ defineOptions({
 .info-box {
   margin-top: 20px;
   display: flex;
-  justify-content: center;
+
 }
 
 .avatar-box {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-top: 20px;
+  margin-left: -5px; 
 }
 
 .student-avatar {
