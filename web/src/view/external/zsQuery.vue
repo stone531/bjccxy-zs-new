@@ -160,77 +160,46 @@
     ],
   }
 
+  const TYPE_CERTIFICATE = 'certificate'
+  const TYPE_SCHOOL = 'school'
+  const TYPE_TRAIN = 'train'
+
   // 提交查询
-const submitQuery = () => {
-  const typeMap = {
-    certificate: '证书查询',
-    school: '学籍查询',
-    train: '培训证书查询',
+  const submitQuery = () => {
+    const typeMap = {
+      certificate: '证书查询',
+      school: '学籍查询',
+      train: '培训证书查询',
+    }
+
+    const payload = {
+      type: activeTab.value, // certificate / school / train
+      name: formData.name,
+      number: formData.number,
+      idcard: formData.idcard,
+    }
+
+    const userStore = useUserStore()
+
+    //处理分支请求
+    let queryParams = ''
+    console.error('获取证书信息 type:', payload.type)
+    if (payload.type == TYPE_CERTIFICATE) {
+      queryParams = new URLSearchParams({
+        type:TYPE_CERTIFICATE,
+        name: payload.name,
+        certificateNo: payload.number
+      }).toString()
+    } else if(payload.type == TYPE_SCHOOL || payload.type == TYPE_TRAIN) {
+      queryParams = new URLSearchParams({
+        type:payload.type,
+        name: payload.name,
+        idCard: payload.idcard
+      }).toString()
+    } 
+    console.error('获取证书信息 type1:', queryParams)
+    const fullPath = `#/layout/business/certificate/certificateInfo?${queryParams}`
+    window.open(fullPath, '_blank')
   }
 
-  const payload = {
-    type: activeTab.value, // certificate / school / train
-    name: formData.name,
-    number: formData.number,
-    idcard: formData.idcard,
-  }
-
-  // 获取验证码
-  const loginVerify = async () => {
-    const ele = await captcha()
-    rules.captcha.push({
-      max: ele.data.captchaLength,
-      min: ele.data.captchaLength,
-      message: `请输入${ele.data.captchaLength}位验证码`,
-      trigger: 'blur'
-    })
-    picPath.value = ele.data.picPath
-    loginFormData.captchaId = ele.data.captchaId
-    loginFormData.openCaptcha = ele.data.openCaptcha
-  }
-  loginVerify()
-
-  // 登录相关操作
-  const loginForm = ref(null)
-  const picPath = ref('')
-  const loginFormData = reactive({
-    username: 'admin',
-    password: '',
-    captcha: '',
-    captchaId: '',
-    openCaptcha: false
-  })
-
-  const userStore = useUserStore()
-  const login = async () => {
-    return await userStore.LoginIn(loginFormData)
-  }
-
-  const submitForm = () => {
-    loginForm.value.validate(async (v) => {
-      if (!v) {
-        // 未通过前端静态验证
-        ElMessage({
-          type: 'error',
-          message: '请正确填写登录信息',
-          showClose: true
-        })
-        await loginVerify()
-        return false
-      }
-
-      // 通过验证，请求登陆
-      const flag = await login()
-
-      // 登陆失败，刷新验证码
-      if (!flag) {
-        await loginVerify()
-        return false
-      }
-
-      // 登陆成功
-      return true
-    })
-  }
-}
 </script>

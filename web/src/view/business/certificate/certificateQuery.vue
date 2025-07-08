@@ -553,10 +553,12 @@ const nativeplaces = [
     name: 'certificateInfo',  // 你注册的路由名称
     query: { id: row.ID }     // 假设 row.ID 是证书主键
   })*/
+  const TYPE_CERTIFICATE = 'certificate'
   const queryParams = new URLSearchParams({
-      id: row.ID,
-      name: row.name,
-      idCard: row.certificatenumber2
+      type:TYPE_CERTIFICATE,
+      id: row.ID
+      //name: row.name,
+      //idCard: row.certificatenumber2
     }).toString()
 
     //window.open(`/business/certificateInfo?${queryParams}`, '_blank')

@@ -55,6 +55,7 @@ const route = useRoute()
 const student = reactive({ /* 初始化字段保持不变 */ })
 const loading = ref(true)
 const searchInfo = ref({
+  type:route.query.type,
   id: route.query.id || 0,  // 优先使用路由参数
   name: route.query.name || '',
   graduschool: route.query.certificateNo || '',
@@ -70,9 +71,8 @@ const formatGender = (val) => {
 const getStudentData = async () => {
   try {
     loading.value = true
+    console.error('recv params:', searchInfo)
     const res = await getOneZhengshu({
-      //page: 1,
-      //pageSize: 1,
       ...searchInfo.value,
       id: Number(searchInfo.value.id) || 0
     })

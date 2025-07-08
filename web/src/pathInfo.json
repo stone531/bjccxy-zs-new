@@ -4,6 +4,7 @@
   "/src/view/business/certificate/certificateInfo.vue": "CertificateInfo",
   "/src/view/business/certificate/certificateQuery.vue": "certificateQuery",
   "/src/view/business/index.vue": "business",
+  "/src/view/business/queryIndex.vue": "QueryIndex",
   "/src/view/dashboard/components/banner.vue": "Banner",
   "/src/view/dashboard/components/card.vue": "Card",
   "/src/view/dashboard/components/charts-content-numbers.vue": "ChartsContentNumbers",
