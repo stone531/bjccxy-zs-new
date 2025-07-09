@@ -259,7 +259,7 @@ func (userService *BsTrainingApi) GetTrainingInfoList(info request.GetBsTraining
 }
 
 func (userService *BsTrainingApi) SetZhengShuInfo(req request.ChangeTrainingStuInfo) error {
-	return global.GVA_DB.Model(&request.ChangeTrainingStuInfo{}).
+	return global.GVA_DB.Model(&business.BsTrainingStudent{}).
 		Select("updated_at", "name", "gender", "id_card_number", "certificate_name", "certificate_id", "training_program", "grade", "zhuanye", "issue_date").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
