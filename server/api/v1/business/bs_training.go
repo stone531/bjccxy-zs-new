@@ -14,6 +14,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/business/request"
 	cReq "github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
+
 	//"github.com/flipped-aurora/gin-vue-admin/server/utils"
 
 	//demoRecordRes "github.com/flipped-aurora/gin-vue-admin/server/model/example/response"
@@ -33,26 +34,25 @@ func (api *BsTrainingApi) CreateBsTraining(c *gin.Context) {
 	}
 
 	//check idcard
-	/*ok, _ := api.CheckIDCardExists(req.CertificateNumber2)
+	ok, _ := api.CheckIDCardExists(req.IDCardNumber)
 	if ok {
 		response.FailWithMessage("exit the same CertificateNumber2 ", c)
 		return
-	}*/
+	}
 
 	//now := time.Now()
 	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
 	record := business.BsTrainingStudent{
-		Name:               req.Name,
-		Gender:             req.Gender,
-		IDCardNumber:                req.IDCardNumber,
-		CertificateName:            req.CertificateName,
-		CertificateID:                req.CertificateID,
-		IssueDate:        req.IssueDate,
-		TrainingProgram:               req.TrainingProgram,
+		Name:            req.Name,
+		Gender:          req.Gender,
+		IDCardNumber:    req.IDCardNumber,
+		CertificateName: req.CertificateName,
+		CertificateID:   req.CertificateID,
+		IssueDate:       req.IssueDate,
+		TrainingProgram: req.TrainingProgram,
 		Grade:           req.Grade,
-		Editer: req.Editer,
-		
+		Editer:          req.Editer,
 	}
 
 	if err := global.GVA_DB.Create(&record).Error; err != nil {
@@ -195,14 +195,14 @@ func (api *BsTrainingApi) SetTrainingInfo(c *gin.Context) {
 		GVA_MODEL: global.GVA_MODEL{
 			ID: user.ID,
 		},
-		Name:               user.Name,
-		Gender:                user.Gender,
-		IDCardNumber:                user.IDCardNumber,
-		CertificateName:               user.CertificateName,
-		CertificateID:                user.CertificateID,
-		TrainingProgram:            user.TrainingProgram,
-		Grade:        user.Grade,
-		IssueDate:            user.IssueDate,
+		Name:            user.Name,
+		Gender:          user.Gender,
+		IDCardNumber:    user.IDCardNumber,
+		CertificateName: user.CertificateName,
+		CertificateID:   user.CertificateID,
+		TrainingProgram: user.TrainingProgram,
+		Grade:           user.Grade,
+		IssueDate:       user.IssueDate,
 	})
 	if err != nil {
 		global.GVA_LOG.Error("设置失败!", zap.Error(err))
@@ -212,10 +212,10 @@ func (api *BsTrainingApi) SetTrainingInfo(c *gin.Context) {
 	response.OkWithMessage("设置成功", c)
 }
 
-/*func (api *BsTrainingApi) CheckIDCardExists(idCard string) (bool, error) {
+func (api *BsTrainingApi) CheckIDCardExists(idCard string) (bool, error) {
 	var count int64
-	err := global.GVA_DB.Model(&business.BsZhengshu{}).
-		Where("CertificateNumber2 = ?", idCard).
+	err := global.GVA_DB.Model(&business.BsTrainingStudent{}).
+		Where("id_card_number = ?", idCard).
 		Count(&count).Error
 
 	if err != nil {
@@ -223,7 +223,6 @@ func (api *BsTrainingApi) SetTrainingInfo(c *gin.Context) {
 	}
 	return count > 0, nil
 }
-*/
 
 func (userService *BsTrainingApi) GetTrainingInfoList(info request.GetBsTrainingStuList) (list interface{}, total int64, err error) {
 	limit := info.PageSize
@@ -235,25 +234,25 @@ func (userService *BsTrainingApi) GetTrainingInfoList(info request.GetBsTraining
 	if info.Name != "" {
 		db = db.Where("name LIKE ?", "%"+info.Name+"%")
 	}
-	if info.IDCardNumber != "" {
-		db = db.Where("id_card_number LIKE ?", "%"+info.IDCardNumber+"%")
+	if info.CertificateID != "" {
+		db = db.Where("certificate_id LIKE ?", "%"+info.CertificateID+"%")
 	}
 	if info.Editer != "" {
 		db = db.Where("editer LIKE ?", "%"+info.Editer+"%")
 	}
 
 	if info.SDate != "" {
-		db = db.Where("date > ?", "%"+info.SDate+"%")
+		db = db.Where("CreatedAt > ?", "%"+info.SDate+"%")
 	}
 	if info.SDate != "" {
-		db = db.Where("date < ?", "%"+info.EDate+"%")
+		db = db.Where("CreatedAt < ?", "%"+info.EDate+"%")
 	}
 
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
-	
+
 	err = db.Limit(limit).Offset(offset).Find(&userList).Error
 	return userList, total, err
 }
@@ -263,14 +262,14 @@ func (userService *BsTrainingApi) SetZhengShuInfo(req request.ChangeTrainingStuI
 		Select("updated_at", "name", "gender", "id_card_number", "certificate_name", "certificate_id", "training_program", "grade", "zhuanye", "issue_date").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
-			"updated_at":         time.Now(),
-			"name":               req.Name,
-			"gender":                req.Gender,
-			"id_card_number":                req.IDCardNumber,
-			"certificate_name":            req.CertificateName,
-			"certificate_id":                req.CertificateID,
-			"training_program":        req.TrainingProgram,
-			"grade":               req.Grade,
-			"issue_date":req.IssueDate,
+			"updated_at":       time.Now(),
+			"name":             req.Name,
+			"gender":           req.Gender,
+			"id_card_number":   req.IDCardNumber,
+			"certificate_name": req.CertificateName,
+			"certificate_id":   req.CertificateID,
+			"training_program": req.TrainingProgram,
+			"grade":            req.Grade,
+			"issue_date":       req.IssueDate,
 		}).Error
 }

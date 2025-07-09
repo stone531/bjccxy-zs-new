@@ -53,6 +53,16 @@ const routes = [
     } 
   },
   {
+    path: '/layout/trainingBusiness/training/trainingInfo',
+    name: 'trainStuInfo',
+    component: () => import('@/view/trainingBusiness/training/trainingInfo.vue'),
+    meta: { 
+      title: '培训证书详情', 
+      keepAlive: false,
+      noLogin: true // gin-vue-admin 默认支持这个字段跳过权限验证
+    } 
+  },
+  {
     path: '/external-query',
     name: 'external-query',
     component: () => import('@/view/external/zsQuery.vue'),

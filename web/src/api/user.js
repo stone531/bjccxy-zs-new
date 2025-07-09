@@ -232,3 +232,44 @@ export const setZhengshuInfo = (data) => {
     data: data
   })
 }
+
+//培训证书
+export const insertTrainStu = (data) => {
+  return service({
+    url: '/bstraining/create',
+    method: 'post',
+    data: data
+  })
+}
+
+export const getTrainStuList = (data) => {
+  return service({
+    url: '/bstraining/getTrainingList',
+    method: 'post',
+    data: data
+  })
+}
+
+export const getOneTrainStu = (data) => {
+  return service({
+    url: '/bstraining/getOneTraining',
+    method: 'post',
+    data: data
+  })
+}
+
+export const delTrainStuById = (data) => {
+  return service({
+    url: '/bstraining/delTrainingById',
+    method: 'delete',
+    data: data
+  })
+}
+
+export const setTrainStuInfo = (data) => {
+  return service({
+    url: '/bstraining/setTrainingInfo',
+    method: 'put',
+    data: data
+  })
+}
