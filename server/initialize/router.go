@@ -109,7 +109,8 @@ func Routers() *gin.Engine {
 		exampleRouter.InitAttachmentCategoryRouterRouter(PrivateGroup)      // 文件上传下载分类
 
 		exampleRouter.InitDemoRecordRouter(PrivateGroup)  //测试demorecord
-		businessRouter.InitBsZhengshuRouter(PrivateGroup) //业务
+		businessRouter.InitBsZhengshuRouter(PrivateGroup) //证书管理
+		businessRouter.InitBsTrainingRouter(PrivateGroup) //培训证书管理	
 	}
 
 	//插件路由安装

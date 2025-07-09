@@ -6,8 +6,10 @@ import (
 
 type RouterGroup struct {
 	BsZhengshuRouter
+	BsTrainingRouter
 }
 
 var (
 	BsZhengShuApi = api.ApiGroupApp.BsZhengshuApiGroup.BsZhengShuApi
+	BsTrainingApi = api.ApiGroupApp.BsZhengshuApiGroup.BsTrainingApi
 )
