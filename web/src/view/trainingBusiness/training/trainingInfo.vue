@@ -3,26 +3,33 @@
     <h1 class="title">北京长城研修学院</h1>
     <h2 class="subtitle">培训证书查询</h2>
 
-    <el-divider content-position="left">基本信息</el-divider>
-    <el-descriptions :column="3" border>
+    
+    <div class="custom-divider">
+      <span class="divider-title">基本信息</span>
+      <div class="divider-line" />
+    </div>
+    <el-descriptions :column="2" border>
       <el-descriptions-item label="姓 名">{{ info.name }}</el-descriptions-item>
-      <el-descriptions-item label="性 别">{{ getGenderLabel(info.gender) }}</el-descriptions-item>
-      <el-descriptions-item label=""></el-descriptions-item>
+      <el-descriptions-item label="性 别">{{ getGenderLabel(info.gender) }}</el-descriptions-item>     
 
-      <el-descriptions-item label="身份证号码" :span="3">{{ info.id_card_number }}</el-descriptions-item>
+      <el-descriptions-item label="身份证号码">{{ info.id_card_number }}</el-descriptions-item>
+      <el-descriptions-item label=""></el-descriptions-item>
     </el-descriptions>
 
-    <el-divider content-position="left">证书信息</el-divider>
-    <el-descriptions :column="3" border>
+    <div class="custom-divider">
+      <span class="divider-title">证书信息</span>
+      <div class="divider-line" />
+    </div>
+    <el-descriptions :column="2" border>
       <el-descriptions-item label="证书名称">{{ info.certificate_name }}</el-descriptions-item>
       <el-descriptions-item label="培训项目">{{ info.training_program }}</el-descriptions-item>
-      <el-descriptions-item label=""></el-descriptions-item>
 
       <el-descriptions-item label="证书编号">{{ info.certificate_id }}</el-descriptions-item>
       <el-descriptions-item label="发证日期">{{ info.issue_date }}</el-descriptions-item>
-      <el-descriptions-item label=""></el-descriptions-item>
+      
 
       <el-descriptions-item label="成绩评定">{{ info.grade }}</el-descriptions-item>
+      <el-descriptions-item label=""></el-descriptions-item>
     </el-descriptions>
 
     <div class="footer-text">
@@ -33,7 +40,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { getOneTrainStu } from '@/api/user'
 import { getBaseUrl } from '@/utils/format'
 import { useRoute } from 'vue-router'
@@ -59,7 +66,7 @@ const getGenderLabel = (val) => {
 
 const route = useRoute()
 const student = reactive({ /* 初始化字段保持不变 */ })
-//const loading = ref(true)
+const loading = ref(true)
 const searchInfo = ref({
   type:route.query.type,
   id: route.query.id || 0,  // 优先使用路由参数
@@ -80,7 +87,7 @@ const getStudentData = async () => {
     
     if (res.code === 0 ) {
       //Object.assign(student, res.data.list[0])
-      Object.assign(student, res.data)
+      Object.assign(info, res.data)
     }
   } catch (error) {
     console.error('获取证书信息失败:', error)
@@ -134,4 +141,22 @@ defineOptions({
   font-size: 14px;
   line-height: 1.8;
 }
+
+.custom-divider {
+  margin-bottom: 16px;
+}
+
+.divider-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #0033cc; /* 深蓝色字体 */
+}
+
+.divider-line {
+  margin-top: 4px;
+  height: 2px;
+  background-color: #409EFF; /* Element Plus 主色 */
+  width: 100%;
+}
+
 </style>
