@@ -46,7 +46,7 @@ type GetUserList struct {
 	CertificateNumber2 string `json:"certificatenumber2" form:"certificatenumber2"`
 	Graduschool        string `json:"graduschool" form:"graduschool"`
 	SDate              string `json:"sdate" form:"sdate"`
-	EDate              string `json:"sdate" form:"edate"`
+	EDate              string `json:"edate" form:"edate"`
 	Editer             string `json:"editer" form:"editer"`
 }
 

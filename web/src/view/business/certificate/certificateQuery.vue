@@ -104,8 +104,13 @@
           align="left"
           label="录入日期"
           min-width="180"
-          prop="date"
-        />
+          prop="CreatedAt"
+        >
+          <template #default="{ row }">
+            {{ formatDate(row.CreatedAt) }}
+          </template>
+        </el-table-column>
+        
         <el-table-column
           align="left"
           label="录入人员"
@@ -258,6 +263,7 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { useAppStore } from "@/pinia";
   import { useRouter } from 'vue-router'
+  import dayjs from 'dayjs'
 
   defineOptions({
     name: 'certificateQuery'
@@ -564,6 +570,10 @@ const nativeplaces = [
     //window.open(`/business/certificateInfo?${queryParams}`, '_blank')
     const fullPath = `#/layout/business/certificate/certificateInfo?${queryParams}`
     window.open(fullPath, '_blank')
+}
+
+const formatDate = (dateStr) => {
+  return dateStr ? dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss') : ''
 }
 </script>
 
