@@ -164,6 +164,12 @@
   const TYPE_SCHOOL = 'school'
   const TYPE_TRAIN = 'train'
 
+  const resetQueryFunc = () => {
+    formData.name= '',
+    formData.number= '',
+    formData.idcard='' 
+  }
+
   // 提交查询
   const submitQuery = () => {
     const typeMap = {
@@ -179,10 +185,12 @@
       idcard: formData.idcard,
     }
 
+
     const userStore = useUserStore()
 
     //处理分支请求
     let queryParams = ''
+    let fullPath = ''
     console.error('获取证书信息 type:', payload.type)
     if (payload.type == TYPE_CERTIFICATE) {
       queryParams = new URLSearchParams({
@@ -190,16 +198,32 @@
         name: payload.name,
         certificateNo: payload.number
       }).toString()
-    } else if(payload.type == TYPE_SCHOOL || payload.type == TYPE_TRAIN) {
+
+      console.error('获取证书信息 type1:', queryParams)
+      fullPath = `#/layout/business/certificate/certificateInfo?${queryParams}`
+    } else if(payload.type == TYPE_SCHOOL) {
       queryParams = new URLSearchParams({
         type:payload.type,
         name: payload.name,
         idCard: payload.idcard
       }).toString()
-    } 
-    console.error('获取证书信息 type1:', queryParams)
-    const fullPath = `#/layout/business/certificate/certificateInfo?${queryParams}`
+
+      console.error('获取证书信息 type1:', queryParams)
+      fullPath = `#/layout/business/certificate/certificateInfo?${queryParams}`
+    } else if(payload.type == TYPE_TRAIN) {
+      queryParams = new URLSearchParams({
+        type:payload.type,
+        name: payload.name,
+        idCard: payload.idcard
+      }).toString()
+
+      console.error('获取证书信息 type1:', queryParams)
+      fullPath = `#/layout/trainingBusiness/training/trainingInfo?${queryParams}`
+    }
+    resetQueryFunc()
     window.open(fullPath, '_blank')
   }
+
+  
 
 </script>

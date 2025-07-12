@@ -27,7 +27,7 @@ type GetBsTrainingStuList struct {
 	CertificateName string ` json:"certificate_name" form:"certificate_name"` // 证书名称
 	CertificateID   string `json:"certificate_id" form:"certificate_id"`      // 证书编号
 	SDate           string `json:"sdate" form:"sdate"`
-	EDate           string `json:"sdate" form:"edate"`
+	EDate           string `json:"edate" form:"edate"`
 	TrainingProgram string `json:"training_program" form:"training_program"` // 培训项目
 	Editer          string `json:"editer" form:"editer"`
 }

@@ -171,7 +171,35 @@ const rules = ref({
 const addUserFunc = async () => {
   //userInfo.value.age = formatDateToMonth(userInfo.value.age)
   //userInfo.value.bysj =formatDateToMonth(userInfo.value.bysj)
-  
+
+  if(userInfo.value.name == ''){
+    ElMessage.error('请填写正确姓名')
+    return
+  }
+  if(userInfo.value.age == ''){
+    ElMessage.error('请填写正确出生年月日')
+    return
+  }
+  if(userInfo.value.pic == ''){
+    ElMessage.error('请先上传证件照信息')
+    return
+  }
+  if(userInfo.value.nativeplace == ''){
+    ElMessage.error('请选择您的籍贯')
+    return
+  }
+  if(userInfo.value.certificatenumber2 == ''){
+    ElMessage.error('请输入正确的身份证号')
+    return
+  }
+  if(userInfo.value.zhuanye == ''){
+    ElMessage.error('请输入专业信息')
+    return
+  }
+  if(userInfo.value.bysj == ''){
+    ElMessage.error('请输入正确的毕业时间')
+    return
+  }
   try {
     const res = await insertZhengshu(userInfo.value)
     if (res.code === 0) {

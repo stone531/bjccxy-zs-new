@@ -229,6 +229,8 @@ func (userService *BsTrainingApi) GetTrainingInfoList(info request.GetBsTraining
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&business.BsTrainingStudent{})
 	var userList []business.BsTrainingStudent
+	layout := "2006-01-02T15:04:05.000Z"
+	loc, _ := time.LoadLocation("Asia/Shanghai")
 
 	fmt.Println("enter GetUserInfoList:", info)
 	if info.Name != "" {
@@ -242,10 +244,18 @@ func (userService *BsTrainingApi) GetTrainingInfoList(info request.GetBsTraining
 	}
 
 	if info.SDate != "" {
-		db = db.Where("CreatedAt > ?", "%"+info.SDate+"%")
+		//db = db.Where("CreatedAt > ?", "%"+info.SDate+"%")
+		t, err := time.Parse(layout, info.SDate)
+		if err == nil {
+			db = db.Where("created_at >= ?", t.In(loc))
+		}
 	}
 	if info.SDate != "" {
-		db = db.Where("CreatedAt < ?", "%"+info.EDate+"%")
+		//db = db.Where("CreatedAt < ?", "%"+info.EDate+"%")
+		t, err := time.Parse(layout, info.EDate)
+		if err == nil {
+			db = db.Where("created_at <= ?", t.In(loc))
+		}
 	}
 
 	err = db.Count(&total).Error
@@ -253,7 +263,8 @@ func (userService *BsTrainingApi) GetTrainingInfoList(info request.GetBsTraining
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&userList).Error
+	//err = db.Limit(limit).Offset(offset).Find(&userList).Error
+	err = db.Order("created_at desc").Limit(limit).Offset(offset).Find(&userList).Error
 	return userList, total, err
 }
 

@@ -20,8 +20,8 @@
             placeholder="开始日期"
             :disabled-date="
               (time) =>
-                searchInfo.edate
-                  ? time.getTime() > searchInfo.edate.getTime()
+                searchInfo.sdate
+                  ? time.getTime() > searchInfo.sdate.getTime()
                   : false
             "
           ></el-date-picker>
@@ -32,8 +32,8 @@
             placeholder="结束日期"
             :disabled-date="
               (time) =>
-                searchInfo.sdate
-                  ? time.getTime() < searchInfo.sdate.getTime()
+                searchInfo.edate
+                  ? time.getTime() < searchInfo.edate.getTime()
                   : false
             "
           ></el-date-picker>
@@ -106,6 +106,18 @@
           min-width="100"
           prop="issue_date"
         />
+
+        <el-table-column
+          align="left"
+          label="录入日期"
+          min-width="180"
+          prop="CreatedAt"
+        >
+          <template #default="{ row }">
+            {{ formatDate(row.CreatedAt) }}
+          </template>
+        </el-table-column>
+
         <el-table-column
           align="left"
           label="录入人员"
@@ -162,7 +174,7 @@
     >
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">修改用户信息</span>
+          <span class="text-lg">用户信息</span>
           <div>
             <el-button @click="closeAddUserDialog">取 消</el-button>
             <el-button type="primary" @click="enterAddUserDialog"
@@ -176,7 +188,7 @@
         ref="userForm"
         :rules="rules"
         :model="userInfo"
-        label-width="100px"
+        label-width="150px"
       >
 
         <el-form-item label="用户名" prop="name">
@@ -229,21 +241,42 @@
   import {
     getTrainStuList,
     delTrainStuById,
-    setTrainStuInfo
+    setTrainStuInfo,
+    insertTrainStu
   } from '@/api/user'
 
   import { getAuthorityList } from '@/api/authority'
   import { setUserInfo, resetPassword } from '@/api/user.js'
-  import SelectImage from '@/components/upload/zsCommon.vue'
+
   //import zhengshuInfo from '@/view/business/certificate/certificateInfo.vue'
   import { nextTick, ref, watch } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { useAppStore } from "@/pinia";
   import { useRouter } from 'vue-router'
+    import dayjs from 'dayjs'
 
   defineOptions({
     name: 'trainingQuery'
   })
+
+  const rules = ref({
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
+  certificate_name: [{ required: true, message: '请输入培训名称', trigger: 'change' }],
+  certificate_id: [{ required: true, message: '请输入培训证书号', trigger: 'change' }],
+  id_card_number: [
+    { required: true, message: '请输入身份证号', trigger: 'blur' },
+    {
+      pattern: /^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\d{3}[\dXx]$/,
+      message: '请输入合法的18位身份证号码',
+      trigger: 'blur'
+    }
+  ],
+  issue_date: [{ required: true, message: '请输入发证日期', trigger: 'change' }],
+  grade: [{ required: true, message: '请输入成绩', trigger: 'change' }],
+  training_program: [{ required: true, message: '请输培训项目', trigger: 'blur' }],
+  extra_field1: [{ trigger: 'change' }]
+})
 
   const appStore = useAppStore()
   const router = useRouter()
@@ -388,14 +421,14 @@
         const req = {
           ...userInfo.value
         }
-        /*if (dialogFlag.value === 'add') {
-          const res = await register(req)
+        if (dialogFlag.value === 'add') {
+          const res = await insertTrainStu(req)
           if (res.code === 0) {
             ElMessage({ type: 'success', message: '创建成功' })
             await getTableData()
             closeAddUserDialog()
           }
-        }*/
+        }
         if (dialogFlag.value === 'edit') {
           const res = await setTrainStuInfo(req)
           if (res.code === 0) {
@@ -458,9 +491,9 @@
     name: 'certificateInfo',  // 你注册的路由名称
     query: { id: row.ID }     // 假设 row.ID 是证书主键
   })*/
-  const TYPE_SCHOOL = 'school'
+  const TYPE_TRAIN = 'train'
   const queryParams = new URLSearchParams({
-      type:TYPE_SCHOOL,
+      type:TYPE_TRAIN,
       id: row.ID
       //name: row.name,
       //idCard: row.certificatenumber2
@@ -469,6 +502,11 @@
     const fullPath = `#/layout/trainingBusiness/training/trainingInfo?${queryParams}`
     window.open(fullPath, '_blank')
 }
+
+const formatDate = (dateStr) => {
+  return dateStr ? dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss') : ''
+}
+
 </script>
 
 <style lang="scss">
