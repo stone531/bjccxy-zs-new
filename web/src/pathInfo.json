@@ -1,5 +1,9 @@
 {
   "/src/view/about/index.vue": "About",
+  "/src/view/business/certificate/certificateAdd.vue": "certificateAdd",
+  "/src/view/business/certificate/certificateInfo.vue": "CertificateInfo",
+  "/src/view/business/certificate/certificateQuery.vue": "certificateQuery",
+  "/src/view/business/index.vue": "business",
   "/src/view/dashboard/components/banner.vue": "Banner",
   "/src/view/dashboard/components/card.vue": "Card",
   "/src/view/dashboard/components/charts-content-numbers.vue": "ChartsContentNumbers",
@@ -19,6 +23,7 @@
   "/src/view/example/index.vue": "Example",
   "/src/view/example/upload/scanUpload.vue": "scanUpload",
   "/src/view/example/upload/upload.vue": "Upload",
+  "/src/view/external/zsQuery.vue": "zsQuery",
   "/src/view/init/index.vue": "Init",
   "/src/view/layout/aside/asideComponent/asyncSubmenu.vue": "AsyncSubmenu",
   "/src/view/layout/aside/asideComponent/index.vue": "AsideComponent",
@@ -69,6 +74,10 @@
   "/src/view/systemTools/installPlugin/index.vue": "Index",
   "/src/view/systemTools/pubPlug/pubPlug.vue": "PubPlug",
   "/src/view/systemTools/system/system.vue": "Config",
+  "/src/view/trainingBusiness/index.vue": "trainingBusiness",
+  "/src/view/trainingBusiness/training/trainingAdd.vue": "trainingAdd",
+  "/src/view/trainingBusiness/training/trainingInfo.vue": "trainStuInfo",
+  "/src/view/trainingBusiness/training/trainingQuery.vue": "trainingQuery",
   "/src/plugin/announcement/form/info.vue": "InfoForm",
   "/src/plugin/announcement/view/info.vue": "Info",
   "/src/plugin/email/view/index.vue": "Email"

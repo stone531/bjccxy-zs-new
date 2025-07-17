@@ -29,15 +29,15 @@
     },
     {
       title: 'GVA 文档',
-      url: 'https://www.gin-vue-admin.com/'
+      url: 'https://www.baidu.com/'
     },
     {
       title: '插件市场',
-      url: 'https://plugin.gin-vue-admin.com/'
+      url: 'www.soso.com'
     },
     {
       title: 'github 仓库',
-      url: 'https://github.com/flipped-aurora/gin-vue-admin'
+      url: 'www.google.com'
     }
   ]
 </script>

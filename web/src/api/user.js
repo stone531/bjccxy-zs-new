@@ -179,3 +179,97 @@ export const resetPassword = (data) => {
     data: data
   })
 }
+
+
+// @Summary insertzhengshu
+// @Produce  application/json
+// @Param data body {username:"string",password:"string"}
+// @Router /base/resige [post]
+export const insertZhengshu = (data) => {
+  return service({
+    url: '/bszhengshu/create',
+    method: 'post',
+    data: data
+  })
+}
+
+// @Tags User
+// @Summary 分页证书学生信息列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body modelInterface.PageInfo true "分页获取用户列表"
+// @Success 200 {string} json "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /user/getUserList [post]
+export const getZhengshuList = (data) => {
+  return service({
+    url: '/bszhengshu/getZhengshuList',
+    method: 'post',
+    data: data
+  })
+}
+
+export const getOneZhengshu = (data) => {
+  return service({
+    url: '/bszhengshu/getOneZhengshu',
+    method: 'post',
+    data: data
+  })
+}
+
+export const delZhengshuById = (data) => {
+  return service({
+    url: '/bszhengshu/delZhengshuById',
+    method: 'delete',
+    data: data
+  })
+}
+
+export const setZhengshuInfo = (data) => {
+  return service({
+    url: '/bszhengshu/setZhengshuInfo',
+    method: 'put',
+    data: data
+  })
+}
+
+//培训证书
+export const insertTrainStu = (data) => {
+  return service({
+    url: '/bstraining/create',
+    method: 'post',
+    data: data
+  })
+}
+
+export const getTrainStuList = (data) => {
+  return service({
+    url: '/bstraining/getTrainingList',
+    method: 'post',
+    data: data
+  })
+}
+
+export const getOneTrainStu = (data) => {
+  return service({
+    url: '/bstraining/getOneTraining',
+    method: 'post',
+    data: data
+  })
+}
+
+export const delTrainStuById = (data) => {
+  return service({
+    url: '/bstraining/delTrainingById',
+    method: 'delete',
+    data: data
+  })
+}
+
+export const setTrainStuInfo = (data) => {
+  return service({
+    url: '/bstraining/setTrainingInfo',
+    method: 'put',
+    data: data
+  })
+}
