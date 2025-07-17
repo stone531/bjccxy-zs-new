@@ -67,7 +67,7 @@
       </div>
 
       <el-table :data="tableData" row-key="ID">
-        <el-table-column align="left" label="ID" min-width="50" prop="ID" />
+        <el-table-column align="left" label="ID" min-width="90" prop="ID" />
         <el-table-column
           align="left"
           label="学员姓名"
