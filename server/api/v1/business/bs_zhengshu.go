@@ -53,7 +53,7 @@ func (api *BsZhengShuApi) CreateBsZhengshu(c *gin.Context) {
 		Chengchi:           req.Chengchi,
 		CertificateNumber2: req.CertificateNumber2,
 		Zhuanye:            req.Zhuanye,
-		Graduschool:        "114158200206036367",
+		Graduschool:        bsZhengshuService.GetNextGraduschoolNumber(),
 		Graduschool2:       req.Graduschool2,
 		Bysj:               req.Bysj,
 		Zwjd:               req.Zwjd,

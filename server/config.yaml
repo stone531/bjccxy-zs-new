@@ -89,8 +89,8 @@ jwt:
     buffer-time: 1d
     issuer: qmPlus
 local:
-    path: uploads/file
-    store-path: uploads/file
+    path: img_certificate/2018
+    store-path: img_certificate/2018
 mcp:
     name: GVA_MCP
     version: v1.0.0
