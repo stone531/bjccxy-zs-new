@@ -72,7 +72,16 @@ const routes = [
       noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
     }
   },
-
+  {
+    path: '/student-register',
+    name: 'student-register',
+    component: () => import('@/view/student/register/register.vue'),
+    meta: {
+      title: '学生注册',
+      hidden: true, // 不在菜单显示
+      noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
+    }
+  },
 ]
 
 const router = createRouter({
