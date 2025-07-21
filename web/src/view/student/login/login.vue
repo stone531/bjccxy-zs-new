@@ -7,7 +7,7 @@
         <div
           class="oblique h-[130%] w-3/5 bg-white dark:bg-slate-900 transform -rotate-12 absolute -ml-52"
         />
-        <!-- ·Ö¸îÐ±¿é -->
+        <!-- åˆ†å‰²æ–œå— -->
         <div
           class="z-[999] pt-12 pb-10 md:w-96 w-full rounded-lg flex flex-col justify-between box-border"
         >
@@ -34,7 +34,7 @@
                 <el-input
                   v-model="loginFormData.username"
                   size="large"
-                  placeholder="ÇëÊäÈëÓÃ»§Ãû"
+                  placeholder="è¯·è¾“å…¥ç”¨æˆ·å"
                   suffix-icon="user"
                 />
               </el-form-item>
@@ -44,7 +44,7 @@
                   show-password
                   size="large"
                   type="password"
-                  placeholder="ÇëÊäÈëÃÜÂë"
+                  placeholder="è¯·è¾“å…¥å¯†ç "
                 />
               </el-form-item>
               <el-form-item
@@ -55,7 +55,7 @@
                 <div class="flex w-full justify-between">
                   <el-input
                     v-model="loginFormData.captcha"
-                    placeholder="ÇëÊäÈëÑéÖ¤Âë"
+                    placeholder="è¯·è¾“å…¥éªŒè¯ç "
                     size="large"
                     class="flex-1 mr-5"
                   />
@@ -64,7 +64,7 @@
                       v-if="picPath"
                       class="w-full h-full"
                       :src="picPath"
-                      alt="ÇëÊäÈëÑéÖ¤Âë"
+                      alt="è¯·è¾“å…¥éªŒè¯ç "
                       @click="loginVerify()"
                     />
                   </div>
@@ -76,20 +76,18 @@
                   type="primary"
                   size="large"
                   @click="submitForm"
-                  >µÇ Â¼</el-button
+                  >ç™» å½•</el-button
                 >
               </el-form-item>
-              <!--
               <el-form-item class="mb-6">
                 <el-button
                   class="shadow shadow-active h-11 w-full"
                   type="primary"
                   size="large"
-                  @click="checkInit"
-                  >Ç°Íù³õÊ¼»¯</el-button
+                  @click="$router.push('/student-register')"
+                  >æ³¨ å†Œ</el-button
                 >
               </el-form-item>
-              -->
             </el-form>
           </div>
         </div>
@@ -107,10 +105,10 @@
       <!--
       <div class="links items-center justify-center gap-2 hidden md:flex">
         <a href="https://www.gin-vue-admin.com/" target="_blank">
-          <img src="@/assets/docs.png" class="w-8 h-8" alt="ÎÄµµ" />
+          <img src="@/assets/docs.png" class="w-8 h-8" alt="æ–‡æ¡£" />
         </a>
         <a href="https://support.qq.com/product/371961" target="_blank">
-          <img src="@/assets/kefu.png" class="w-8 h-8" alt="¿Í·þ" />
+          <img src="@/assets/kefu.png" class="w-8 h-8" alt="å®¢æœ" />
         </a>
         <a
           href="https://github.com/flipped-aurora/gin-vue-admin"
@@ -119,7 +117,7 @@
           <img src="@/assets/github.png" class="w-8 h-8" alt="github" />
         </a>
         <a href="https://space.bilibili.com/322210472" target="_blank">
-          <img src="@/assets/video.png" class="w-8 h-8" alt="ÊÓÆµÕ¾" />
+          <img src="@/assets/video.png" class="w-8 h-8" alt="è§†é¢‘ç«™" />
         </a>
       </div>
       -->
@@ -141,29 +139,29 @@
   })
 
   const router = useRouter()
-  // ÑéÖ¤º¯Êý
+  // éªŒè¯å‡½æ•°
   const checkUsername = (rule, value, callback) => {
     if (value.length < 5) {
-      return callback(new Error('ÇëÊäÈëÕýÈ·µÄÓÃ»§Ãû'))
+      return callback(new Error('è¯·è¾“å…¥æ­£ç¡®çš„ç”¨æˆ·å'))
     } else {
       callback()
     }
   }
   const checkPassword = (rule, value, callback) => {
     if (value.length < 6) {
-      return callback(new Error('ÇëÊäÈëÕýÈ·µÄÃÜÂë'))
+      return callback(new Error('è¯·è¾“å…¥æ­£ç¡®çš„å¯†ç '))
     } else {
       callback()
     }
   }
 
-  // »ñÈ¡ÑéÖ¤Âë
+  // èŽ·å–éªŒè¯ç 
   const loginVerify = async () => {
     const ele = await captcha()
     rules.captcha.push({
       max: ele.data.captchaLength,
       min: ele.data.captchaLength,
-      message: `ÇëÊäÈë${ele.data.captchaLength}Î»ÑéÖ¤Âë`,
+      message: `è¯·è¾“å…¥${ele.data.captchaLength}ä½éªŒè¯ç `,
       trigger: 'blur'
     })
     picPath.value = ele.data.picPath
@@ -172,7 +170,7 @@
   }
   loginVerify()
 
-  // µÇÂ¼Ïà¹Ø²Ù×÷
+  // ç™»å½•ç›¸å…³æ“ä½œ
   const loginForm = ref(null)
   const picPath = ref('')
   const loginFormData = reactive({
@@ -187,7 +185,7 @@
     password: [{ validator: checkPassword, trigger: 'blur' }],
     captcha: [
       {
-        message: 'ÑéÖ¤Âë¸ñÊ½²»ÕýÈ·',
+        message: 'éªŒè¯ç æ ¼å¼ä¸æ­£ç¡®',
         trigger: 'blur'
       }
     ]
@@ -200,31 +198,31 @@
   const submitForm = () => {
     loginForm.value.validate(async (v) => {
       if (!v) {
-        // Î´Í¨¹ýÇ°¶Ë¾²Ì¬ÑéÖ¤
+        // æœªé€šè¿‡å‰ç«¯é™æ€éªŒè¯
         ElMessage({
           type: 'error',
-          message: 'ÇëÕýÈ·ÌîÐ´µÇÂ¼ÐÅÏ¢',
+          message: 'è¯·æ­£ç¡®å¡«å†™ç™»å½•ä¿¡æ¯',
           showClose: true
         })
         await loginVerify()
         return false
       }
 
-      // Í¨¹ýÑéÖ¤£¬ÇëÇóµÇÂ½
+      // é€šè¿‡éªŒè¯ï¼Œè¯·æ±‚ç™»é™†
       const flag = await login()
 
-      // µÇÂ½Ê§°Ü£¬Ë¢ÐÂÑéÖ¤Âë
+      // ç™»é™†å¤±è´¥ï¼Œåˆ·æ–°éªŒè¯ç 
       if (!flag) {
         await loginVerify()
         return false
       }
 
-      // µÇÂ½³É¹¦
+      // ç™»é™†æˆåŠŸ
       return true
     })
   }
 
-  // Ìø×ª³õÊ¼»¯
+  // è·³è½¬åˆå§‹åŒ–
   const checkInit = async () => {
     const res = await checkDB()
     if (res.code === 0) {
@@ -234,9 +232,14 @@
       } else {
         ElMessage({
           type: 'info',
-          message: 'ÒÑÅäÖÃÊý¾Ý¿âÐÅÏ¢£¬ÎÞ·¨³õÊ¼»¯'
+          message: 'å·²é…ç½®æ•°æ®åº“ä¿¡æ¯ï¼Œæ— æ³•åˆå§‹åŒ–'
         })
       }
     }
   }
+
+  const register = () => {
+      this.$router.push({ name: "register" });
+  }
+
 </script>

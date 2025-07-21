@@ -73,11 +73,41 @@ const routes = [
     }
   },
   {
+    path: '/student-login',
+    name: 'student-login',
+    component: () => import('@/view/student/login/login.vue'),
+    meta: {
+      title: '学生登录',
+      hidden: true, // 不在菜单显示
+      noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
+    }
+  },
+  {
     path: '/student-register',
     name: 'student-register',
-    component: () => import('@/view/student/register/register.vue'),
+    component: () => import('@/view/student/login/register.vue'),
     meta: {
       title: '学生注册',
+      hidden: true, // 不在菜单显示
+      noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
+    }
+  },
+  {
+    path: '/user-agreement',
+    name: 'user-agreement',
+    component: () => import('@/view/student/login/user-agreement.vue'),
+    meta: {
+      title: '长城学院用户协议',
+      hidden: true, // 不在菜单显示
+      noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
+    }
+  },
+  {
+    path: '/privacy-policy',
+    name: 'privacy-policy',
+    component: () => import('@/view/student/login/privacy-policy.vue'),
+    meta: {
+      title: '长城学院隐私协议',
       hidden: true, // 不在菜单显示
       noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
     }
