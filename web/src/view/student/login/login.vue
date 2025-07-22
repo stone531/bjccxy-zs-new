@@ -70,6 +70,16 @@
                   </div>
                 </div>
               </el-form-item>
+              <el-form-item>
+                <div class="flex justify-between items-center w-full">
+                  <el-checkbox v-model="checked">记住密码</el-checkbox>
+                  
+                  <el-link @click="() => $router.push('/student-retrivev-password')" type="primary">
+                    找回密码
+                  </el-link>
+                </div>
+              </el-form-item>
+              
               <el-form-item class="mb-6">
                 <el-button
                   class="shadow shadow-active h-11 w-full"
@@ -129,7 +139,7 @@
   import { captcha } from '@/api/user'
   import { checkDB } from '@/api/initdb'
   import BottomInfo from '@/components/bottomInfo/bottomInfo.vue'
-  import { reactive, ref } from 'vue'
+  import { onMounted,reactive, ref } from 'vue'
   import { ElMessage } from 'element-plus'
   import { useRouter } from 'vue-router'
   import { useUserStore } from '@/pinia/modules/user'
@@ -174,11 +184,12 @@
   const loginForm = ref(null)
   const picPath = ref('')
   const loginFormData = reactive({
-    username: 'admin',
+    username: '',
     password: '',
     captcha: '',
     captchaId: '',
-    openCaptcha: false
+    openCaptcha: false,
+    checked: false,
   })
   const rules = reactive({
     username: [{ validator: checkUsername, trigger: 'blur' }],
@@ -217,6 +228,8 @@
         return false
       }
 
+      cookieValid()  // 判断是否保存
+
       // 登陆成功
       return true
     })
@@ -241,5 +254,49 @@
   const register = () => {
       this.$router.push({ name: "register" });
   }
+
+  const forgetPass = ()  => {
+      //this.dialogFormVisible = !this.dialogFormVisible;
+  }
+
+  // 设置 cookie
+const setCookie = (c_name, c_pwd, exdays) => {
+  const exdate = new Date()
+  exdate.setTime(exdate.getTime() + 24 * 60 * 60 * 1000 * exdays)
+  document.cookie = `userName=${c_name};path=/;expires=${exdate.toGMTString()}`
+  document.cookie = `userPwd=${c_pwd};path=/;expires=${exdate.toGMTString()}`
+}
+
+// 获取 cookie
+const getCookie = () => {
+  const cookieStr = document.cookie
+  if (cookieStr.length > 0) {
+    const arr = cookieStr.split('; ')
+    for (let i = 0; i < arr.length; i++) {
+      const [key, value] = arr[i].split('=')
+      if (key === 'userName') loginForm.value.username = value
+      if (key === 'userPwd') loginForm.value.password = value
+    }
+  }
+}
+
+// 清除 cookie
+const clearCookie = () => {
+  setCookie('', '', -1)
+}
+
+// 校验是否需要存 cookie
+const cookieValid = () => {
+  if (checked.value) {
+    setCookie(loginForm.value.username, loginForm.value.password, 7)
+  } else {
+    clearCookie()
+  }
+}
+
+// 页面加载时获取 cookie
+onMounted(() => {
+  getCookie()
+})
 
 </script>

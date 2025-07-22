@@ -107,7 +107,17 @@ const routes = [
     name: 'privacy-policy',
     component: () => import('@/view/student/login/privacy-policy.vue'),
     meta: {
-      title: '长城学院隐私协议',
+      title: '长城学院隐私政策',
+      hidden: true, // 不在菜单显示
+      noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
+    }
+  },
+  {
+    path: '/student-retrivev-password',
+    name: 'student-retrivev-password',
+    component: () => import('@/view/student/login/retrieve-password.vue'),
+    meta: {
+      title: '找回密码',
       hidden: true, // 不在菜单显示
       noLogin: true // 自定义字段，后面可以在拦截器中使用跳过 token 检查
     }

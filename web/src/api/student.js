@@ -136,3 +136,11 @@ export const changeEmail = (data) => {
         data: data
     })
 }
+
+export const initPassword = (data) => {
+    return service({
+        url: "/user/initPassword",
+        method: 'post',
+        data: data
+    })
+}
