@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { studentRoutes } from '../api/student.js'
 
 const routes = [
   {
@@ -128,5 +129,7 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes
 })
+
+studentRoutes.forEach(route => router.addRoute(route))
 
 export default router

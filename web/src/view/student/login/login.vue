@@ -208,7 +208,7 @@
   }
   const submitForm = () => {
     loginForm.value.validate(async (v) => {
-      if (!v) {
+      /*if (!v) {
         // 未通过前端静态验证
         ElMessage({
           type: 'error',
@@ -226,9 +226,12 @@
       if (!flag) {
         await loginVerify()
         return false
-      }
+      }*/
 
       cookieValid()  // 判断是否保存
+
+      //localStorage.setItem('studentToken', res.data.token)
+      router.push('/student/info')
 
       // 登陆成功
       return true
@@ -287,7 +290,7 @@ const clearCookie = () => {
 
 // 校验是否需要存 cookie
 const cookieValid = () => {
-  if (checked.value) {
+  if (loginFormData.checked.value) {
     setCookie(loginForm.value.username, loginForm.value.password, 7)
   } else {
     clearCookie()

@@ -1,11 +1,48 @@
 import request from '@/utils/request'
 
-// ·¢ËÍÓÊÏäÑéÖ¤Âë
+// src/router/student.js
+export const studentRoutes = [
+  {
+    path: '/student',
+    name: 'StudentRoot',
+    component: () => import('@/view/student/home/home.vue'),
+    redirect: '/student/info',
+    children: [
+      {
+        path: 'info',
+        name: 'StudentInfo',
+        component: () => import('@/view/student/home/info.vue'),
+        meta: { title: 'æˆ‘çš„ä¿¡æ¯', icon: 'user' }
+      },
+      {
+        path: 'order',
+        name: 'StudentOrder',
+        component: () => import('@/view/student/home/order.vue'),
+        meta: { title: 'æˆ‘çš„è®¢å•', icon: 'list' }
+      },
+      {
+        path: 'certificate',
+        name: 'StudentCertificate',
+        component: () => import('@/view/student/home/certificate.vue'),
+        meta: { title: 'æ¯•ä¸šè¯ä¹¦ç”³è¯·', icon: 'file-text' }
+      },
+      {
+        path: 'quit',
+        name: 'StudentQuit',
+        component: () => import('@/view/student/home/quit.vue'),
+        meta: { title: 'é€€å‡ºç™»å½•', icon: 'file-text' }
+      }
+    ]
+  }
+]
+
+
+// å‘é€é‚®ç®±éªŒè¯ç 
 export function sendStudentCodeApi(data) {
   return request.post('/student/sendCode', data)
 }
 
-// ×¢²á½Ó¿Ú
+// æ³¨å†ŒæŽ¥å£
 export function registerStudentApi(data) {
   return request.post('/student/register', data)
 }
@@ -20,7 +57,7 @@ export const login = (data) => {
     })
 }
 
-// @Summary »ñÈ¡ÑéÖ¤Âë
+// @Summary èŽ·å–éªŒè¯ç 
 // @Produce  application/json
 // @Param data body {username:"string",password:"string"}
 // @Router /base/captcha [post]
@@ -33,7 +70,7 @@ export const captcha = (data) => {
     })
 }*/
 
-// @Summary ÓÃ»§×¢²á
+// @Summary ç”¨æˆ·æ³¨å†Œ
 // @Produce  application/json
 // @Param data body {username:"string",password:"string"}
 // @Router /base/resige [post]
@@ -61,7 +98,7 @@ export const forgetVerify = (data) => {
     })
 }
 
-// @Summary ÐÞ¸ÄÃÜÂë
+// @Summary ä¿®æ”¹å¯†ç 
 // @Produce  application/json
 // @Param data body {username:"string",password:"string",newPassword:"string"}
 // @Router /user/changePassword [post]
@@ -73,12 +110,12 @@ export const changePassword = (data) => {
     })
 }
 // @Tags User
-// @Summary ·ÖÒ³»ñÈ¡ÓÃ»§ÁÐ±í
+// @Summary åˆ†é¡µèŽ·å–ç”¨æˆ·åˆ—è¡¨
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body modelInterface.PageInfo true "·ÖÒ³»ñÈ¡ÓÃ»§ÁÐ±í"
-// @Success 200 {string} json "{"success":true,"data":{},"msg":"»ñÈ¡³É¹¦"}"
+// @Param data body modelInterface.PageInfo true "åˆ†é¡µèŽ·å–ç”¨æˆ·åˆ—è¡¨"
+// @Success 200 {string} json "{"success":true,"data":{},"msg":"èŽ·å–æˆåŠŸ"}"
 // @Router /user/getUserList [post]
 export const getUserList = (data) => {
     return service({
@@ -90,12 +127,12 @@ export const getUserList = (data) => {
 
 
 // @Tags User
-// @Summary ÉèÖÃÓÃ»§È¨ÏÞ
+// @Summary è®¾ç½®ç”¨æˆ·æƒé™
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body api.SetUserAuth true "ÉèÖÃÓÃ»§È¨ÏÞ"
-// @Success 200 {string} json "{"success":true,"data":{},"msg":"ÐÞ¸Ä³É¹¦"}"
+// @Param data body api.SetUserAuth true "è®¾ç½®ç”¨æˆ·æƒé™"
+// @Success 200 {string} json "{"success":true,"data":{},"msg":"ä¿®æ”¹æˆåŠŸ"}"
 // @Router /user/setUserAuthority [post]
 export const setUserAuthority = (data) => {
     return service({

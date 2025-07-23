@@ -49,6 +49,7 @@
   "/src/view/student/login/login.vue": "Login",
   "/src/view/student/login/privacy-policy.vue": "PrivacyPolicy",
   "/src/view/student/login/register.vue": "Register",
+  "/src/view/student/login/retrieve-password.vue": "RetrievePassword",
   "/src/view/student/login/user-agreement.vue": "UserAgreement",
   "/src/view/superAdmin/api/api.vue": "Api",
   "/src/view/superAdmin/authority/authority.vue": "Authority",
