@@ -2,10 +2,24 @@ package student
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+
+	"github.com/google/uuid"
 )
+
+type StudentLogin interface {
+	GetUsername() string
+	GetNickname() string
+	GetUUID() uuid.UUID
+	GetUserId() uint
+	GetAuthorityId() uint
+	GetUserInfo() any
+}
+
+var _ StudentLogin = new(BsStudents)
 
 type BsStudents struct {
 	global.GVA_MODEL
+	UUID             uuid.UUID      `json:"uuid" gorm:"index;comment:用户UUID"`
 	UserAccount      string `gorm:"column:useraccount;type:varchar(50);not null;default:''" json:"usera_ccount"` //登录账号
 	Name             string `gorm:"column:name;type:varchar(50);not null;default:''" json:"name"`
 	PassWord         string `gorm:"column:password;type:varchar(50);not null;default:''" json:"password"`
@@ -21,18 +35,33 @@ type BsStudents struct {
 
 //var _ ZhengShu = new(BsZhengshu)
 
+// TableName 返回表名
+//
+// 返回：字符串类型，表示表名
 func (BsStudents) TableName() string {
 	return "bs_students"
 }
 
 func (s *BsStudents) GetUsername() string {
-	return s.Name
+	return s.UserAccount
 }
 
 func (s *BsStudents) GetNickname() string {
 	return s.Name
 }
 
+func (s *BsStudents) GetUUID() uuid.UUID {
+	return s.UUID
+}
+
 func (s *BsStudents) GetUserId() uint {
 	return s.ID
+}
+
+func (s *BsStudents) GetAuthorityId() uint {
+	return 1
+}
+
+func (s *BsStudents) GetUserInfo() any {
+	return *s
 }
