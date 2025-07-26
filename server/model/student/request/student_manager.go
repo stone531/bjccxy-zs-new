@@ -12,3 +12,11 @@ type AddStudent struct {
 	ExtraField1      string ` json:"extra_file1"`      // 编辑者
 	ExtraField2      string ` json:"extra_file2"`      // 编辑者
 }
+
+// Login User login structure
+type Login struct {
+	Username  string `json:"username"`  // 用户名
+	Password  string `json:"password"`  // 密码
+	Captcha   string `json:"captcha"`   // 验证码
+	CaptchaId string `json:"captchaId"` // 验证码ID
+}

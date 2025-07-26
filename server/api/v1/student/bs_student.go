@@ -1,19 +1,34 @@
 package student
 
 import (
+	"time"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+
+	//"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 
 	//"gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
+	stumodel "github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
+
+	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
+	systemRes "github.com/flipped-aurora/gin-vue-admin/server/model/student/response"
 
 	//"github.com/flipped-aurora/gin-vue-admin/server/utils"
 
 	//demoRecordRes "github.com/flipped-aurora/gin-vue-admin/server/model/example/response"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mojocn/base64Captcha"
 )
+
+var store = base64Captcha.DefaultMemStore
 
 type BsStudentApi struct{}
 
@@ -50,8 +65,10 @@ func (b *BsStudentApi) Login(c *gin.Context) {
 	var oc bool = openCaptcha == 0 || openCaptcha < interfaceToInt(v)
 
 	if !oc || (l.CaptchaId != "" && l.Captcha != "" && store.Verify(l.CaptchaId, l.Captcha, true)) {
-		u := &system.SysUser{Username: l.Username, Password: l.Password}
-		user, err := userService.Login(u)
+		//u := &system.SysUser{Username: l.Username, Password: l.Password}
+		u := &stumodel.BsStudents{UserAccount: l.Username, Password: l.Password}
+
+		user, err := bsStudentService.Login(u)
 		if err != nil {
 			global.GVA_LOG.Error("登陆失败! 用户名不存在或者密码错误!", zap.Error(err))
 			// 验证码次数+1
@@ -59,13 +76,7 @@ func (b *BsStudentApi) Login(c *gin.Context) {
 			response.FailWithMessage("用户名不存在或者密码错误", c)
 			return
 		}
-		if user.Enable != 1 {
-			global.GVA_LOG.Error("登陆失败! 用户被禁止登录!")
-			// 验证码次数+1
-			global.BlackCache.Increment(key, 1)
-			response.FailWithMessage("用户被禁止登录", c)
-			return
-		}
+
 		b.TokenNext(c, *user)
 		return
 	}
@@ -75,7 +86,7 @@ func (b *BsStudentApi) Login(c *gin.Context) {
 }
 
 // TokenNext 登录以后签发jwt
-func (b *BsStudentApi) TokenNext(c *gin.Context, user system.SysUser) {
+func (b *BsStudentApi) TokenNext(c *gin.Context, user student.BsStudents) {
 	token, claims, err := utils.StudentLoginToken(&user)
 	if err != nil {
 		global.GVA_LOG.Error("获取token失败!", zap.Error(err))
@@ -92,8 +103,8 @@ func (b *BsStudentApi) TokenNext(c *gin.Context, user system.SysUser) {
 		return
 	}
 
-	if jwtStr, err := jwtService.GetRedisJWT(user.Username); err == redis.Nil {
-		if err := utils.SetRedisJWT(token, user.Username); err != nil {
+	if jwtStr, err := jwtService.GetRedisJWT(user.UserAccount); err == redis.Nil {
+		if err := utils.SetRedisJWT(token, user.UserAccount); err != nil {
 			global.GVA_LOG.Error("设置登录状态失败!", zap.Error(err))
 			response.FailWithMessage("设置登录状态失败", c)
 			return
@@ -143,7 +154,7 @@ func (api *BsStudentApi) CreateBsStudent(c *gin.Context) {
 		Name:             req.Name,
 		UserAccount:      req.UserAccount,
 		IDCardNumber:     req.IDCardNumber,
-		PassWord:         req.PassWord,
+		Password:         req.PassWord,
 		Email:            req.Email,
 		VerificationCode: req.VerificationCode,
 		BindId:           req.BindId,
@@ -157,6 +168,17 @@ func (api *BsStudentApi) CreateBsStudent(c *gin.Context) {
 	}
 
 	response.OkWithData(gin.H{"id": record.ID}, c)
+}
+
+// 类型转换
+func interfaceToInt(v interface{}) (i int) {
+	switch v := v.(type) {
+	case int:
+		i = v
+	default:
+		i = 0
+	}
+	return
 }
 
 // GetDemoRecordList

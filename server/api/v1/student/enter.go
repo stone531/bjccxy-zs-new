@@ -7,5 +7,6 @@ type ApiGroup struct {
 }
 
 var (
+	jwtService       = service.ServiceGroupApp.SystemServiceGroup.JwtService
 	bsStudentService = service.ServiceGroupApp.StudentServiceGroup.BsStudentService
 )

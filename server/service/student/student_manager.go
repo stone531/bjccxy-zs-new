@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"gorm.io/gorm"
@@ -40,4 +41,20 @@ func (bzs *BsStudentService) DeleteUser(id int) (err error) {
 		return nil
 	})
 
+}
+
+func (userService *BsStudentService) Login(u *student.BsStudents) (userInter *student.BsStudents, err error) {
+	/*if nil == global.GVA_DB {
+		return nil, fmt.Errorf("db not init")
+	}*/
+
+	var user student.BsStudents
+	err = global.GVA_DB.Where("username = ?", u.UserAccount).Preload("Authorities").Preload("Authority").First(&user).Error
+	if err == nil {
+		if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
+			return nil, errors.New("密码错误")
+		}
+		//MenuServiceApp.UserAuthorityDefaultRouter(&user)
+	}
+	return &user, err
 }

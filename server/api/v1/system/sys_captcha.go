@@ -68,3 +68,4 @@ func interfaceToInt(v interface{}) (i int) {
 	}
 	return
 }
+

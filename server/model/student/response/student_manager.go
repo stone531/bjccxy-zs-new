@@ -5,6 +5,12 @@ import (
 	//"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 )
 
-type BSZhengShuResponse struct {
-	Students student.BsStudents `json:"students"`
+type StudentResponse struct {
+	User student.BsStudents `json:"user"`
+}
+
+type LoginResponse struct {
+	User      student.BsStudents `json:"user"`
+	Token     string             `json:"token"`
+	ExpiresAt int64              `json:"expiresAt"`
 }
