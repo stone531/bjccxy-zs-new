@@ -2,9 +2,12 @@ package student
 
 import (
 	"errors"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
+	emailreq "github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/google/uuid"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"gorm.io/gorm"
@@ -49,12 +52,49 @@ func (userService *BsStudentService) Login(u *student.BsStudents) (userInter *st
 	}*/
 
 	var user student.BsStudents
-	err = global.GVA_DB.Where("username = ?", u.UserAccount).Preload("Authorities").Preload("Authority").First(&user).Error
+	err = global.GVA_DB.Where("useraccount = ?", u.UserAccount).First(&user).Error
 	if err == nil {
-		if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
+		/*if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
 			return nil, errors.New("密码错误")
-		}
+		}*/
 		//MenuServiceApp.UserAuthorityDefaultRouter(&user)
 	}
 	return &user, err
+}
+
+func (bzs *BsStudentService) InitPassword(u emailreq.InitPasswordReq, pwd string) (err error) {
+	//var user student.BsStudents
+	/*if !errors.Is(global.GVA_DB.Where("useraccount = ? and email = ?", u.UserAccount, u.Email).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
+		return userInter, errors.New("用户名已注册")
+	}*/
+
+	return global.GVA_DB.Model(&student.BsStudents{}).
+		Select("updated_at", "password").
+		Where("useraccount=? and email=?", u.UserAccount, u.Email).
+		Updates(map[string]interface{}{
+			"updated_at": time.Now(),
+			"password":   utils.GetMD5Hash(pwd),
+		}).Error
+}
+
+func (api *BsStudentService) CheckUserExists(uaccount string, uEmail string) (bool, error) {
+	var count int64
+	err := global.GVA_DB.Model(&student.BsStudents{}).
+		Where("useraccount = ? and email = ?", uaccount, uEmail).
+		Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (us *BsStudentService) GetUserInfo(uuid uuid.UUID) (user student.BsStudents, err error) {
+	var reqUser student.BsStudents
+	err = global.GVA_DB.Model(&student.BsStudents{}).First(&reqUser, "uuid = ?", uuid).Error
+	if err != nil {
+		return reqUser, err
+	}
+
+	return reqUser, err
 }

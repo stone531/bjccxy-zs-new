@@ -1,14 +1,18 @@
 package student
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/google/uuid"
 
 	//"github.com/go-redis/redis"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
+
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/cacheutil"
 
 	//"gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
@@ -40,22 +44,24 @@ type BsStudentApi struct{}
 // @Success  200   {object}  response.Response{data=systemRes.LoginResponse,msg=string}  "返回包括用户信息,token,过期时间"
 // @Router   /base/login [post]
 func (b *BsStudentApi) Login(c *gin.Context) {
+	fmt.Println("student login")
 	var l systemReq.Login
 	err := c.ShouldBindJSON(&l)
 	key := c.ClientIP()
+	fmt.Println("login user:", l.UserAccount, l.Password, l.CaptchaId)
 
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(l, utils.LoginVerify)
+	/*err = utils.Verify(l, utils.LoginVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
-	}
+	}*/
 
 	// 判断验证码是否开启
-	openCaptcha := global.GVA_CONFIG.Captcha.OpenCaptcha               // 是否开启防爆次数
+	/*openCaptcha := global.GVA_CONFIG.Captcha.OpenCaptcha // 是否开启防爆次数
 	openCaptchaTimeOut := global.GVA_CONFIG.Captcha.OpenCaptchaTimeOut // 缓存超时时间
 	v, ok := global.BlackCache.Get(key)
 	if !ok {
@@ -63,10 +69,11 @@ func (b *BsStudentApi) Login(c *gin.Context) {
 	}
 
 	var oc bool = openCaptcha == 0 || openCaptcha < interfaceToInt(v)
-
-	if !oc || (l.CaptchaId != "" && l.Captcha != "" && store.Verify(l.CaptchaId, l.Captcha, true)) {
+	*/
+	//if !oc || (l.CaptchaId != "" && l.Captcha != "" && store.Verify(l.CaptchaId, l.Captcha, true)) {
+	if l.CaptchaId != "" && l.Captcha != "" && store.Verify(l.CaptchaId, l.Captcha, true) {
 		//u := &system.SysUser{Username: l.Username, Password: l.Password}
-		u := &stumodel.BsStudents{UserAccount: l.Username, Password: l.Password}
+		u := &stumodel.BsStudents{UserAccount: l.UserAccount, Password: l.Password}
 
 		user, err := bsStudentService.Login(u)
 		if err != nil {
@@ -147,27 +154,41 @@ func (api *BsStudentApi) CreateBsStudent(c *gin.Context) {
 		return
 	}
 
+	ok, _ := bsStudentService.CheckUserExists(req.UserAccount, req.Email)
+	if ok {
+		response.FailWithMessage("用户名和邮箱已被占用 ", c)
+		return
+	}
 	//now := time.Now()
 	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-
-	record := student.BsStudents{
-		Name:             req.Name,
-		UserAccount:      req.UserAccount,
-		IDCardNumber:     req.IDCardNumber,
-		Password:         req.PassWord,
-		Email:            req.Email,
-		VerificationCode: req.VerificationCode,
-		BindId:           req.BindId,
-		ExtraField1:      req.ExtraField1,
-		ExtraField2:      req.ExtraField2,
+	cache := cacheutil.GetInstance()
+	code, ok := cache.Get(req.Email)
+	if !ok {
+		response.FailWithMessage("输入先点发送验证码到邮箱", c)
+		return
+	}
+	fmt.Println("code0:", req.VerificationCode)
+	fmt.Println("code1:", code)
+	if req.VerificationCode != code {
+		response.FailWithMessage("输入邮箱验证码有误", c)
+		return
+	}
+	stuObj := student.BsStudents{
+		UUID:        uuid.New(),
+		UserAccount: req.UserAccount,
+		Password:    req.PassWord,
+		Email:       req.Email,
+		//VerificationCode: req.VerificationCode,
+		//ExtraField1:      req.ExtraField1,
+		//ExtraField2:      req.ExtraField2,
 	}
 
-	if err := global.GVA_DB.Create(&record).Error; err != nil {
-		response.FailWithMessage("create fail", c)
+	if err := global.GVA_DB.Create(&stuObj).Error; err != nil {
+		response.FailWithMessage("注册成功", c)
 		return
 	}
 
-	response.OkWithData(gin.H{"id": record.ID}, c)
+	response.OkWithData(gin.H{"id": stuObj.ID}, c)
 }
 
 // 类型转换
@@ -179,6 +200,17 @@ func interfaceToInt(v interface{}) (i int) {
 		i = 0
 	}
 	return
+}
+
+func (b *BsStudentApi) GetUserInfo(c *gin.Context) {
+	uuid := utils.GetUserUuid(c)
+	ReqUser, err := bsStudentService.GetUserInfo(uuid)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+	response.OkWithDetailed(gin.H{"userInfo": ReqUser}, "获取成功", c)
 }
 
 // GetDemoRecordList

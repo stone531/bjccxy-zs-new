@@ -51,7 +51,7 @@
   "/src/view/student/home/order.vue": "Order",
   "/src/view/student/home/quit.vue": "Quit",
   "/src/view/student/index.vue": "student",
-  "/src/view/student/login/login.vue": "Login",
+  "/src/view/student/login/login.vue": "StudentLogin",
   "/src/view/student/login/privacy-policy.vue": "PrivacyPolicy",
   "/src/view/student/login/register.vue": "Register",
   "/src/view/student/login/retrieve-password.vue": "RetrievePassword",

@@ -1,4 +1,5 @@
-import request from '@/utils/request'
+//import request from '@/utils/request'
+import service from '@/utils/request'
 
 // src/router/student.js
 export const studentRoutes = [
@@ -39,7 +40,7 @@ export const studentRoutes = [
 
 // 发送邮箱验证码
 export function sendStudentCodeApi(data) {
-  return request.post('/student/sendCode', data)
+  return request.post('/student/sendEmailCode', data)
 }
 
 // 注册接口
@@ -51,10 +52,11 @@ export function registerStudentApi(data) {
 
 export const login = (data) => {
     return service({
-        url: "/base/login",
+        url: "/student/login",
         method: 'post',
         data: data
     })
+    //return request.post('/student/login', data)
 }
 
 // @Summary 获取验证码
@@ -76,10 +78,12 @@ export const captcha = (data) => {
 // @Router /base/resige [post]
 export const register = (data) => {
     return service({
-        url: "/base/register",
+        url: "/student/register",
         method: 'post',
         data: data
     })
+
+    //return request.post('/student/register', data)
 }
 
 export const forgetSendEmail = (data) => {
@@ -176,8 +180,17 @@ export const changeEmail = (data) => {
 
 export const initPassword = (data) => {
     return service({
-        url: "/user/initPassword",
+        url: "/student/initPassword",
         method: 'post',
         data: data
     })
+    //return request.post('/student/initPassword', data)
+}
+
+
+export const getStudentInfo = () => {
+  return service({
+    url: '/student/getInfo',
+    method: 'get'
+  })
 }

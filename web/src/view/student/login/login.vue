@@ -142,10 +142,12 @@
   import { onMounted,reactive, ref } from 'vue'
   import { ElMessage } from 'element-plus'
   import { useRouter } from 'vue-router'
-  import { useUserStore } from '@/pinia/modules/user'
+  //import { useUserStore } from '@/pinia/modules/user'
+  import { useStudentStore } from '@/pinia/modules/student'
+  //import { login } from '@/api/student'
 
   defineOptions({
-    name: 'Login'
+    name: 'StudentLogin'
   })
 
   const router = useRouter()
@@ -202,13 +204,18 @@
     ]
   })
 
-  const userStore = useUserStore()
+  const studentStore = useStudentStore()
   const login = async () => {
-    return await userStore.LoginIn(loginFormData)
+    return await studentStore.LoginIn(loginFormData)
   }
+  const doLogin = async () => {
+    return await studentStore.LoginIn({ username, password })
+
+  }
+
   const submitForm = () => {
     loginForm.value.validate(async (v) => {
-      /*if (!v) {
+      if (!v) {
         // 未通过前端静态验证
         ElMessage({
           type: 'error',
@@ -226,7 +233,7 @@
       if (!flag) {
         await loginVerify()
         return false
-      }*/
+      }
 
       cookieValid()  // 判断是否保存
 

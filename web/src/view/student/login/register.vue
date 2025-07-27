@@ -14,17 +14,17 @@
           label-position="left"
           label-width="90px"
         >
-          <el-form-item label="用户名" prop="userName">
-            <el-input v-model="registerForm.userName" placeholder="请输入用户名" />
+          <el-form-item label="用户名" prop="usera_ccount">
+            <el-input v-model="registerForm.usera_ccount" placeholder="请输入用户名" />
           </el-form-item>
 
           <el-form-item label="邮  箱" prop="email">
             <el-input v-model="registerForm.email" placeholder="请输入邮箱" />
           </el-form-item>
 
-          <el-form-item label="密  码" prop="passWord">
+          <el-form-item label="密  码" prop="password">
             <el-input
-              v-model="registerForm.passWord"
+              v-model="registerForm.password"
               :type="showPassword ? 'text' : 'password'"
               placeholder="请输入密码"
               suffix-icon="el-icon-view"
@@ -42,10 +42,10 @@
             />
           </el-form-item>
 
-          <el-form-item label="验证码" prop="verification">
+          <el-form-item label="验证码" prop="verification_code">
             <div style="display: flex; align-items: center; width: 100%;">
               <el-input
-                v-model="registerForm.verification"
+                v-model="registerForm.verification_code"
                 placeholder="请输入6位邮箱验证码"
                 maxlength="6"
                 style="flex: 1"
@@ -96,97 +96,126 @@
 </template>
 
 <script>
-import { register } from '@/api/user'
-import {sendStudentCodeApi} from '@/api/student'
+import {sendStudentCodeApi, register} from '@/api/student'
+import MD5 from 'crypto-js/md5';
 import logo from '@/assets/logo.jpg'
 
 export default {
   name: 'Register',
   data() {
     return {
-      logo,
-      showPassword: false,
-      registerForm: {
-        userName: '',
-        email: '',
-        passWord: '',
-        rePassword: '',
-        agreed: false,
-        verification:'',
-      },
-      codeTimer: 0,
-      codeTimerInterval: null,
+    logo,
+    showPassword: false,
+    registerForm: {
+      usera_ccount: '',
+      email: '',
+      password: '',
+      rePassword: '',
+      agreed: false,
+      verification_code: '',
+    },
+    codeTimer: 0,
+    codeTimerInterval: null,
+    rules: {}, // 先留空
+   }
+ },
 
-      
-
-      rules: {
-        userName: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          {
-            min: 5,
-            max: 12,
-            message: '用户名长度应为 5-12 位',
-            trigger: 'blur',
-          },
-        ],
-        email: [
-          { required: true, message: '请输入邮箱', trigger: 'blur' },
-          {
-            type: 'email',
-            message: '邮箱格式不正确',
-            trigger: ['blur', 'change'],
-          },
-        ],
-        passWord: [
-          {
-            required: true,
-            message: '请输入密码',
-            trigger: 'blur',
-          },
-          {
-            min: 6,
-            max: 12,
-            message: '密码长度应为 6-12 位',
-            trigger: 'blur',
-          },
-        ],
-        rePassword: [
-          {
-            required: true,
-            validator: function (rule, value, callback) {
-              if (value !== this.registerForm.passWord) {
-                callback(new Error('两次输入的密码不一致'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
-        verification: [
-          { required: true, message: '请输入验证码', trigger: 'blur' },
-          { min: 6, max: 6, message: '验证码为6位', trigger: 'blur' },
-        ],
+ created() {
+  this.rules = {
+    usera_ccount: [
+      { required: true, message: '请输入用户名', trigger: 'blur' },
+      {
+        min: 5,
+        max: 12,
+        message: '用户名长度应为 5-12 位',
+        trigger: 'blur',
       },
+    ],
+    email: [
+      { required: true, message: '请输入邮箱', trigger: 'blur' },
+      {
+        type: 'email',
+        message: '邮箱格式不正确',
+        trigger: ['blur', 'change'],
+      },
+    ],
+    password: [
+      {
+        required: true,
+        message: '请输入密码',
+        trigger: 'blur',
+      },
+      {
+        min: 6,
+        max: 12,
+        message: '密码长度应为 6-12 位',
+        trigger: 'blur',
+      },
+    ],
+    rePassword: [
+      {
+        required: true,
+        validator: (rule, value, callback) => {
+          if (value !== this.registerForm.password) {
+            callback(new Error('两次输入的密码不一致'))
+          } else {
+            callback()
+          }
+        },
+        trigger: 'blur'
+      }
+    ],
+    verification_code: [
+      { required: true, message: '请输入验证码', trigger: 'blur' },
+      { min: 6, max: 6, message: '验证码为6位', trigger: 'blur' },
+    ]
     }
-  },
+ },
+ 
   methods: {
     togglePassword() {
       this.showPassword = !this.showPassword
     },
+    
     async submitForm() {
       this.$refs.registerFormRef.validate(async (valid) => {
         if (valid) {
-          const res = await register(this.registerForm)
-          if (res.success) {
-            this.$message.success('注册成功，请登录')
-            this.$router.push({ name: 'login' })
-          } else {
-            this.$message.error(res.message || '注册失败')
+          // 创建表单副本，避免直接修改原数据
+          const formData = { ...this.registerForm };
+          
+          // 对密码进行 MD5 加密
+          if (formData.password) {
+            formData.password = MD5(formData.password).toString();
+            formData.rePassword = '';
+          }
+
+          try {
+            const res = await register(formData); // 发送加密后的数据
+            if (res.code == 0) {
+              this.$message.success('注册成功，请登录');
+              this.resetUserFunc();
+              // this.$router.push({ name: 'login' });
+            } else {
+              this.$message.error(res.message || '注册失败');
+            }
+          } catch (error) {
+            this.$message.error('请求失败，请稍后重试');
+            console.error('注册请求错误:', error);
           }
         } else {
-          this.$message.error('请检查填写内容')
+          this.$message.error('请检查填写内容');
         }
+      });
+    },
+
+    resetUserFunc() {
+      Object.assign(this.registerForm, {
+        usera_ccount: '',
+        email: '',
+        password: '',
+        rePassword: '',
+        agreed: false,
+        verification_code: '',
       })
     },
 
@@ -198,7 +227,7 @@ export default {
       }
 
       // 假设有API叫 sendEmailCode(email)
-      sendStudentCodeApi(email)
+      sendStudentCodeApi({ email })
       this.$message.success(`验证码已发送到 ${email}`)
 
       // 启动倒计时

@@ -68,12 +68,12 @@ disk-list:
     - mount-point: /
 email:
     to: seek@qq.com
-    from: seek@bjccxy.com
-    host: smtp.qq.com
-    secret: CCXYbj321
+    from: 18210550568@126.com
+    host: smtp.126.com
+    secret: lrl@198918
     nickname: bjccxy
-    port: 25
-    is-ssl: false
+    port: 465
+    is-ssl: true
     is-loginauth: false
 excel:
     dir: ./resource/excel/
