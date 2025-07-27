@@ -30,9 +30,9 @@
               :validate-on-rule-change="false"
               @keyup.enter="submitForm"
             >
-              <el-form-item prop="username" class="mb-6">
+              <el-form-item prop="useraccount" class="mb-6">
                 <el-input
-                  v-model="loginFormData.username"
+                  v-model="loginFormData.useraccount"
                   size="large"
                   placeholder="请输入用户名"
                   suffix-icon="user"
@@ -186,7 +186,7 @@
   const loginForm = ref(null)
   const picPath = ref('')
   const loginFormData = reactive({
-    username: '',
+    useraccount: '',
     password: '',
     captcha: '',
     captchaId: '',
@@ -194,7 +194,7 @@
     checked: false,
   })
   const rules = reactive({
-    username: [{ validator: checkUsername, trigger: 'blur' }],
+    useraccount: [{ validator: checkUsername, trigger: 'blur' }],
     password: [{ validator: checkPassword, trigger: 'blur' }],
     captcha: [
       {
@@ -209,7 +209,7 @@
     return await studentStore.LoginIn(loginFormData)
   }
   const doLogin = async () => {
-    return await studentStore.LoginIn({ username, password })
+    return await studentStore.LoginIn({ useraccount, password })
 
   }
 
@@ -284,7 +284,7 @@ const getCookie = () => {
     const arr = cookieStr.split('; ')
     for (let i = 0; i < arr.length; i++) {
       const [key, value] = arr[i].split('=')
-      if (key === 'userName') loginForm.value.username = value
+      if (key === 'userName') loginForm.value.useraccount = value
       if (key === 'userPwd') loginForm.value.password = value
     }
   }
@@ -298,7 +298,7 @@ const clearCookie = () => {
 // 校验是否需要存 cookie
 const cookieValid = () => {
   if (loginFormData.checked.value) {
-    setCookie(loginForm.value.username, loginForm.value.password, 7)
+    setCookie(loginForm.value.useraccount, loginForm.value.password, 7)
   } else {
     clearCookie()
   }

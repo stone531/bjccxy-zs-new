@@ -15,8 +15,8 @@ type AddStudent struct {
 
 // Login User login structure
 type Login struct {
-	UserAccount string `json:"usera_ccount"` // 用户名
-	Password    string `json:"password"`     // 密码
-	Captcha     string `json:"captcha"`      // 验证码
-	CaptchaId   string `json:"captchaId"`    // 验证码ID
+	UserAccount string `json:"useraccount"` // 用户名
+	Password    string `json:"password"`    // 密码
+	Captcha     string `json:"captcha"`     // 验证码
+	CaptchaId   string `json:"captchaId"`   // 验证码ID
 }

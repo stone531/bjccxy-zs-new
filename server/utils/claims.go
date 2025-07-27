@@ -1,12 +1,13 @@
 package utils
 
 import (
+	"fmt"
 	"net"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -47,6 +48,7 @@ func GetToken(c *gin.Context) string {
 		token, _ = c.Cookie("x-token")
 		claims, err := j.ParseToken(token)
 		if err != nil {
+			fmt.Println(err)
 			global.GVA_LOG.Error("重新写入cookie token失败,未能成功解析token,请检查请求头是否存在x-token且claims是否为规定结构")
 			return token
 		}
@@ -148,7 +150,7 @@ func LoginToken(user system.Login) (token string, claims systemReq.CustomClaims,
 	return
 }
 
-func StudentLoginToken(user student.StudentLogin) (token string, claims systemReq.CustomClaims, err error) { 
+func StudentLoginToken(user student.StudentLogin) (token string, claims systemReq.CustomClaims, err error) {
 	j := NewJWT()
 	claims = j.CreateClaims(systemReq.BaseClaims{
 		UUID:        user.GetUUID(),
