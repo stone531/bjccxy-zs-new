@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"github.com/gin-gonic/gin"
@@ -138,19 +137,6 @@ func GetUserName(c *gin.Context) string {
 }
 
 func LoginToken(user system.Login) (token string, claims systemReq.CustomClaims, err error) {
-	j := NewJWT()
-	claims = j.CreateClaims(systemReq.BaseClaims{
-		UUID:        user.GetUUID(),
-		ID:          user.GetUserId(),
-		NickName:    user.GetNickname(),
-		Username:    user.GetUsername(),
-		AuthorityId: user.GetAuthorityId(),
-	})
-	token, err = j.CreateToken(claims)
-	return
-}
-
-func StudentLoginToken(user student.StudentLogin) (token string, claims systemReq.CustomClaims, err error) {
 	j := NewJWT()
 	claims = j.CreateClaims(systemReq.BaseClaims{
 		UUID:        user.GetUUID(),
