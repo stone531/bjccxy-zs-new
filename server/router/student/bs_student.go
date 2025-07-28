@@ -8,13 +8,18 @@ import (
 type BsStudentRouter struct{}
 
 func (e *BsStudentRouter) InitBsStudentsRouter(Router *gin.RouterGroup) {
-	BsStudentRouter := Router.Group("student")
-	BsStudentRouter.Use(middleware.JWTStudentAuthMiddleware())
+	BsStudentPublicRouter := Router.Group("student") // 不需要 token
 	{
-		BsStudentRouter.POST("register", BsStudentApi.CreateBsStudent) //创建       //查询一个证书信息
-		BsStudentRouter.POST("sendEmailCode", BsStudentApi.RegSendEmail)
-		BsStudentRouter.POST("initPassword", BsStudentApi.InitPassword)
-		BsStudentRouter.POST("login", BsStudentApi.Login)
-		BsStudentRouter.POST("getInfo", BsStudentApi.GetUserInfo)
+		BsStudentPublicRouter.POST("register", BsStudentApi.CreateBsStudent)
+		BsStudentPublicRouter.POST("sendEmailCode", BsStudentApi.RegSendEmail)
+		BsStudentPublicRouter.POST("initPassword", BsStudentApi.InitPassword)
+		BsStudentPublicRouter.POST("login", BsStudentApi.Login)
+	}
+
+	BsStudentPrivateRouter := Router.Group("student")
+	BsStudentPrivateRouter.Use(middleware.JWTStudentAuthMiddleware()) // 需要 token
+	{
+		BsStudentPrivateRouter.POST("getInfo", BsStudentApi.GetUserInfo)
+		// 这里可以放其他需要登录后访问的接口
 	}
 }

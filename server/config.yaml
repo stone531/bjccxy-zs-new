@@ -68,9 +68,9 @@ disk-list:
     - mount-point: /
 email:
     to: seek@qq.com
-    from: 18210550568@126.com
-    host: smtp.126.com
-    secret: lrl@198918
+    from: bjccyxxy@163.com
+    host: smtp.163.com
+    secret: Ccxy123456
     nickname: bjccxy
     port: 465
     is-ssl: true

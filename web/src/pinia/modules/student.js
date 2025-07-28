@@ -13,15 +13,17 @@ export const useStudentStore = defineStore('student', () => {
 
   const studentInfo = ref({
     uuid: '',
-    nickName: '',
+    useraccount: '',
     avatar: '',
     classInfo: {},
   })
 
-  // ✅ 使用独立的 token 名称存储，防止冲突
+  // ✅ 存储 token：本地存储 + cookie 双保险
   const studentToken = useStorage('student-token', '')
-  const xToken = useCookies('x-student-token')  // cookie 也独立
-  const currentToken = computed(() => studentToken.value || xToken.value || '')
+  const cookies = useCookies()
+  const currentToken = computed(() => {
+    return studentToken.value || cookies.get('student-token') || ''
+  })
 
   const setStudentInfo = (val) => {
     studentInfo.value = val
@@ -29,7 +31,12 @@ export const useStudentStore = defineStore('student', () => {
 
   const setToken = (val) => {
     studentToken.value = val
-    xToken.value = val
+    cookies.set('student-token', val, { path: '/', maxAge: 60 * 60 * 24 }) // 1天
+  }
+
+  const clearToken = () => {
+    studentToken.value = ''
+    cookies.remove('student-token')
   }
 
   const GetStudentInfo = async () => {
@@ -54,10 +61,11 @@ export const useStudentStore = defineStore('student', () => {
         return false
       }
 
-      setStudentInfo(res.data.student)
+      setStudentInfo(res.data.user || res.data.student)
       setToken(res.data.token)
 
-      //await router.replace({ name: 'StudentHome' }) // 学生默认路由
+      // 登录成功后可跳转
+      // await router.replace({ name: 'StudentHome' })
 
       return true
     } catch (error) {
@@ -69,17 +77,15 @@ export const useStudentStore = defineStore('student', () => {
   }
 
   const LoginOut = async () => {
-    // 如果你有接口 logoutStudent()，可调用之
     await ClearStorage()
     await router.push({ name: 'StudentLogin' })
     window.location.reload()
   }
 
   const ClearStorage = () => {
-    studentToken.value = ''
-    xToken.remove()
+    clearToken()
     sessionStorage.clear()
-    localStorage.removeItem('student-token')
+    localStorage.removeItem('student-token') // 保险
   }
 
   return {

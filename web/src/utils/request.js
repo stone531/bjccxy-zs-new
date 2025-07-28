@@ -1,6 +1,7 @@
 import axios from 'axios' // 引入axios
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/pinia/modules/user'
+import { useStudentStore } from '@/pinia/modules/student'
 import router from '@/router/index'
 import { ElLoading } from 'element-plus'
 
@@ -39,6 +40,8 @@ const closeLoading = () => {
     loadingInstance && loadingInstance.close()
   }
 }
+
+/*
 // http request 拦截器
 service.interceptors.request.use(
   (config) => {
@@ -56,6 +59,63 @@ service.interceptors.request.use(
   },
   (error) => {
     if (!error.config.donNotShowLoading) {
+      closeLoading()
+    }
+    ElMessage({
+      showClose: true,
+      message: error,
+      type: 'error'
+    })
+    return error
+  }
+)
+  */
+ // http request 拦截器
+service.interceptors.request.use(
+  (config) => {
+    if (!config.donNotShowLoading) {
+      showLoading(config.loadingOption)
+    }
+
+    const userStore = useUserStore()
+    //const { useStudentStore } = await import('@/pinia/modules/student') // 动态导入，避免循环依赖
+
+    const studentStore = useStudentStore()
+
+    const isStudentAPI = config.url?.includes('/student/')
+    const studentTokenWhitelist = ['/student/login', '/student/register', '/student/initPassword','/student/sendEmailCode']
+
+    const isWhiteListed = studentTokenWhitelist.some(url => config.url?.includes(url))
+
+
+    // 设置通用 header
+    config.headers = {
+      'Content-Type': 'application/json',
+      ...config.headers
+    }
+
+    if (isStudentAPI && !isWhiteListed) {
+      // 学生端请求，设置 student-token
+      if (studentStore.token) {
+        config.headers['student-token'] = studentStore.token
+      }
+      if (studentStore.user?.ID) {
+        config.headers['student-id'] = studentStore.user.ID
+      }
+    } else {
+      // 用户端请求，设置 x-token 和 x-user-id
+      if (userStore.token) {
+        config.headers['x-token'] = userStore.token
+      }
+      if (userStore.userInfo?.ID) {
+        config.headers['x-user-id'] = userStore.userInfo.ID
+      }
+    }
+
+    return config
+  },
+  (error) => {
+    if (!error.config?.donNotShowLoading) {
       closeLoading()
     }
     ElMessage({

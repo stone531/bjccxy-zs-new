@@ -53,6 +53,7 @@ func JWTStudentAuthMiddleware() gin.HandlerFunc {
 
 		// 将 claims 设置到 context 中
 		c.Set("student_claims", claims)
+		c.Set("student_id", claims.ID)
 		c.Next()
 	}
 }

@@ -51,12 +51,12 @@ export function registerStudentApi(data) {
 
 
 export const login = (data) => {
-    /*return service({
+    return service({
         url: "/student/login",
         method: 'post',
         data: data
-    })*/
-    return request.post('/student/login', data)
+    })
+    //return request.post('/student/login', data)
 }
 
 // @Summary 获取验证码
