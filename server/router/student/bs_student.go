@@ -19,7 +19,8 @@ func (e *BsStudentRouter) InitBsStudentsRouter(Router *gin.RouterGroup) {
 	BsStudentPrivateRouter := Router.Group("student")
 	BsStudentPrivateRouter.Use(middleware.JWTStudentAuthMiddleware()) // 需要 token
 	{
-		BsStudentPrivateRouter.POST("getInfo", BsStudentApi.GetUserInfo)
+		BsStudentPrivateRouter.GET("getInfo", BsStudentApi.GetUserInfo)
+		//BsStudentPrivateRouter.GET("getStudentInfoByUUID", BsStudentApi.GetUserInfo)
 		// 这里可以放其他需要登录后访问的接口
 	}
 }

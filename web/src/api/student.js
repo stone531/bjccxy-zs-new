@@ -194,3 +194,11 @@ export const getStudentInfo = () => {
     method: 'get'
   })
 }
+
+export const getStudentInfoByUUID = (data) => {
+    return service({
+        url: "/student/getStudentInfoByUUID",
+        method: 'get',
+        data: data
+    })
+}

@@ -204,6 +204,7 @@ func interfaceToInt(v interface{}) (i int) {
 
 func (b *BsStudentApi) GetUserInfo(c *gin.Context) {
 	uuid := utils.GetUserUuid(c)
+	fmt.Println("GetUserInfo :", uuid)
 	ReqUser, err := bsStudentService.GetUserInfo(uuid)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))

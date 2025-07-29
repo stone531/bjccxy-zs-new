@@ -70,7 +70,7 @@ email:
     to: seek@qq.com
     from: bjccyxxy@163.com
     host: smtp.163.com
-    secret: Ccxy123456
+    secret: JXrQYDEXu3sH7UZz
     nickname: bjccxy
     port: 465
     is-ssl: true

@@ -237,9 +237,16 @@
 
       cookieValid()  // 判断是否保存
 
-      //localStorage.setItem('studentToken', res.data.token)
-      router.push('/student/info')
-
+      const uuid = "aabbccdd"
+      /*const uuid = res.data.user.uuid
+      if (!uuid) {
+        ElMessage.error('未获取到学生 UUID')
+        return false
+      }*/
+      router.push({
+        path: '/student/info',
+        query: { uuid }
+      })
       // 登陆成功
       return true
     })
