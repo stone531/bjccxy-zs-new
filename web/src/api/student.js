@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 import service from '@/utils/request'
+import { data } from 'autoprefixer'
 
 // src/router/student.js
 export const studentRoutes = [
@@ -193,12 +194,4 @@ export const getStudentInfo = () => {
     url: '/student/getInfo',
     method: 'get'
   })
-}
-
-export const getStudentInfoByUUID = (data) => {
-    return service({
-        url: "/student/getStudentInfoByUUID",
-        method: 'get',
-        data: data
-    })
 }

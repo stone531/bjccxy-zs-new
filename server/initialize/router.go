@@ -78,6 +78,9 @@ func Routers() *gin.Engine {
 
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 
+	StudentPrivateGroup := Router.Group(global.GVA_CONFIG.System.RouterPrefix)
+	StudentPrivateGroup.Use(middleware.JWTStudentAuthMiddleware())
+
 	{
 		// 健康监测
 		PublicGroup.GET("/health", func(c *gin.Context) {
@@ -111,8 +114,10 @@ func Routers() *gin.Engine {
 
 		exampleRouter.InitDemoRecordRouter(PrivateGroup)  //测试demorecord
 		businessRouter.InitBsZhengshuRouter(PrivateGroup) //证书管理
-		businessRouter.InitBsTrainingRouter(PrivateGroup) //培训证书管理	
-		studentRouter.InitBsStudentsRouter(PrivateGroup) //学生管理	
+		businessRouter.InitBsTrainingRouter(PrivateGroup) //培训证书管理
+
+		//studentRouter.InitBsStudentsRouter(PrivateGroup)
+		studentRouter.InitBsStudentsRouter(StudentPrivateGroup) //学生管理
 	}
 
 	//插件路由安装

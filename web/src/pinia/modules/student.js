@@ -16,6 +16,9 @@ export const useStudentStore = defineStore('student', () => {
     useraccount: '',
     avatar: '',
     classInfo: {},
+    name: '',
+    email: '',
+    id_card_number: ''
   })
 
   // ✅ 存储 token：本地存储 + cookie 双保险
@@ -24,6 +27,7 @@ export const useStudentStore = defineStore('student', () => {
   const currentToken = computed(() => {
     return studentToken.value || cookies.get('student-token') || ''
   })
+  //const currentToken = computed(() => studentToken.value || xToken.value || '')
 
   const setStudentInfo = (val) => {
     studentInfo.value = val
@@ -96,6 +100,7 @@ export const useStudentStore = defineStore('student', () => {
     GetStudentInfo,
     ClearStorage,
     setToken,
-    loadingInstance
+    loadingInstance,
+    setStudentInfo
   }
 })

@@ -208,10 +208,6 @@
   const login = async () => {
     return await studentStore.LoginIn(loginFormData)
   }
-  const doLogin = async () => {
-    return await studentStore.LoginIn({ useraccount, password })
-
-  }
 
   const submitForm = () => {
     loginForm.value.validate(async (v) => {
@@ -237,16 +233,13 @@
 
       cookieValid()  // 判断是否保存
 
-      const uuid = "aabbccdd"
+      //const uuid = "aabbccdd"
       /*const uuid = res.data.user.uuid
       if (!uuid) {
         ElMessage.error('未获取到学生 UUID')
         return false
       }*/
-      router.push({
-        path: '/student/info',
-        query: { uuid }
-      })
+      router.push('/student/info')
       // 登陆成功
       return true
     })

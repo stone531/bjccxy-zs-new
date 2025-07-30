@@ -90,17 +90,15 @@
 
 
 <script setup>
-import { reactive, ref , onMounted} from 'vue'
+import { reactive, computed, onMounted } from 'vue'
 import { useStudentStore } from '@/pinia/modules/student'
 import { ElMessage } from 'element-plus'
-import { useRoute } from 'vue-router'
-import {getStudentInfo } from '@/api/student'
+import { getStudentInfo } from '@/api/student'
 
 const studentStore = useStudentStore()
-const route = useRoute()
 
-// 学生信息
-const student = studentStore.studentInfo
+// 直接用 computed 绑定 store，保证刷新数据时会更新
+const student = computed(() => studentStore.studentInfo)
 
 // 控制哪些字段处于编辑状态
 const editField = reactive({
@@ -112,12 +110,12 @@ const editField = reactive({
 
 // 表单数据
 const form = reactive({
-  oldPassword:'',
+  oldPassword: '',
   password: '',
   passwordConfirm: '',
-  name: student.name || '',
-  email: student.email || '',
-  idCard: student.id_card_number || ''
+  name: '',
+  email: '',
+  idCard: ''
 })
 
 // 切换编辑状态
@@ -140,27 +138,32 @@ const saveField = async (field) => {
       return ElMessage.error('两次密码输入不一致')
     }
     // TODO: 调用修改密码接口
-  } else if (field === 'name') {
-    // TODO: 调用修改姓名接口
-  } else if (field === 'email') {
-    // TODO: 调用修改邮箱接口
-  } else if (field === 'idCard') {
-    // TODO: 调用修改身份证接口
   }
-
+  // TODO: 其他修改接口
   ElMessage.success('修改成功')
   editField[field] = false
 }
 
-onMounted(() => {
-  const uuid = route.query.uuid
-  if (uuid) {
-    // 调用获取学生信息的 API
-    getStudentInfo(uuid)
+// 页面加载时获取学生信息
+onMounted(async () => {
+  try {
+    const res = await getStudentInfo()
+    if (res.code === 0 && res.data?.userInfo) {
+      // 存到 store
+      studentStore.setStudentInfo(res.data.userInfo)
+
+      // 同步到表单
+      form.name = res.data.userInfo.name || ''
+      form.email = res.data.userInfo.email || ''
+      form.idCard = res.data.userInfo.id_card_number || ''
+    } else {
+      ElMessage.error(res.msg || '获取学生信息失败')
+    }
+  } catch (err) {
+    console.error('请求学生信息失败', err)
+    ElMessage.error('请求学生信息失败')
   }
 })
-
-
 </script>
 
 

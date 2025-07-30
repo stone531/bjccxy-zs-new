@@ -203,7 +203,7 @@ func interfaceToInt(v interface{}) (i int) {
 }
 
 func (b *BsStudentApi) GetUserInfo(c *gin.Context) {
-	uuid := utils.GetUserUuid(c)
+	uuid := utils.GetStudentUUID(c)
 	fmt.Println("GetUserInfo :", uuid)
 	ReqUser, err := bsStudentService.GetUserInfo(uuid)
 	if err != nil {
