@@ -195,3 +195,12 @@ export const getStudentInfo = () => {
     method: 'get'
   })
 }
+
+//更新学生信息字段
+export const updateStudentField = (data) => {
+  return service({
+    url: '/student/updateField',
+    method: 'put',
+    data
+  })
+}
