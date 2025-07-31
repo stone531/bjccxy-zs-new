@@ -3,6 +3,7 @@ package utils
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/golang-jwt/jwt/v5"
@@ -22,6 +23,10 @@ func NewStudentJWT() *StudentJWT {
 func (j *StudentJWT) CreateStudentClaims(baseClaims student.StudentBaseClaims) student.StudentClaims {
 	//bufferTime := global.GVA_CONFIG.JWT.BufferTime
 	//expiresTime := global.GVA_CONFIG.JWT.ExpiresTime
+	if baseClaims.UUID == uuid.Nil {
+		// 如果UUID没传，直接生成一个，避免全 0
+		baseClaims.UUID = uuid.New()
+	}
 	bf, _ := ParseDuration(global.GVA_CONFIG.JWT.BufferTime)
 	ep, _ := ParseDuration(global.GVA_CONFIG.JWT.ExpiresTime)
 	now := time.Now()

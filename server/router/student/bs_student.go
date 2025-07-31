@@ -1,14 +1,15 @@
 package student
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
+	//"github.com/flipped-aurora/gin-vue-admin/server/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 type BsStudentRouter struct{}
 
-func (e *BsStudentRouter) InitBsStudentsRouter(Router *gin.RouterGroup) {
-	BsStudentPublicRouter := Router.Group("student") // 不需要 token
+func (e *BsStudentRouter) InitBsStudentsRouter(public *gin.RouterGroup, private *gin.RouterGroup) {
+	// 公共路由
+	BsStudentPublicRouter := public.Group("student")
 	{
 		BsStudentPublicRouter.POST("register", BsStudentApi.CreateBsStudent)
 		BsStudentPublicRouter.POST("sendEmailCode", BsStudentApi.RegSendEmail)
@@ -16,11 +17,9 @@ func (e *BsStudentRouter) InitBsStudentsRouter(Router *gin.RouterGroup) {
 		BsStudentPublicRouter.POST("login", BsStudentApi.Login)
 	}
 
-	BsStudentPrivateRouter := Router.Group("student")
-	BsStudentPrivateRouter.Use(middleware.JWTStudentAuthMiddleware()) // 需要 token
+	// 私有路由
+	BsStudentPrivateRouter := private.Group("student")
 	{
 		BsStudentPrivateRouter.GET("getInfo", BsStudentApi.GetUserInfo)
-		//BsStudentPrivateRouter.GET("getStudentInfoByUUID", BsStudentApi.GetUserInfo)
-		// 这里可以放其他需要登录后访问的接口
 	}
 }

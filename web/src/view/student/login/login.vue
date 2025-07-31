@@ -211,6 +211,7 @@
 
   const submitForm = () => {
     loginForm.value.validate(async (v) => {
+      console.error('submitForm 00')
       if (!v) {
         // 未通过前端静态验证
         ElMessage({
@@ -218,21 +219,25 @@
           message: '请正确填写登录信息',
           showClose: true
         })
+        console.error('submitForm 01')
         await loginVerify()
         return false
       }
+      console.error('submitForm 02')
 
       // 通过验证，请求登陆
       const flag = await login()
-
+      console.error('submitForm 03')
       // 登陆失败，刷新验证码
       if (!flag) {
+        console.error('submitForm 04')
         await loginVerify()
         return false
       }
+      console.error('submitForm 05')
 
       cookieValid()  // 判断是否保存
-
+      console.error('submitForm 06')
       //const uuid = "aabbccdd"
       /*const uuid = res.data.user.uuid
       if (!uuid) {
@@ -240,6 +245,7 @@
         return false
       }*/
       router.push('/student/info')
+      console.error('submitForm 07')
       // 登陆成功
       return true
     })

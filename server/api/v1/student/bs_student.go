@@ -101,7 +101,7 @@ func (b *BsStudentApi) TokenNext(c *gin.Context, user student.BsStudents) {
 		return
 	}
 	if !global.GVA_CONFIG.System.UseMultipoint {
-		utils.SetToken(c, token, int(claims.RegisteredClaims.ExpiresAt.Unix()-time.Now().Unix()))
+		utils.SetStudentToken(c, token, int(claims.RegisteredClaims.ExpiresAt.Unix()-time.Now().Unix()))
 		response.OkWithDetailed(systemRes.LoginResponse{
 			User:      user,
 			Token:     token,
@@ -116,7 +116,7 @@ func (b *BsStudentApi) TokenNext(c *gin.Context, user student.BsStudents) {
 			response.FailWithMessage("设置登录状态失败", c)
 			return
 		}
-		utils.SetToken(c, token, int(claims.RegisteredClaims.ExpiresAt.Unix()-time.Now().Unix()))
+		utils.SetStudentToken(c, token, int(claims.RegisteredClaims.ExpiresAt.Unix()-time.Now().Unix()))
 		response.OkWithDetailed(systemRes.LoginResponse{
 			User:      user,
 			Token:     token,
@@ -136,7 +136,7 @@ func (b *BsStudentApi) TokenNext(c *gin.Context, user student.BsStudents) {
 			response.FailWithMessage("设置登录状态失败", c)
 			return
 		}
-		utils.SetToken(c, token, int(claims.RegisteredClaims.ExpiresAt.Unix()-time.Now().Unix()))
+		utils.SetStudentToken(c, token, int(claims.RegisteredClaims.ExpiresAt.Unix()-time.Now().Unix()))
 		response.OkWithDetailed(systemRes.LoginResponse{
 			User:      user,
 			Token:     token,

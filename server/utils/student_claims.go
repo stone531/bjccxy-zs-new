@@ -6,7 +6,8 @@ import (
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
-	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	//systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	//"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -126,15 +127,35 @@ func GetStudentUsername(c *gin.Context) string {
 	}
 }
 
-func StudentLoginToken(user student.StudentLogin) (token string, claims systemReq.CustomClaims, err error) {
+/*func StudentLoginToken(user student.StudentLogin) (token string, claims systemReq.CustomClaims, err error) {
 	j := NewJWT()
-	claims = j.CreateClaims(systemReq.BaseClaims{
+	claims = j.CreateStudentClaims(systemReq.BaseClaims{
 		UUID:        user.GetUUID(),
 		ID:          user.GetUserId(),
 		NickName:    user.GetNickname(),
 		Username:    user.GetUsername(),
 		AuthorityId: user.GetAuthorityId(),
 	})
-	token, err = j.CreateToken(claims)
+	token, err = j.CreateStudentToken(claims)
 	return
+}*/
+func StudentLoginToken(user *student.BsStudents) (string, *student.StudentClaims, error) {
+	j := NewStudentJWT()
+
+	// 构造基础 claims，必须保证 UUID 有值
+	claims := j.CreateStudentClaims(student.StudentBaseClaims{
+		ID:        user.ID,
+		UUID:      user.UUID, // 这里是重点！必须从数据库带出来
+		Username:      user.Name,
+		NickName:  user.UserAccount,
+		AuthorityId: 1, // 也可以从 user 读取
+	})
+
+	// 创建 token
+	token, err := j.CreateStudentToken(claims)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return token, &claims, nil
 }
