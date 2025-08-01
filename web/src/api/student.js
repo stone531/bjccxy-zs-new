@@ -103,17 +103,7 @@ export const forgetVerify = (data) => {
     })
 }
 
-// @Summary 修改密码
-// @Produce  application/json
-// @Param data body {username:"string",password:"string",newPassword:"string"}
-// @Router /user/changePassword [post]
-export const changePassword = (data) => {
-    return service({
-        url: "/user/changePassword",
-        method: 'post',
-        data: data
-    })
-}
+
 // @Tags User
 // @Summary 分页获取用户列表
 // @Security ApiKeyAuth
@@ -202,5 +192,17 @@ export const updateStudentField = (data) => {
     url: '/student/updateField',
     method: 'put',
     data
+  })
+}
+
+// @Summary 修改密码
+// @Produce  application/json
+// @Param data body {username:"string",password:"string",newPassword:"string"}
+// @Router /user/changePassword [post]
+export const changePassword = (data) => {
+  return service({
+      url: "/student/changePassword",
+      method: 'post',
+      data: data
   })
 }

@@ -20,3 +20,13 @@ type Login struct {
 	Captcha     string `json:"captcha"`     // 验证码
 	CaptchaId   string `json:"captchaId"`   // 验证码ID
 }
+
+type ChangePasswordReq struct {
+    OldPassword string `json:"oldPassword" `
+    NewPassword string `json:"newPassword" `
+}
+
+type UpdateStudentFieldReq struct {
+	Field string `json:"field" `
+	Value string `json:"value" `
+}

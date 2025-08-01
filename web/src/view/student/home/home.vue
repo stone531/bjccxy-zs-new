@@ -7,13 +7,13 @@
         <el-menu-item index="/student/info">
           <el-icon><User /></el-icon>我的信息
         </el-menu-item>
+        <el-menu-item index="/student/certificate">
+          <el-icon><Document /></el-icon>证书申请
+        </el-menu-item>
         <el-menu-item index="/student/order">
           <el-icon><List /></el-icon>我的订单
-        </el-menu-item>
-        <el-menu-item index="/student/certificate">
-          <el-icon><Document /></el-icon>毕业证书申请
-        </el-menu-item>
-        <el-menu-item index="/student/quit">
+        </el-menu-item>       
+        <el-menu-item @click="logout">
           <el-icon><Document /></el-icon>退出登录
         </el-menu-item>
       </el-menu>
@@ -29,6 +29,33 @@
 
 <script setup>
 import { User, List, Document } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { useStudentStore } from '@/pinia/modules/student'
+import { ElMessageBox, ElMessage } from 'element-plus'
+
+const router = useRouter()
+const studentStore = useStudentStore()
+
+const logout = () => {
+  ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      // 1. 清除 student-token（看你存哪里，这里两个都清一下）
+      studentStore.LoginOut()
+
+      // 3. 跳转到学生登录页
+      router.push('/student-login')
+
+      ElMessage.success('已退出登录')
+    })
+    .catch(() => {
+      // 用户取消，不做操作
+    })
+}
+
 </script>
 
 <style scoped>

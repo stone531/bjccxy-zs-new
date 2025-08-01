@@ -145,6 +145,7 @@
   //import { useUserStore } from '@/pinia/modules/user'
   import { useStudentStore } from '@/pinia/modules/student'
   //import { login } from '@/api/student'
+  import MD5 from 'crypto-js/md5';
 
   defineOptions({
     name: 'StudentLogin'
@@ -206,12 +207,17 @@
 
   const studentStore = useStudentStore()
   const login = async () => {
-    return await studentStore.LoginIn(loginFormData)
+    //return await studentStore.LoginIn(loginFormData)
+    const payload = { ...loginFormData }
+    if (payload.password) {
+      payload.password = MD5(payload.password).toString()
+    }
+
+    return await studentStore.LoginIn(payload)
   }
 
   const submitForm = () => {
     loginForm.value.validate(async (v) => {
-      console.error('submitForm 00')
       if (!v) {
         // 未通过前端静态验证
         ElMessage({
@@ -223,21 +229,20 @@
         await loginVerify()
         return false
       }
-      console.error('submitForm 02')
+  
 
       // 通过验证，请求登陆
       const flag = await login()
-      console.error('submitForm 03')
       // 登陆失败，刷新验证码
       if (!flag) {
         console.error('submitForm 04')
         await loginVerify()
         return false
       }
-      console.error('submitForm 05')
+  
 
       cookieValid()  // 判断是否保存
-      console.error('submitForm 06')
+  
       //const uuid = "aabbccdd"
       /*const uuid = res.data.user.uuid
       if (!uuid) {

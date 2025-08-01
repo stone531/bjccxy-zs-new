@@ -101,6 +101,6 @@ export const useStudentStore = defineStore('student', () => {
     ClearStorage,
     setToken,
     loadingInstance,
-    setStudentInfo
+    setStudentInfo,
   }
 })

@@ -110,6 +110,7 @@ import { reactive, computed, onMounted, ref } from 'vue'
 import { useStudentStore } from '@/pinia/modules/student'
 import { ElMessage } from 'element-plus'
 import { getStudentInfo ,updateStudentField,changePassword} from '@/api/student'
+import MD5 from 'crypto-js/md5';
 
 const studentStore = useStudentStore()
 const student = computed(() => studentStore.studentInfo)
@@ -199,15 +200,18 @@ const saveField = async (field) => {
     const fieldMap = {
       name: 'name',
       email: 'email',
-      idCard: 'idcard'
+      idCard: 'id_card_number'
     }
 
     let res
     if (field === 'password') {
       res = await changePassword({
-        oldPassword: form.oldPassword,  // 旧密码
-        newPassword: form.password      // 新密码
+        oldPassword: MD5(form.oldPassword).toString(),  // 旧密码 
+        newPassword: MD5(form.password).toString()      // 新密码
       })
+      form.oldPassword = ''
+      form.password = ''
+      form.passwordConfirm = ''
     } else {
       res = await updateStudentField({
         field: fieldMap[field],
@@ -218,6 +222,21 @@ const saveField = async (field) => {
     if (res.code === 0) {
       ElMessage.success('修改成功')
       editField[field] = false
+
+      try {
+        const infoRes = await getStudentInfo()
+        if (infoRes.code === 0 && infoRes.data?.userInfo) {
+          studentStore.setStudentInfo(infoRes.data.userInfo)
+
+          // 同步到表单
+          form.name = infoRes.data.userInfo.name || ''
+          form.email = infoRes.data.userInfo.email || ''
+          form.idCard = infoRes.data.userInfo.id_card_number || ''
+        }
+      } catch (e) {
+        console.error('刷新学生信息失败', e)
+      }
+      
     } else {
       ElMessage.error(res.msg || '修改失败')
     }

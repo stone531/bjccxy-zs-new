@@ -6,6 +6,7 @@ import (
 
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	emailreq "github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
+	stureq "github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/google/uuid"
 
@@ -52,7 +53,7 @@ func (userService *BsStudentService) Login(u *student.BsStudents) (userInter *st
 	}*/
 
 	var user student.BsStudents
-	err = global.GVA_DB.Where("useraccount = ?", u.UserAccount).First(&user).Error
+	err = global.GVA_DB.Where("useraccount = ? and password = ?", u.UserAccount,u.Password).First(&user).Error
 	if err == nil {
 		/*if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
 			return nil, errors.New("密码错误")
@@ -97,4 +98,30 @@ func (us *BsStudentService) GetUserInfo(uuid uuid.UUID) (user student.BsStudents
 	}
 
 	return reqUser, err
+}
+
+func (api *BsStudentService) ChangePassword(id uint, pwd stureq.ChangePasswordReq) (bool, error) {
+
+	var reqUser student.BsStudents
+	err := global.GVA_DB.Model(&student.BsStudents{}).First(&reqUser, "id = ? and password = ?", id,pwd.OldPassword).Error
+	if err != nil {
+		return false, err
+	}
+
+	if err := global.GVA_DB.Model(&student.BsStudents{}).Where("id = ? ", id).Update("password", pwd.NewPassword).Error; err != nil {
+        return false, err
+    }
+
+	return true, nil
+}
+
+func (api *BsStudentService) UpdateStuFiled(id uint, obj stureq.UpdateStudentFieldReq) (bool, error) {
+
+	if err := global.GVA_DB.Model(&student.BsStudents{}).
+    	Where("id = ?", id).
+    	Update(obj.Field, obj.Value).Error; err != nil {
+    	return false, err
+	}
+
+	return true, nil
 }
