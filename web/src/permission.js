@@ -138,6 +138,10 @@ const handleRedirect = (to, userStore) => {
 })*/
 
 router.beforeEach(async (to, from) => {
+    // lrl 新增加的无需登录
+  if (to.meta?.noLogin) {
+    return true
+  }
   const userStore = useUserStore()
   const studentStore = useStudentStore()
   const routerStore = useRouterStore()
