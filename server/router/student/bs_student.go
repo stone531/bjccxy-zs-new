@@ -23,5 +23,6 @@ func (e *BsStudentRouter) InitBsStudentsRouter(public *gin.RouterGroup, private 
 		BsStudentPrivateRouter.GET("getInfo", BsStudentApi.GetUserInfo)
 		BsStudentPrivateRouter.PUT("updateField", BsStudentApi.UpdateField)
 		BsStudentPrivateRouter.POST("changePassword", BsStudentApi.ChangePassword)
+		BsStudentPrivateRouter.GET("getCertificateList", BsStudentApi.GetCertificateList)
 	}
 }

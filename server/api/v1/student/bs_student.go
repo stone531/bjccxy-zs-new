@@ -243,18 +243,18 @@ func (b *BsStudentApi) GetUserInfo(c *gin.Context) {
 
 func (b *BsStudentApi) UpdateField(c *gin.Context) {
 	var req request.UpdateStudentFieldReq
-    if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.FailWithMessage("参数错误", c)
-        return
-    }
+		return
+	}
 
-    Id := utils.GetStudentID(c) // 从 JWT 或 session 获取当前登录用户 ID
+	Id := utils.GetStudentID(c) // 从 JWT 或 session 获取当前登录用户 ID
 	if Id <= 0 {
 		response.FailWithMessage("用户不存在", c)
 		return
 	}
 	fmt.Println("GetStudentID :", Id)
-    
+
 	ok, _ := bsStudentService.UpdateStuFiled(Id, req)
 	if !ok {
 		response.FailWithMessage("操作失败 ", c)
@@ -266,21 +266,37 @@ func (b *BsStudentApi) UpdateField(c *gin.Context) {
 
 func (b *BsStudentApi) ChangePassword(c *gin.Context) {
 	var req request.ChangePasswordReq
-    if err := c.ShouldBindJSON(&req); err != nil {
-        response.FailWithMessage("参数错误", c)
-        return
-    }
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
 
-    Id := utils.GetStudentID(c) // 从 JWT 或 session 获取当前登录用户 ID
+	Id := utils.GetStudentID(c) // 从 JWT 或 session 获取当前登录用户 ID
 	if Id <= 0 {
 		response.FailWithMessage("用户不存在", c)
 		return
 	}
 	fmt.Println("GetStudentID :", Id)
-    
+
 	ok, _ := bsStudentService.ChangePassword(Id, req)
 	if !ok {
 		response.FailWithMessage("旧密码错误 ", c)
+		return
+	}
+
+	response.OkWithDetailed(gin.H{"code": 0}, "密码修改成功", c)
+}
+
+func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
+	var req request.ChangePasswordReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	Id := utils.GetStudentID(c) // 从 JWT 或 session 获取当前登录用户 ID
+	if Id <= 0 {
+		response.FailWithMessage("用户不存在", c)
 		return
 	}
 
