@@ -77,6 +77,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+// API 方法（替换成你的接口）
+import { getCertificateList } from '@/api/student'
 
 // 数据
 const graduationCert = ref(null) // 毕业证书
@@ -84,7 +86,7 @@ const completionCertList = ref([]) // 多个结业证书
 
 // 模拟接口请求
 onMounted(async () => {
-  graduationCert.value = {
+  /*graduationCert.value = {
     name: '本科毕业证书',
     no: 'GRA-2023-001',
     date: '2023-07-01'
@@ -92,7 +94,33 @@ onMounted(async () => {
   completionCertList.value = [
     { name: 'Java Web 开发结业证书', no: 'COM-2024-101', date: '2024-05-10' },
     { name: 'Vue 前端进阶结业证书', no: 'COM-2024-202', date: '2024-06-20' }
-  ]
+  ]*/
+ try {
+  const res = await getCertificateList()
+  if (res.code === 0 && res.data?.certicates) {
+    // 毕业证书
+    if (res.data.certicates.graduationCert) {
+      const grad = res.data.certicates.graduationCert
+      graduationCert.value = {
+        name: grad.major || '',
+        no: grad.certificateNum || '',
+        date: grad.date || ''
+      }
+    }
+
+    // 结业证书（映射字段）
+    completionCertList.value = (res.data.certicates.completionCert || []).map(item => ({
+      name: item.name || '',
+      no: item.certificateNum || '',
+      date: item.date || ''
+    }))
+  } else {
+    ElMessage.error(res.msg || '获取学生信息失败')
+  }
+ } catch (err) {
+  console.error('请求证书信息列表失败', err)
+  ElMessage.error('请求证书信息列表失败')
+}
 })
 
 // 增加证书

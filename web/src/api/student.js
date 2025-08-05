@@ -120,23 +120,6 @@ export const getUserList = (data) => {
     })
 }
 
-
-// @Tags User
-// @Summary 设置用户权限
-// @Security ApiKeyAuth
-// @accept application/json
-// @Produce application/json
-// @Param data body api.SetUserAuth true "设置用户权限"
-// @Success 200 {string} json "{"success":true,"data":{},"msg":"修改成功"}"
-// @Router /user/setUserAuthority [post]
-export const setUserAuthority = (data) => {
-    return service({
-        url: "/user/setUserAuthority",
-        method: 'post',
-        data: data
-    })
-}
-
 export const resetPassword = (data) => {
     return service({
         url: "/user/resetPassword",
@@ -153,13 +136,7 @@ export const findSysUserById = (data) => {
     })
 }
 
-export const deleteSysUser = (data) => {
-    return service({
-        url: "/user/deleteSysUser",
-        method: 'post',
-        data: data
-    })
-}
+
 
 export const changeEmail = (data) => {
     return service({
@@ -204,5 +181,55 @@ export const changePassword = (data) => {
       url: "/student/changePassword",
       method: 'post',
       data: data
+  })
+}
+
+export const getCertificateList = () => {
+  return service({
+    url: '/student/getCertificateList',
+    method: 'get'
+  })
+}
+
+//=====订单相关
+// 获取当前用户待支付订单
+export const getMyPendingOrder = (params) => {
+  return service({
+    url: "/student/order-my-pending",
+    method: "get",
+    params // GET 用 params
+  })
+}
+
+// 创建微信支付二维码
+export const createWeChatPay = (orderSn) => {
+  return service({
+    url: `/student/order-pay/${orderSn}`,
+    method: "post"
+  })
+}
+
+// 获取订单状态
+export const getOrderStatus = (orderSn) => {
+  return service({
+    url: `/student/order-status/${orderSn}`,
+    method: "get"
+  })
+}
+
+// 刷新二维码
+export const refreshQRCode = (orderSn) => {
+  return service({
+    url: `/student/order-refresh/${orderSn}`,
+    method: "post"
+  })
+}
+
+// 微信支付回调（这个一般是后端用的，前端不用主动调）
+export const weChatPayNotify = (data) => {
+  return service({
+    url: "/student/order-wechat-notify",
+    method: "post",
+    data
   })
 }

@@ -288,24 +288,24 @@ func (b *BsStudentApi) ChangePassword(c *gin.Context) {
 }
 
 func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
-	var req request.ChangePasswordReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误", c)
+
+	uuid := utils.GetStudentUUID(c)
+	fmt.Println("GetCertificateList :", uuid)
+
+	stuObj, err := bsStudentService.GetUserInfo(uuid)
+	if err != nil {
+		global.GVA_LOG.Error("GetCertificateInfo 获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
 		return
 	}
-
-	Id := utils.GetStudentID(c) // 从 JWT 或 session 获取当前登录用户 ID
-	if Id <= 0 {
-		response.FailWithMessage("用户不存在", c)
-		return
-	}
-
-	res,err := bsStudentService.GetCertificateInfo("");
+	//idCardNum := utils.GetStudentIdCardNum(c) // 从 JWT 或 session 获取当前登录用户 ID
+	//fmt.Println("GetCertificateList idcardnum:", idCardNum)
+	res, err := bsStudentService.GetCertificateInfo(stuObj.IDCardNumber)
 	if err != nil {
 		global.GVA_LOG.Error("GetCertificateInfo 获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
 
-	response.OkWithDetailed(gin.H{"certicates": res}, "密码修改成功", c)
+	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }

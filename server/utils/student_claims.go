@@ -6,6 +6,7 @@ import (
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
+
 	//systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	//"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/gin-gonic/gin"
@@ -103,15 +104,15 @@ func GetStudentUUID(c *gin.Context) uuid.UUID {
 	}
 }
 
-func GetStudentAuthorityId(c *gin.Context) uint {
+func GetStudentIdCardNum(c *gin.Context) string {
 	if claims, exists := c.Get("student_claims"); !exists {
 		if cl, err := GetStudentClaims(c); err != nil {
-			return 0
+			return ""
 		} else {
-			return cl.BaseClaims.AuthorityId
+			return cl.BaseClaims.IdCardNum
 		}
 	} else {
-		return claims.(*student.StudentClaims).BaseClaims.AuthorityId
+		return claims.(*student.StudentClaims).BaseClaims.IdCardNum
 	}
 }
 
@@ -127,18 +128,20 @@ func GetStudentUsername(c *gin.Context) string {
 	}
 }
 
-/*func StudentLoginToken(user student.StudentLogin) (token string, claims systemReq.CustomClaims, err error) {
-	j := NewJWT()
-	claims = j.CreateStudentClaims(systemReq.BaseClaims{
-		UUID:        user.GetUUID(),
-		ID:          user.GetUserId(),
-		NickName:    user.GetNickname(),
-		Username:    user.GetUsername(),
-		AuthorityId: user.GetAuthorityId(),
-	})
-	token, err = j.CreateStudentToken(claims)
-	return
-}*/
+/*
+	func StudentLoginToken(user student.StudentLogin) (token string, claims systemReq.CustomClaims, err error) {
+		j := NewJWT()
+		claims = j.CreateStudentClaims(systemReq.BaseClaims{
+			UUID:        user.GetUUID(),
+			ID:          user.GetUserId(),
+			NickName:    user.GetNickname(),
+			Username:    user.GetUsername(),
+			AuthorityId: user.GetAuthorityId(),
+		})
+		token, err = j.CreateStudentToken(claims)
+		return
+	}
+*/
 func StudentLoginToken(user *student.BsStudents) (string, *student.StudentClaims, error) {
 	j := NewStudentJWT()
 
@@ -146,9 +149,9 @@ func StudentLoginToken(user *student.BsStudents) (string, *student.StudentClaims
 	claims := j.CreateStudentClaims(student.StudentBaseClaims{
 		ID:        user.ID,
 		UUID:      user.UUID, // 这里是重点！必须从数据库带出来
-		Username:      user.Name,
+		Username:  user.Name,
 		NickName:  user.UserAccount,
-		AuthorityId: 1, // 也可以从 user 读取
+		IdCardNum: user.IDCardNumber, // 也可以从 user 读取
 	})
 
 	// 创建 token

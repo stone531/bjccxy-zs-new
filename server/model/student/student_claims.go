@@ -6,11 +6,11 @@ import (
 )
 
 type StudentBaseClaims struct {
-	UUID        uuid.UUID
-	ID          uint
-	Username    string
-	NickName    string
-	AuthorityId uint
+	UUID      uuid.UUID
+	ID        uint
+	Username  string
+	NickName  string
+	IdCardNum string
 }
 
 type StudentClaims struct {

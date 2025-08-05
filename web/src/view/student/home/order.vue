@@ -36,7 +36,7 @@ import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 // API 方法（替换成你的接口）
-import { getMyPendingOrder, createWeChatPay, getOrderStatus } from '@/api/order'
+import { getMyPendingOrder, createWeChatPay, getOrderStatus } from '@/api/student'
 
 const router = useRouter()
 
