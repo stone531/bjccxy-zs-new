@@ -300,5 +300,12 @@ func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
 		return
 	}
 
-	response.OkWithDetailed(gin.H{"code": 0}, "密码修改成功", c)
+	res,err := bsStudentService.GetCertificateInfo("");
+	if err != nil {
+		global.GVA_LOG.Error("GetCertificateInfo 获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	response.OkWithDetailed(gin.H{"certicates": res}, "密码修改成功", c)
 }

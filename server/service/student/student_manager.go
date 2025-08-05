@@ -7,6 +7,8 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	emailreq "github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
 	stureq "github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/student/response"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/google/uuid"
 
@@ -124,4 +126,54 @@ func (api *BsStudentService) UpdateStuFiled(id uint, obj stureq.UpdateStudentFie
 	}
 
 	return true, nil
+}
+
+func (api *BsStudentService) GetCertificateInfo(cardNum string) (response.BSCertificateRes, error) {
+	if cardNum == "" {
+		return response.BSCertificateRes{}, nil)
+	}
+
+	var res response.BSCertificateRes
+
+	// ===== 1. 查询毕业证书（通常只有一条） =====
+	var gradRecord business.BsZhengshu
+	err := global.GVA_DB.Model(&business.BsZhengshu{}).
+		Where("certificatenumber2 = ?", cardNum).
+		First(&gradRecord).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.BSCertificateRes{}, err
+		}
+	} else {
+		res.GraduationCert = response.GraduationInfo{
+			Major:          gradRecord.Zhuanye,
+			CertificateNum: gradRecord.CertificateNumber2,
+			Date:           gradRecord.Bysj,
+		}
+	}
+
+	// ===== 2. 查询结业证书（可能多条） =====
+	var trRecords []business.BsTrainingStudent
+	err = global.GVA_DB.Model(&business.BsTrainingStudent{}).
+		Where("id_card_number = ?", cardNum).
+		Find(&trRecords).Error
+	if err != nil {
+		return response.BSCertificateRes{}, err
+	}
+
+	if len(trRecords) > 0 {
+		trainingList := make([]response.CompletionInfo, 0, len(trRecords))
+		for _, rec := range trRecords {
+			trainingList = append(trainingList, response.CompletionInfo{
+				Name:           rec.CertificateName,
+				CertificateNum: rec.CertificateID, // 如果表里有专门字段，就用它
+				Date:           rec.IssueDate,
+			})
+		}
+		res.GompletionCert = trainingList
+	} else {
+		res.GompletionCert = []response.CompletionInfo{}
+	}
+
+	return res, nil
 }
