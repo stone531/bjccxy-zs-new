@@ -5,6 +5,12 @@ import (
 	"encoding/hex"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"math/rand"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // BcryptHash 使用 bcrypt 对密码进行加密
@@ -46,4 +52,40 @@ func GetMD5Hash(password string) string {
 	hashString := hex.EncodeToString(hashBytes)
 
 	return hashString
+}
+
+// 生成随机字符串
+func GenNonceStr() string {
+	rand.Seed(time.Now().UnixNano())
+	return strconv.FormatInt(rand.Int63(), 10)
+}
+
+// MD5签名
+func MD5Hash(text string) string {
+	h := md5.New()
+	h.Write([]byte(text))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func CreateSign(params map[string]string, apiKey string) string {
+	// 1. 参数按照 key 排序
+	keys := make([]string, 0, len(params))
+	for k := range params {
+		if params[k] != "" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	// 2. 拼接成字符串
+	var buf strings.Builder
+	for _, k := range keys {
+		if params[k] != "" {
+			buf.WriteString(k + "=" + params[k] + "&")
+		}
+	}
+	buf.WriteString("key=" + apiKey)
+
+	// 3. MD5加密并转大写
+	return strings.ToUpper(MD5Hash(buf.String()))
 }

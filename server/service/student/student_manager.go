@@ -24,7 +24,7 @@ import (
 
 type BsStudentService struct{}
 
-var BsServiceApp = new(BsStudentService)
+//var BsServiceApp = new(BsStudentService)
 
 func (bzs *BsStudentService) Register(u student.BsStudents) (userInter student.BsStudents, err error) {
 	var user student.BsStudents

@@ -1,7 +1,12 @@
 package student
 
 import (
+	"encoding/xml"
 	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -310,13 +315,11 @@ func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
 	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }
 
-
-//订单相关
-// 获取当前用户待支付订单  
+// 订单相关
+// 获取当前用户待支付订单
 func (b *BsStudentApi) GetMyPendingOrder(c *gin.Context) {
 
-
-	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
+	response.OkWithDetailed(gin.H{"certicates": "ok"}, "获取成功", c)
 }
 
 // 创建微信支付二维码
@@ -324,16 +327,16 @@ func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
 	orderSn := c.Param("orderSn")
 
 	// 查询订单
-	var order BsOrders
+	var order stumodel.BsOrders
 	if err := global.GVA_DB.Where("order_sn = ?", orderSn).First(&order).Error; err != nil {
 		response.FailWithMessage("订单不存在", c)
 		return
 	}
 
 	params := map[string]string{
-		"appid":            global.GVA_CONFIG.WeChat.AppID,
-		"mch_id":           global.GVA_CONFIG.WeChat.MchID,
-		"nonce_str":        utils.GenNonceStr(),
+		//"appid":            global.GVA_CONFIG.WeChat.AppID,
+		"mch_id": global.GVA_CONFIG.WeChat.MchID,
+		//"nonce_str":        utils.GenNonceStr(),
 		"body":             order.Body,
 		"out_trade_no":     order.OrderSN,
 		"total_fee":        strconv.Itoa(order.TotalFee), // 单位：分
@@ -343,7 +346,7 @@ func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
 	}
 
 	// 生成签名
-	sign := CreateSign(params, global.GVA_CONFIG.WeChat.APIKey)
+	sign := utils.CreateSign(params, global.GVA_CONFIG.WeChat.MchKey)
 	params["sign"] = sign
 
 	// 转 XML
@@ -380,42 +383,40 @@ func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
 
 	if res.ReturnCode == "SUCCESS" && res.ResultCode == "SUCCESS" {
 		// 返回给前端二维码链接
-		response.OkWithDetailed(gin.H{"code_url": res.CodeURL,"order_sn" :orderSn }, "获取成功", c)
+		response.OkWithDetailed(gin.H{"code_url": res.CodeURL, "order_sn": orderSn}, "获取成功", c)
 	} else {
 		response.FailWithMessage("微信返回失败", c)
 		//c.JSON(500, gin.H{"msg": "微信返回失败", "data": string(body)})
 	}
 
-	
 }
 
-// 获取订单状态 
+// 获取订单状态
 func (b *BsStudentApi) GetOrderStatus(c *gin.Context) {
 	orderSn := c.Param("orderSn") // 从URL路径取到 :orderSn
-    if orderSn == "" {
+	var err error
+	if orderSn == "" {
 		global.GVA_LOG.Error("GetOrderStatus 获取失败!", zap.Error(err))
 		response.FailWithMessage("订单号不能为空", c)
-    }
+	}
 
-    var order BsOrders
-    if err := db.Where("order_sn = ?", orderSn).First(&order).Error; err != nil {
+	var order stumodel.BsOrders
+	if err := global.GVA_DB.Where("order_sn = ?", orderSn).First(&order).Error; err != nil {
 		response.FailWithMessage("订单不存在", c)
-        return
-    }
+		return
+	}
 
 	response.OkWithDetailed(gin.H{"status": order.Status}, "获取成功", c)
 }
 
-// 刷新二维码 
+// 刷新二维码
 func (b *BsStudentApi) RefreshQRCode(c *gin.Context) {
 
-
-	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
+	//response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }
 
 // 微信支付回调（微信会调用，不需要登录权限）
 func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 
-
-	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
+	//response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }

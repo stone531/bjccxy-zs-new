@@ -16,7 +16,7 @@ func (e *BsStudentRouter) InitBsStudentsRouter(public *gin.RouterGroup, private 
 		BsStudentPublicRouter.POST("initPassword", BsStudentApi.InitPassword)
 		BsStudentPublicRouter.POST("login", BsStudentApi.Login)
 
-		BsStudentPrivateRouter.POST("order-wechat-notify", BsStudentApi.WeChatPayNotify) // 微信支付回调（微信会调用，不需要登录权限）
+		BsStudentPublicRouter.POST("order-wechat-notify", BsStudentApi.WeChatPayNotify) // 微信支付回调（微信会调用，不需要登录权限）
 	}
 
 	// 私有路由
@@ -27,11 +27,10 @@ func (e *BsStudentRouter) InitBsStudentsRouter(public *gin.RouterGroup, private 
 		BsStudentPrivateRouter.POST("changePassword", BsStudentApi.ChangePassword)
 		BsStudentPrivateRouter.GET("getCertificateList", BsStudentApi.GetCertificateList)
 
-		
-        BsStudentPrivateRouter.GET("order-my-pending", BsStudentApi.GetMyPendingOrder) // 获取当前用户待支付订单        
-        BsStudentPrivateRouter.POST("order-pay/:orderSn", BsStudentApi.CreateWeChatPay)// 创建微信支付二维码
-        BsStudentPrivateRouter.GET("order-status/:orderSn", BsStudentApi.GetOrderStatus) // 获取订单状态       
-        BsStudentPrivateRouter.POST("order-refresh/:orderSn", BsStudentApi.RefreshQRCode)  // 刷新二维码        
-       
+		BsStudentPrivateRouter.GET("order-my-pending", BsStudentApi.GetMyPendingOrder)    // 获取当前用户待支付订单
+		BsStudentPrivateRouter.POST("order-pay/:orderSn", BsStudentApi.CreateWeChatPay)   // 创建微信支付二维码
+		BsStudentPrivateRouter.GET("order-status/:orderSn", BsStudentApi.GetOrderStatus)  // 获取订单状态
+		BsStudentPrivateRouter.POST("order-refresh/:orderSn", BsStudentApi.RefreshQRCode) // 刷新二维码
+
 	}
 }
