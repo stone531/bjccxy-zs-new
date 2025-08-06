@@ -309,3 +309,113 @@ func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
 
 	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }
+
+
+//订单相关
+// 获取当前用户待支付订单  
+func (b *BsStudentApi) GetMyPendingOrder(c *gin.Context) {
+
+
+	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
+}
+
+// 创建微信支付二维码
+func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
+	orderSn := c.Param("orderSn")
+
+	// 查询订单
+	var order BsOrders
+	if err := global.GVA_DB.Where("order_sn = ?", orderSn).First(&order).Error; err != nil {
+		response.FailWithMessage("订单不存在", c)
+		return
+	}
+
+	params := map[string]string{
+		"appid":            global.GVA_CONFIG.WeChat.AppID,
+		"mch_id":           global.GVA_CONFIG.WeChat.MchID,
+		"nonce_str":        utils.GenNonceStr(),
+		"body":             order.Body,
+		"out_trade_no":     order.OrderSN,
+		"total_fee":        strconv.Itoa(order.TotalFee), // 单位：分
+		"spbill_create_ip": "127.0.0.1",
+		"notify_url":       global.GVA_CONFIG.WeChat.NotifyURL,
+		"trade_type":       "NATIVE",
+	}
+
+	// 生成签名
+	sign := CreateSign(params, global.GVA_CONFIG.WeChat.APIKey)
+	params["sign"] = sign
+
+	// 转 XML
+	xmlData := "<xml>"
+	for k, v := range params {
+		xmlData += fmt.Sprintf("<%s><![CDATA[%s]]></%s>", k, v, k)
+	}
+	xmlData += "</xml>"
+
+	// 沙箱统一下单地址
+	url := "https://api.mch.weixin.qq.com/sandboxnew/pay/unifiedorder"
+
+	// 发送 POST 请求
+	resp, err := http.Post(url, "application/xml;charset=utf-8", strings.NewReader(xmlData))
+	if err != nil {
+		response.FailWithMessage("请求微信失败", c)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	// 解析返回 XML
+	type WxUnifiedOrderResp struct {
+		ReturnCode string `xml:"return_code"`
+		ResultCode string `xml:"result_code"`
+		CodeURL    string `xml:"code_url"`
+	}
+	var res WxUnifiedOrderResp
+	if err := xml.Unmarshal(body, &res); err != nil {
+		response.FailWithMessage("微信返回解析失败", c)
+		return
+	}
+
+	if res.ReturnCode == "SUCCESS" && res.ResultCode == "SUCCESS" {
+		// 返回给前端二维码链接
+		response.OkWithDetailed(gin.H{"code_url": res.CodeURL,"order_sn" :orderSn }, "获取成功", c)
+	} else {
+		response.FailWithMessage("微信返回失败", c)
+		//c.JSON(500, gin.H{"msg": "微信返回失败", "data": string(body)})
+	}
+
+	
+}
+
+// 获取订单状态 
+func (b *BsStudentApi) GetOrderStatus(c *gin.Context) {
+	orderSn := c.Param("orderSn") // 从URL路径取到 :orderSn
+    if orderSn == "" {
+		global.GVA_LOG.Error("GetOrderStatus 获取失败!", zap.Error(err))
+		response.FailWithMessage("订单号不能为空", c)
+    }
+
+    var order BsOrders
+    if err := db.Where("order_sn = ?", orderSn).First(&order).Error; err != nil {
+		response.FailWithMessage("订单不存在", c)
+        return
+    }
+
+	response.OkWithDetailed(gin.H{"status": order.Status}, "获取成功", c)
+}
+
+// 刷新二维码 
+func (b *BsStudentApi) RefreshQRCode(c *gin.Context) {
+
+
+	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
+}
+
+// 微信支付回调（微信会调用，不需要登录权限）
+func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
+
+
+	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
+}

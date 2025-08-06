@@ -162,3 +162,14 @@ func (api *BsZhengshuService) GetNextGraduschoolNumber() string {
 	// 3. 转换回字符串
 	return strconv.FormatUint(nextNum, 10)
 }
+
+
+func (api *BsZhengshuService) UpdateZhengshuPublic(publish string,id uint) (bool, error) {
+	if err := global.GVA_DB.Model(&business.BsZhengshu{}).
+		Where("id = ?", id).
+		Update("publish", publish).Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
