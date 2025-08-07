@@ -15,15 +15,16 @@ type LoginResponse struct {
 	ExpiresAt int64              `json:"expiresAt"`
 }
 
-
-//证书详情返回给前端的实体类
+// 证书详情返回给前端的实体类
 type GraduationInfo struct {
+	Id             uint   `json:"id"`
 	Major          string `json:"major"`
 	CertificateNum string `json:"certificateNum"`
 	Date           string `json:"date"`
 }
 
 type CompletionInfo struct {
+	Id             uint   `json:"id"`
 	Name           string `json:"name"`
 	CertificateNum string `json:"certificateNum"`
 	Date           string `json:"date"`

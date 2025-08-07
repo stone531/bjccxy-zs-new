@@ -146,6 +146,7 @@ func (api *BsStudentService) GetCertificateInfo(cardNum string) (response.BSCert
 		}
 	} else {
 		res.GraduationCert = response.GraduationInfo{
+			Id:             gradRecord.ID,
 			Major:          gradRecord.Zhuanye,
 			CertificateNum: gradRecord.Graduschool,
 			Date:           gradRecord.Bysj,
@@ -165,6 +166,7 @@ func (api *BsStudentService) GetCertificateInfo(cardNum string) (response.BSCert
 		trainingList := make([]response.CompletionInfo, 0, len(trRecords))
 		for _, rec := range trRecords {
 			trainingList = append(trainingList, response.CompletionInfo{
+				Id:             rec.ID,
 				Name:           rec.CertificateName,
 				CertificateNum: rec.CertificateID, // 如果表里有专门字段，就用它
 				Date:           rec.IssueDate,
