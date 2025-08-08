@@ -247,9 +247,9 @@ zap:
     log-in-console: true
     retention-day: -1
 wechat:
-  mch_id: "商户号"
-  mch_key: "APIv3密钥"
-  cert_path: "apiclient_cert.pem"
-  key_path: "apiclient_key.pem"
-  rootca_path: "rootca.pem"
-  notify_url: "https://你的域名/api/order/wechat-notify"
+  mch_id: "1724488999"
+  mch_key: "PUB_KEY_ID_0117244889992025080800212100000405"
+  cert_path: "./wechatCerts/apiclient_cert.pem"
+  key_path: "./wechatCerts/apiclient_key.pem"
+  rootca_path: "./wechatCerts/pub_key.pem"
+  notify_url: "https://zs.bjccxy.com/student/order-wechat-notify"
