@@ -106,8 +106,10 @@ func Routers() *gin.Engine {
 	exampleRouter.InitDemoRecordRouter(PrivateGroup)
 
 	// 业务模块（管理员）
-	businessRouter.InitBsZhengshuRouter(PrivateGroup)
-	businessRouter.InitBsTrainingRouter(PrivateGroup)
+	//businessRouter.InitBsZhengshuRouter(PrivateGroup)
+	businessRouter.InitBsZhengshuRouter(PublicGroup, PrivateGroup)
+
+	businessRouter.InitBsTrainingRouter(PublicGroup, PrivateGroup)
 
 	// 学生模块
 	studentRouter.InitBsStudentsRouter(PublicGroup, StudentPrivateGroup)
