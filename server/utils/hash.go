@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -88,4 +89,18 @@ func CreateSign(params map[string]string, apiKey string) string {
 
 	// 3. MD5加密并转大写
 	return strings.ToUpper(MD5Hash(buf.String()))
+}
+
+func RandString(n int) string {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(err)
+	}
+	return hex.EncodeToString(b)[:n]
+}
+
+func GenerateOrderNo() string {
+	rand.Seed(time.Now().UnixNano())
+	return fmt.Sprintf("ORD%d%d", time.Now().Unix(), rand.Intn(10000))
 }

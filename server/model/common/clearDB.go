@@ -5,3 +5,17 @@ type ClearDB struct {
 	CompareField string
 	Interval     string
 }
+
+type WeiChatType_Type int
+
+const (
+	Graduschool_ZhengShu WeiChatType_Type = iota
+	Training_ZhengShu
+)
+
+type WeiChatPay_TotalFee int
+
+const (
+	Graduschool_TotalFee WeiChatPay_TotalFee = 10
+	Training_TotalFee    WeiChatPay_TotalFee = 20
+)

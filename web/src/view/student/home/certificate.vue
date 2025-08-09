@@ -211,10 +211,6 @@
           <el-input v-model="trainingUserInfo.certificate_name" style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="证书编号" prop="certificate_id">
-          <el-input v-model="trainingUserInfo.certificate_id" style="width: 200px" />
-        </el-form-item>
-
         <el-form-item label="培训项目名称" prop="training_program">
           <el-input v-model="trainingUserInfo.training_program" style="width: 200px" />
         </el-form-item>
@@ -236,16 +232,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed,watchEffect } from 'vue'
 import { ElMessage } from 'element-plus'
 // API 方法（替换成你的接口）
 import SelectImage from '@/components/upload/zsCommon.vue'
 import { getCertificateList } from '@/api/student'
 import { useAppStore } from "@/pinia";
-import { insertZhengshu } from '@/api/user.js'
+import { insertZhengshu ,insertTrainStu} from '@/api/user.js'
+import { useStudentStore } from '@/pinia/modules/student'
 
 const appStore = useAppStore()
+const studentStore = useStudentStore()
 
+/*const res1 = await studentStore.GetStudentInfo() 
+console.error('aaaa:',res1.data.userInfo.name)
+
+const g_name = computed(() => res1.data.userInfo.name)
+const g_idCard_num = computed(() => res1.data.userInfo.name)
+
+watchEffect(() => {
+  console.error('name from store:', g_name.value, g_idCard_num.value)
+})*/
+
+
+//const studentInfo = computed(() => studentStore.studentInfo)
 // 数据
 const graduationCert = ref(null) // 毕业证书
 const completionCertList = ref([]) // 多个结业证书
@@ -292,7 +302,7 @@ const addTrainingUser = () => {
     nativeplace: '',
     bysj: '',
     zhuanye:'',
-    certificatenumber2:'',
+    certificatenumber2: '',
     graduschool2: '北京长城学院',
     editer:'student',
   })
@@ -360,7 +370,8 @@ const trainingRules = ref({
     nativeplace: '',
     bysj: '',
     zhuanye:'',
-    certificatenumber2:''
+    certificatenumber2:'',
+    editer:'student',
   })
 
   const trainingUserForm = ref(null)
@@ -376,7 +387,17 @@ onMounted(async () => {
     { name: 'Java Web 开发结业证书', no: 'COM-2024-101', date: '2024-05-10' },
     { name: 'Vue 前端进阶结业证书', no: 'COM-2024-202', date: '2024-06-20' }
   ]*/
+
+  //const res1 = await studentStore.GetStudentInfo() 
+  //console.error('aaaa:',res1.data.userInfo.name)
+
  try {
+ //1. 检查上一个页面是否更新了真实姓名和身份证号信息如果没有，
+ if(studentStore.name === ''  || studentStore.id_card_number === '' ){
+  ElMessage.error('请先更新姓名和生份证号')
+  return
+ }
+
   const res = await getCertificateList()
   if (res.code === 0 && res.data?.certicates) {
     // 毕业证书
@@ -466,23 +487,18 @@ const resetUserFunc = () => {
   })
 }
 
-  const enterAddTrainingUserDialog = async () => {
-    trainingUserForm.value.validate(async (valid) => {
-      if (valid) {
-        const req = {
-          ...trainingUserInfo.value
-        }
-        if (dialogTrainingFlag.value === 'edit') {
-          const res = await setZhengshuInfo(req)
-          if (res.code === 0) {
-            ElMessage({ type: 'success', message: '编辑成功' })
-            await getTableData()
-            closeAddTrainingUserDialog()
-          }
-        }
-      }
-    })
+const enterAddTrainingUserDialog = async () => {
+    try {
+    const res = await insertTrainStu(trainingUserInfo.value)
+    if (res.code === 0) {
+      ElMessage.success('创建成功')
+      //resetUserFunc()
+      closeAddTrainingUserDialog();
+    }
+  } catch (error) {
+    ElMessage.error('提交失败，请重试')
   }
+}
 
 // 增加证书
 function addCertificate(type) {

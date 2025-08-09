@@ -1,16 +1,14 @@
 package student
 
 import (
-	"encoding/xml"
 	"fmt"
-	"io"
-	"net/http"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+
+	//"github.com/gin-gonic/gin"
+	//"github.com/go-pay/gopay"
 	"github.com/google/uuid"
 
 	//"github.com/go-redis/redis"
@@ -20,6 +18,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/cacheutil"
 
 	//"gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	stumodel "github.com/flipped-aurora/gin-vue-admin/server/model/student"
@@ -318,8 +317,17 @@ func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
 // 订单相关
 // 获取当前用户待支付订单
 func (b *BsStudentApi) GetMyPendingOrder(c *gin.Context) {
+	id := utils.GetStudentID(c)
+	fmt.Println("GetMyPendingOrder :", id)
 
-	response.OkWithDetailed(gin.H{"certicates": "ok"}, "获取成功", c)
+	orders, err := bsOrderService.GetMyPendingOrder(int64(id))
+	if err != nil {
+		global.GVA_LOG.Error("GetMyPendingOrder 获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	response.OkWithDetailed(gin.H{"orders": orders}, "获取成功", c)
 }
 
 // 创建微信支付二维码
@@ -327,68 +335,22 @@ func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
 	orderSn := c.Param("orderSn")
 
 	// 查询订单
+	fmt.Println("CreateWeChatPay00 sn:", orderSn)
 	var order stumodel.BsOrders
 	if err := global.GVA_DB.Where("order_sn = ?", orderSn).First(&order).Error; err != nil {
 		response.FailWithMessage("订单不存在", c)
 		return
 	}
 
-	params := map[string]string{
-		//"appid":            global.GVA_CONFIG.WeChat.AppID,
-		"mch_id": global.GVA_CONFIG.WeChat.MchID,
-		//"nonce_str":        utils.GenNonceStr(),
-		"body":             order.Body,
-		"out_trade_no":     order.OrderSN,
-		"total_fee":        strconv.Itoa(order.TotalFee), // 单位：分
-		"spbill_create_ip": "127.0.0.1",
-		"notify_url":       global.GVA_CONFIG.WeChat.NotifyURL,
-		"trade_type":       "NATIVE",
-	}
+	fmt.Println("CreateWeChatPay01 sn:", orderSn)
 
-	// 生成签名
-	sign := utils.CreateSign(params, global.GVA_CONFIG.WeChat.MchKey)
-	params["sign"] = sign
-
-	// 转 XML
-	xmlData := "<xml>"
-	for k, v := range params {
-		xmlData += fmt.Sprintf("<%s><![CDATA[%s]]></%s>", k, v, k)
-	}
-	xmlData += "</xml>"
-
-	// 沙箱统一下单地址
-	url := "https://api.mch.weixin.qq.com/sandboxnew/pay/unifiedorder"
-
-	// 发送 POST 请求
-	resp, err := http.Post(url, "application/xml;charset=utf-8", strings.NewReader(xmlData))
+	payUrl, err := bsOrderService.CreateNativeOrder(orderSn, int(common.Graduschool_TotalFee), "毕业证书申请")
 	if err != nil {
-		response.FailWithMessage("请求微信失败", c)
+		response.FailWithMessage("返回支付码失败", c)
 		return
 	}
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
-
-	// 解析返回 XML
-	type WxUnifiedOrderResp struct {
-		ReturnCode string `xml:"return_code"`
-		ResultCode string `xml:"result_code"`
-		CodeURL    string `xml:"code_url"`
-	}
-	var res WxUnifiedOrderResp
-	if err := xml.Unmarshal(body, &res); err != nil {
-		response.FailWithMessage("微信返回解析失败", c)
-		return
-	}
-
-	if res.ReturnCode == "SUCCESS" && res.ResultCode == "SUCCESS" {
-		// 返回给前端二维码链接
-		response.OkWithDetailed(gin.H{"code_url": res.CodeURL, "order_sn": orderSn}, "获取成功", c)
-	} else {
-		response.FailWithMessage("微信返回失败", c)
-		//c.JSON(500, gin.H{"msg": "微信返回失败", "data": string(body)})
-	}
-
+	fmt.Println("CreateWeChatPay03 url:", payUrl)
+	response.OkWithDetailed(gin.H{"payUrl": payUrl}, "获取成功", c)
 }
 
 // 获取订单状态
@@ -407,16 +369,4 @@ func (b *BsStudentApi) GetOrderStatus(c *gin.Context) {
 	}
 
 	response.OkWithDetailed(gin.H{"status": order.Status}, "获取成功", c)
-}
-
-// 刷新二维码
-func (b *BsStudentApi) RefreshQRCode(c *gin.Context) {
-
-	//response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
-}
-
-// 微信支付回调（微信会调用，不需要登录权限）
-func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
-
-	//response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }

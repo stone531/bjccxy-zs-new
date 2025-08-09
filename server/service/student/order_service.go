@@ -1,11 +1,22 @@
 package student
 
 import (
+	"context"
+	"crypto/rand"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
+	"io/ioutil"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-pay/gopay"
+	"github.com/go-pay/gopay/wechat/v3"
+	"go.uber.org/zap"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	mstud "github.com/flipped-aurora/gin-vue-admin/server/model/student"
 )
 
@@ -89,4 +100,118 @@ func (s *OrderService) WeChatPayNotify(c *gin.Context) {
 		"return_code": "SUCCESS",
 		"return_msg":  "OK",
 	})
+}
+
+func (s *OrderService) GenerateOrderSN(userID uint) string {
+	timestamp := time.Now().Format("20060102150405") // 精确到秒
+	randomStr := s.randomString(8)                   // 8位随机字符串
+	return fmt.Sprintf("%s%d%s", timestamp, userID, randomStr)
+}
+
+// randomString 生成随机字符串
+func (s *OrderService) randomString(n int) string {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	bytes := make([]byte, n)
+	_, _ = rand.Read(bytes)
+	for i := range bytes {
+		bytes[i] = letters[bytes[i]%byte(len(letters))]
+	}
+	return string(bytes)
+}
+
+func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uint, totalFee int) error {
+	var (
+		body     string
+		detail   string
+		certType string
+	)
+
+	if orderType == common.Graduschool_ZhengShu {
+		body = "毕业证书"
+		detail = "在线毕业证书申请"
+		certType = "graduation"
+	} else if orderType == common.Training_ZhengShu {
+		body = "培训证书"
+		detail = "在线培训书申请"
+		certType = "training"
+	}
+
+	order := &mstud.BsOrders{
+		UserID:     int64(userID),
+		OrderSN:    s.GenerateOrderSN(userID),
+		TotalFee:   totalFee,
+		FeeType:    "CNY",
+		CertType:   certType,
+		Body:       body,
+		Detail:     detail,
+		Status:     0, // 待支付
+		PayType:    "NATIVE",
+		ExpireTime: time.Now().Add(15 * time.Minute), // 默认15分钟过期
+	}
+
+	if err := global.GVA_DB.Create(order).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (w *OrderService) CreateNativeOrder(orderSN string, totalFee int, description string) (string, error) {
+	cfg := global.GVA_CONFIG.WeChat
+
+	fmt.Println("CreateNativeOrder sn:", orderSN, cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
+	// 初始化微信支付客户端
+	client, err := wechat.NewClientV3(cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
+	if err != nil {
+		global.GVA_LOG.Error("CreateNativeOrder NewClientV3 获取失败!", zap.Error(err))
+
+		return "", err
+	}
+
+	fmt.Println("CreateNativeOrder client ok")
+	// 构造请求参数
+	bm := make(gopay.BodyMap)
+	bm.Set("appid", cfg.AppID).
+		Set("mchid", cfg.MchID).
+		Set("description", description).
+		Set("out_trade_no", orderSN).
+		Set("notify_url", cfg.NotifyURL).
+		SetBodyMap("amount", func(b gopay.BodyMap) {
+			b.Set("total", totalFee). // 金额，单位分
+							Set("currency", "CNY")
+		})
+
+	fmt.Println("CreateNativeOrder bm:", bm)
+
+	// 请求微信生成二维码
+	resp, err := client.V3TransactionNative(context.Background(), bm)
+	if err != nil {
+		global.GVA_LOG.Error("CreateNativeOrder V3TransactionNative 获取失败!", zap.Error(err))
+		return "", err
+	}
+	fmt.Println("CreateNativeOrder resp:", resp)
+
+	//resp.Response.CodeUrl
+	// 返回二维码链接
+	return resp.Response.CodeUrl, nil
+}
+
+func (w *OrderService) InitWechatClient() (*wechat.ClientV3, error) {
+	return wechat.NewClientV3("商户号", "证书序列号", "APIv3密钥", "私钥内容")
+}
+
+func (w *OrderService) GetSerialNumber() (string, error) {
+	cfg := global.GVA_CONFIG.WeChat
+	certPEM, err := ioutil.ReadFile(cfg.CertPath)
+	if err != nil {
+		return "", fmt.Errorf("read cert file error: %v", err)
+	}
+	block, _ := pem.Decode(certPEM)
+	if block == nil {
+		return "", fmt.Errorf("decode pem error")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("parse cert error: %v", err)
+	}
+	return fmt.Sprintf("%X", cert.SerialNumber), nil
 }

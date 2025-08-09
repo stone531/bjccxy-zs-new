@@ -247,6 +247,7 @@ zap:
     log-in-console: true
     retention-day: -1
 wechat:
+  app_id: "wxcfd778de260fadf6"
   mch_id: "1724488999"
   mch_key: "PUB_KEY_ID_0117244889992025080800212100000405"
   cert_path: "./wechatCerts/apiclient_cert.pem"
