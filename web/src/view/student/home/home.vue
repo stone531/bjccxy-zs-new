@@ -12,7 +12,10 @@
         </el-menu-item>
         <el-menu-item index="/student/order">
           <el-icon><List /></el-icon>我的订单
-        </el-menu-item>       
+        </el-menu-item>    
+        <el-menu-item index="/student/quit">
+          <el-icon><List /></el-icon>test
+        </el-menu-item>     
         <el-menu-item @click="logout">
           <el-icon><Document /></el-icon>退出登录
         </el-menu-item>
