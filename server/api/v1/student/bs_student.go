@@ -344,7 +344,7 @@ func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
 
 	fmt.Println("CreateWeChatPay01 sn:", orderSn)
 
-	payUrl, err := bsOrderService.CreateNativeOrder(orderSn, int(common.Graduschool_TotalFee), "毕业证书申请")
+	payUrl, err := bsOrderService.CreateNativeOrder_test(orderSn, int(common.Graduschool_TotalFee), "毕业证书申请")
 	if err != nil {
 		response.FailWithMessage("返回支付码失败", c)
 		return

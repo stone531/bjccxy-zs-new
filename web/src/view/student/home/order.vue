@@ -45,9 +45,15 @@
     >
       <div style="text-align: center;">
         <template v-if="!qrcodeExpired">
+          
           <img :src="qrcodeUrl" alt="支付二维码" style="width: 250px; height: 250px;" />
-          <p>请使用微信扫码支付</p>
+          <p>请使用微信扫码支付</p> 
+          <vue-qrcode 
+            :value="qrcodeUrl" 
+            :options="{ errorCorrectionLevel: 'H', width: 250 }"
+          />
         </template>
+        
         <template v-else>
           <p>二维码已过期</p>
           <el-button type="primary" @click="refreshQRCode">重新生成二维码</el-button>
@@ -94,17 +100,34 @@ export default {
     },
 
     async generateQRCode() {
-      //const res = await createWeChatPay({ orderSn: this.currentOrder.orderSn })
+    try {
       const res = await createWeChatPay(this.currentOrder.orderSn)
-      if (res.code === 0 && res.data.codeUrl) {
-        this.qrcodeUrl = await QRCode.toDataURL(res.data.codeUrl)
-        this.qrcodeExpired = false
-      } else {
-        this.$message.error('生成二维码失败')
+      console.error("generateQRCode 接口返回:", res)
+
+      // 如果是 axios 返回值，需要取 res.data
+      const payload = res.data ? res.data : res
+      console.error("payload:",payload)
+      // 从 payload 中取 payUrl
+      const payUrl = payload?.payUrl
+      console.error("payUrl:", payUrl)
+
+      if (res.code === 0 && payUrl) {
+          console.error("enetr qrcodeUrl:", payUrl)
+          this.qrcodeUrl = await QRCode.toDataURL(String(payUrl), {
+            errorCorrectionLevel: 'H', // 提高容错率
+            width: 250
+          })
+          this.qrcodeExpired = false
+        } else {
+          this.$message.error('生成二维码失败: ' + (payload.msg || '未知错误'))
+        }
+      } catch (err) {
+        console.error("生成二维码异常:", err)
+        this.$message.error('生成二维码异常')
       }
     },
 
-    refreshQRCode() {
+  refreshQRCode() {
       this.generateQRCode()
       this.startPolling()
       this.startExpireTimer(new Date(Date.now() + 5 * 60 * 1000)) // 5分钟过期

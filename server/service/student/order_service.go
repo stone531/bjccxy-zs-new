@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"time"
 
@@ -164,6 +165,53 @@ func (w *OrderService) CreateNativeOrder(orderSN string, totalFee int, descripti
 	if err != nil {
 		global.GVA_LOG.Error("CreateNativeOrder NewClientV3 获取失败!", zap.Error(err))
 
+		return "", err
+	}
+
+	fmt.Println("CreateNativeOrder client ok")
+	// 构造请求参数
+	bm := make(gopay.BodyMap)
+	bm.Set("appid", cfg.AppID).
+		Set("mchid", cfg.MchID).
+		Set("description", description).
+		Set("out_trade_no", orderSN).
+		Set("notify_url", cfg.NotifyURL).
+		SetBodyMap("amount", func(b gopay.BodyMap) {
+			b.Set("total", totalFee). // 金额，单位分
+							Set("currency", "CNY")
+		})
+
+	fmt.Println("CreateNativeOrder bm:", bm)
+
+	// 请求微信生成二维码
+	resp, err := client.V3TransactionNative(context.Background(), bm)
+	if err != nil {
+		global.GVA_LOG.Error("CreateNativeOrder V3TransactionNative 获取失败!", zap.Error(err))
+		return "", err
+	}
+	fmt.Println("CreateNativeOrder resp:", resp)
+
+	//resp.Response.CodeUrl
+	// 返回二维码链接
+	return resp.Response.CodeUrl, nil
+}
+func (w *OrderService) CreateNativeOrder_test(orderSN string, totalFee int, description string) (string, error) {
+	cfg := global.GVA_CONFIG.WeChat
+
+	fmt.Println("CreateNativeOrder sn:", orderSN, cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
+	// 初始化微信支付客户端
+
+	keyBytes, err := os.ReadFile(cfg.KeyPath)
+	if err != nil {
+		global.GVA_LOG.Error("读取私钥失败", zap.Error(err))
+		return "", err
+	}
+
+	//client, err := wechat.NewClientV3(cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
+
+	client, err := wechat.NewClientV3(cfg.MchID, cfg.MchKey, cfg.CertPath, string(keyBytes))
+	if err != nil {
+		global.GVA_LOG.Error("NewClientV3 创建失败", zap.Error(err))
 		return "", err
 	}
 
