@@ -39,24 +39,23 @@
     <!-- 支付二维码弹窗 -->
     <el-dialog
       title="微信扫码支付"
-      :visible.sync="payDialogVisible"
+      v-model="payDialogVisible"
       width="400px"
       @close="stopPolling"
     >
       <div style="text-align: center;">
-        <template v-if="!qrcodeExpired">
-          
+        <template v-if="qrcodeUrl && !qrcodeExpired">
           <img :src="qrcodeUrl" alt="支付二维码" style="width: 250px; height: 250px;" />
-          <p>请使用微信扫码支付</p> 
-          <vue-qrcode 
-            :value="qrcodeUrl" 
-            :options="{ errorCorrectionLevel: 'H', width: 250 }"
-          />
+          <p>请使用微信扫码支付</p>
         </template>
-        
-        <template v-else>
+
+        <template v-else-if="qrcodeExpired">
           <p>二维码已过期</p>
           <el-button type="primary" @click="refreshQRCode">重新生成二维码</el-button>
+        </template>
+
+        <template v-else>
+          <p>正在生成二维码...</p>
         </template>
       </div>
     </el-dialog>
@@ -85,41 +84,46 @@ export default {
   },
   methods: {
     async loadOrders() {
-      const res = await getMyPendingOrder()
-      if (res.code === 0) {
-        this.orderList = res.data.orders
+      try {
+        const res = await getMyPendingOrder()
+        if (res.code === 0) {
+          this.orderList = res.data.orders
+        }
+      } catch (err) {
+        console.error('加载订单失败:', err)
       }
     },
 
     async openPayDialog(order) {
       this.currentOrder = order
-      await this.generateQRCode()
+      this.qrcodeUrl = ''
+      this.qrcodeExpired = false
       this.payDialogVisible = true
-      this.startPolling()
-      this.startExpireTimer(order.expireTime)
+      this.$nextTick(async () => {
+        await this.generateQRCode()
+        this.startPolling()
+        this.startExpireTimer(order.expireTime || new Date(Date.now() + 5 * 60 * 1000))
+      })
     },
 
     async generateQRCode() {
-    try {
-      const res = await createWeChatPay(this.currentOrder.orderSn)
-      console.error("generateQRCode 接口返回:", res)
+      try {
+        const res = await createWeChatPay(this.currentOrder.orderSn)
+        console.log('创建支付返回:', res)
 
-      // 如果是 axios 返回值，需要取 res.data
-      const payload = res.data ? res.data : res
-      console.error("payload:",payload)
-      // 从 payload 中取 payUrl
-      const payUrl = payload?.payUrl
-      console.error("payUrl:", payUrl)
+        const payUrl = res?.data?.payUrl
+        console.log('payUrl:', payUrl)
 
-      if (res.code === 0 && payUrl) {
-          console.error("enetr qrcodeUrl:", payUrl)
-          this.qrcodeUrl = await QRCode.toDataURL(String(payUrl), {
-            errorCorrectionLevel: 'H', // 提高容错率
+        if (res.code === 0 && payUrl) {
+          const base64 = await QRCode.toDataURL(String(payUrl), {
+            errorCorrectionLevel: 'H',
             width: 250
           })
+          console.log("二维码Base64长度:", base64.length)
+          this.qrcodeUrl = base64
           this.qrcodeExpired = false
         } else {
-          this.$message.error('生成二维码失败: ' + (payload.msg || '未知错误'))
+          this.$message.error('生成二维码失败: ' + (res.msg || '未知错误'))
         }
       } catch (err) {
         console.error("生成二维码异常:", err)
@@ -127,19 +131,20 @@ export default {
       }
     },
 
-  refreshQRCode() {
+    refreshQRCode() {
       this.generateQRCode()
       this.startPolling()
-      this.startExpireTimer(new Date(Date.now() + 5 * 60 * 1000)) // 5分钟过期
+      this.startExpireTimer(new Date(Date.now() + 5 * 60 * 1000))
     },
 
     startExpireTimer(expireTime) {
       if (this.expireTimer) clearTimeout(this.expireTimer)
       const expireMs = new Date(expireTime).getTime() - Date.now()
+
       this.expireTimer = setTimeout(() => {
         this.qrcodeExpired = true
-        this.stopPolling()
-      }, expireMs)
+        //this.stopPolling()
+      }, 5 * 60 * 1000)
     },
 
     startPolling() {

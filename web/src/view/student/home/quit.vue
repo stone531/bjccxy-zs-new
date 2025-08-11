@@ -1,42 +1,84 @@
 <template>
-  <div>
-    <h3>微信支付二维码示例</h3>
-    <el-input v-model="payUrl" placeholder="支付链接" readonly style="width: 400px;" />
-    <div v-if="qrCodeSrc" style="margin-top: 20px;">
-      <img :src="qrCodeSrc" alt="微信支付二维码" style="width: 250px; height: 250px;" />
-    </div>
+  <div class="order-container">
+    <el-card class="box-card">
+      <div class="header">
+        <el-button type="primary" @click="getPayQrCode">获取二维码</el-button>
+      </div>
+
+      <div class="qrcode-box" v-if="qrCodeUrl">
+        <img :src="qrCodeUrl" alt="支付二维码" />
+        <p class="tip">请使用微信扫描二维码进行支付</p>
+      </div>
+
+      <div v-else class="placeholder">
+        <p>点击上方按钮生成二维码</p>
+      </div>
+    </el-card>
   </div>
 </template>
 
-<script setup>
-import { ref, watch } from 'vue'
+<script>
 import QRCode from 'qrcode'
+import request from '@/utils/request' // gin-vue-admin 默认 axios 封装
 
-// 模拟后端返回的支付链接
-const payUrl = ref('weixin://wxpay/bizpayurl?pr=0k1KkPEz1')
-const qrCodeSrc = ref('')
-
-async function generateQRCode(url) {
-  try {
-    qrCodeSrc.value = await QRCode.toDataURL(url, {
-      errorCorrectionLevel: 'H',
-      width: 250
-    })
-  } catch (err) {
-    console.error('二维码生成失败:', err)
-  }
+export default {
+  name: 'Order',
+  data() {
+    return {
+      qrCodeUrl: '', // 生成的二维码图片 base64
+    }
+  },
+  methods: {
+    async getPayQrCode() {
+      try {
+        const res = await request({
+          url: '/order/create-qrcode', // 你的后端二维码生成接口
+          method: 'get',
+        })
+        if (res.code === 0 && res.data?.payUrl) {
+          // 用 qrcode 生成 base64 图片
+          this.qrCodeUrl = await QRCode.toDataURL(res.data.payUrl, {
+            width: 200,
+            margin: 2,
+          })
+        } else {
+          this.$message.error(res.msg || '获取二维码失败')
+        }
+      } catch (err) {
+        console.error(err)
+        this.$message.error('接口请求失败')
+      }
+    },
+  },
 }
-
-// 监听payUrl变化，自动生成二维码
-watch(payUrl, (newUrl) => {
-  if (newUrl) {
-    generateQRCode(newUrl)
-  }
-}, { immediate: true })
 </script>
 
 <style scoped>
-h3 {
-  margin-bottom: 10px;
+.order-container {
+  padding: 20px;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.qrcode-box {
+  text-align: center;
+}
+
+.qrcode-box img {
+  width: 200px;
+  height: 200px;
+}
+
+.tip {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.placeholder {
+  text-align: center;
+  color: #999;
 }
 </style>

@@ -104,6 +104,6 @@ web
  └── yarn.lock
 
 
-
+ npm install qrcode
  npm install @chenfengyuan/vue-qrcode
 ```
