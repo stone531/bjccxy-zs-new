@@ -7,7 +7,8 @@ type ApiGroup struct {
 }
 
 var (
-	jwtService       = service.ServiceGroupApp.SystemServiceGroup.JwtService
-	bsStudentService = service.ServiceGroupApp.StudentServiceGroup.BsStudentService
-	bsOrderService   = service.ServiceGroupApp.StudentServiceGroup.OrderService
+	jwtService        = service.ServiceGroupApp.SystemServiceGroup.JwtService
+	bsStudentService  = service.ServiceGroupApp.StudentServiceGroup.BsStudentService
+	bsOrderService    = service.ServiceGroupApp.StudentServiceGroup.OrderService
+	bsZhengshuService = service.ServiceGroupApp.BusinessServiceGroup.BsZhengshuService
 )

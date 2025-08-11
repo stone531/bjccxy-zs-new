@@ -241,3 +241,20 @@ export const getOrderDetail = (orderSn) => {
     method: "get"
   })
 }
+
+export const insertZhengshu = (data) => {
+  return service({
+    url: '/student/certificate-create',
+    method: 'post',
+    data: data
+  })
+}
+
+//培训证书
+export const insertTrainStu = (data) => {
+  return service({
+    url: '/student/training-create',
+    method: 'post',
+    data: data
+  })
+}

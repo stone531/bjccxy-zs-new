@@ -17,9 +17,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="body" label="商品描述" width="400"/>
-        <el-table-column prop="totalFee" label="金额" width="100">
-          <template #default="{ row }">{{ row.totalFee }} 元</template>
+        <el-table-column prop="body" label="商品描述" width="300"/>
+        <el-table-column prop="totalFee" label="金额(元)" width="100">
+          <template #default="{ row }">{{ (row.totalFee / 100).toFixed(2) }} 元</template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">

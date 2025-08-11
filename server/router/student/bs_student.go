@@ -22,6 +22,8 @@ func (e *BsStudentRouter) InitBsStudentsRouter(public *gin.RouterGroup, private 
 	// 私有路由
 	BsStudentPrivateRouter := private.Group("student")
 	{
+		BsStudentPrivateRouter.POST("certificate-create", BsStudentApi.CreateBsZhengshu)
+		BsStudentPrivateRouter.POST("training-create", BsStudentApi.CreateBsTraining)
 		BsStudentPrivateRouter.GET("getInfo", BsStudentApi.GetUserInfo)
 		BsStudentPrivateRouter.PUT("updateField", BsStudentApi.UpdateField)
 		BsStudentPrivateRouter.POST("changePassword", BsStudentApi.ChangePassword)

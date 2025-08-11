@@ -18,6 +18,8 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/cacheutil"
 
 	//"gin-vue-admin/server/global"
+	zsBusiness "github.com/flipped-aurora/gin-vue-admin/server/model/business"
+	zsModel "github.com/flipped-aurora/gin-vue-admin/server/model/business/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
@@ -314,7 +316,6 @@ func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
 	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }
 
-
 // 获取当前用户待支付订单
 func (b *BsStudentApi) GetMyPendingOrder(c *gin.Context) {
 	id := utils.GetStudentID(c)
@@ -388,4 +389,139 @@ func (b *BsStudentApi) GetOrderStatus(c *gin.Context) {
 	}
 
 	response.OkWithDetailed(gin.H{"status": order.Status}, "获取成功", c)
+}
+
+func (api *BsStudentApi) CreateBsZhengshu(c *gin.Context) {
+	var req zsModel.AddUser
+	global.GVA_LOG.Info("BsZhengShuApi 001")
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	//check idcard
+	ok, _ := api.checkCertifityIDCardExists(req.CertificateNumber2)
+	if ok {
+		response.FailWithMessage("exit the same CertificateNumber2 ", c)
+		return
+	}
+
+	now := time.Now()
+	currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+	public := "no"
+	if req.Editer != "student" {
+		public = "yes"
+	}
+	record := zsBusiness.BsZhengshu{
+		Name:               req.Name,
+		Age:                req.Age,
+		Sex:                req.Sex,
+		Mingzhu:            req.Mingzhu,
+		Pic:                req.Pic,
+		NativePlace:        req.NativePlace,
+		Zzmm:               req.Zzmm,
+		Chengchi:           req.Chengchi,
+		CertificateNumber2: req.CertificateNumber2,
+		Zhuanye:            req.Zhuanye,
+		Graduschool:        bsZhengshuService.GetNextGraduschoolNumber(),
+		Graduschool2:       req.Graduschool2,
+		Bysj:               req.Bysj,
+		Zwjd:               req.Zwjd,
+		Demo:               req.Demo,
+		Editer:             req.Editer,
+		Date:               currentDate,
+		Publish:            public,
+	}
+
+	if err := global.GVA_DB.Create(&record).Error; err != nil {
+		response.FailWithMessage("create fail", c)
+		return
+	}
+
+	if req.Editer == "student" {
+		err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, record.ID, int(common.Graduschool_TotalFee))
+		if err != nil {
+			response.FailWithMessage("create order fail", c)
+			return
+		}
+	}
+
+	response.OkWithData(gin.H{"id": record.ID}, c)
+}
+
+func (api *BsStudentApi) CreateBsTraining(c *gin.Context) {
+	var req zsModel.AddTrainingStu
+	global.GVA_LOG.Info("CreateBsTraining 001")
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	//check idcard
+	ok, _ := api.checkTrainingIDCardExists(req.IDCardNumber)
+	if ok {
+		response.FailWithMessage("exit the same CertificateNumber2 ", c)
+		return
+	}
+
+	//now := time.Now()
+	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	public := "no"
+	if req.Editer != "student" {
+		public = "yes"
+	}
+	record := zsBusiness.BsTrainingStudent{
+		Name:            req.Name,
+		Gender:          req.Gender,
+		IDCardNumber:    req.IDCardNumber,
+		CertificateName: req.CertificateName,
+		CertificateID:   bsZhengshuService.GetNextTrainingGraduschoolNumber(),
+		IssueDate:       req.IssueDate,
+		TrainingProgram: req.TrainingProgram,
+		Grade:           req.Grade,
+		Editer:          req.Editer,
+		ExtraField1:     public,
+	}
+
+	if err := global.GVA_DB.Create(&record).Error; err != nil {
+		response.FailWithMessage("create fail", c)
+		return
+	}
+
+	if req.Editer == "student" {
+		fmt.Println("student insert id:", utils.GetStudentID(c))
+		//是student的id
+		err := bsOrderService.CreateOrder(common.Training_ZhengShu, utils.GetStudentID(c), int(common.Training_TotalFee))
+		if err != nil {
+			response.FailWithMessage("create order fail", c)
+			return
+		}
+	}
+
+	response.OkWithData(gin.H{"id": record.ID}, c)
+}
+
+func (api *BsStudentApi) checkCertifityIDCardExists(idCard string) (bool, error) {
+	var count int64
+	err := global.GVA_DB.Model(&zsBusiness.BsZhengshu{}).
+		Where("CertificateNumber2 = ?", idCard).
+		Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (api *BsStudentApi) checkTrainingIDCardExists(idCard string) (bool, error) {
+	var count int64
+	err := global.GVA_DB.Model(&zsBusiness.BsTrainingStudent{}).
+		Where("id_card_number = ?", idCard).
+		Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

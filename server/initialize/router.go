@@ -101,7 +101,7 @@ func Routers() *gin.Engine {
 
 	// 示例模块
 	exampleRouter.InitCustomerRouter(PrivateGroup)
-	exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup)
+	exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup, StudentPrivateGroup)
 	exampleRouter.InitAttachmentCategoryRouterRouter(PrivateGroup)
 	exampleRouter.InitDemoRecordRouter(PrivateGroup)
 

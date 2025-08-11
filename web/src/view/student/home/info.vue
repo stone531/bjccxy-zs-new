@@ -1,5 +1,10 @@
 <template>
   <div class="student-info">
+    <warning-bar
+      :title="`温馨提示：为了你的信息通过审核，请仔细填写下表、系统将对所填真实的姓名、真实的证件号码，请填写个人真实信息。`"
+       style="color: red;"
+      class="multiline-warning"
+    />
     <h2 class="title">学生账号信息</h2>
 
     <!-- 账号（不可修改） -->
@@ -112,6 +117,7 @@ import { ElMessage } from 'element-plus'
 import { getStudentInfo ,updateStudentField,changePassword} from '@/api/student'
 import MD5 from 'crypto-js/md5';
 import { useRoute } from 'vue-router'
+import WarningBar from '@/components/warningBar/warningBar.vue'
 const route = useRoute()
 
 const studentStore = useStudentStore()
@@ -326,5 +332,12 @@ watch(
   content: " ";
   display: inline-block;
   width: 1em;
+}
+.warning-bar-text {
+  color: red;
+  white-space: pre-line;
+}
+.multiline-warning span {
+  white-space: pre-line;
 }
 </style>
