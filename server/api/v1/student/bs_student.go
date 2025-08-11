@@ -346,7 +346,7 @@ func (b *BsStudentApi) GetOrderDetail(c *gin.Context) {
 		return
 	}
 
-	response.OkWithDetailed(gin.H{"order": order}, "获取成功", c)
+	response.OkWithDetailed(order, "获取成功", c)
 }
 
 // 创建微信支付二维码

@@ -64,6 +64,16 @@ const routes = [
     } 
   },
   {
+    path: '/layout/student/home/detail',
+    name: 'orderDetail',
+    component: () => import('@/view/student/home/detail.vue'),
+    meta: { 
+      title: '学生订单详情', 
+      keepAlive: false,
+      noLogin: true 
+    } 
+  },
+  {
     path: '/external-query',
     name: 'external-query',
     component: () => import('@/view/external/zsQuery.vue'),

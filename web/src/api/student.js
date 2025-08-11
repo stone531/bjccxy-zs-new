@@ -31,7 +31,7 @@ export const studentRoutes = [
       {
         path: 'quit',
         name: 'StudentQuit',
-        component: () => import('@/view/student/home/quit.vue'),
+        component: () => import('@/view/student/home/detail.vue'),
         meta: { title: '退出登录', icon: 'file-text' }
       }
     ]

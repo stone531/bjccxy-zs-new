@@ -72,7 +72,7 @@
 
     </div>
 
-      <!-- 增加毕业证书用户信息 -->
+    <!-- 增加毕业证书用户信息 -->
     <el-drawer
       v-model="addUserDialog"
       :size="600"
@@ -100,7 +100,7 @@
       >
 
         <el-form-item label="用户名" prop="name">
-          <el-input v-model="userInfo.name" style="width: 200px" />
+          <el-input v-model="userInfo.name" style="width: 200px" disabled />
         </el-form-item>
 
         <el-form-item label="性别" prop="sex">
@@ -140,7 +140,7 @@
           <el-input
             v-model="userInfo.certificatenumber2"
             style="width: 200px"
-            placeholder="请输入18位身份证号码"
+            disabled
           />
         </el-form-item>
 
@@ -189,7 +189,7 @@
       >
 
         <el-form-item label="用户名" prop="name">
-          <el-input v-model="trainingUserInfo.name" style="width: 200px" />
+          <el-input v-model="trainingUserInfo.name" style="width: 200px" disabled />
         </el-form-item>
 
         <el-form-item label="性别" prop="gender">
@@ -203,7 +203,7 @@
           <el-input
             v-model="trainingUserInfo.id_card_number"
             style="width: 200px"
-            placeholder="请输入18位身份证号码"
+            disabled
           />
         </el-form-item>
 
@@ -232,305 +232,175 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed,watchEffect } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-// API 方法（替换成你的接口）
 import SelectImage from '@/components/upload/zsCommon.vue'
 import { getCertificateList } from '@/api/student'
-import { useAppStore } from "@/pinia";
 import { insertZhengshu ,insertTrainStu} from '@/api/user.js'
 import { useStudentStore } from '@/pinia/modules/student'
+import { getStudentInfo } from '@/api/student'
+import { useRouter } from 'vue-router'
 
-const appStore = useAppStore()
 const studentStore = useStudentStore()
+const router = useRouter()
 
-/*const res1 = await studentStore.GetStudentInfo() 
-console.error('aaaa:',res1.data.userInfo.name)
-
-const g_name = computed(() => res1.data.userInfo.name)
-const g_idCard_num = computed(() => res1.data.userInfo.name)
-
-watchEffect(() => {
-  console.error('name from store:', g_name.value, g_idCard_num.value)
-})*/
-
-
-//const studentInfo = computed(() => studentStore.studentInfo)
-// 数据
-const graduationCert = ref(null) // 毕业证书
-const completionCertList = ref([]) // 多个结业证书
+const graduationCert = ref(null) 
+const completionCertList = ref([]) 
 
 const userForm = ref(null)
-
-//毕业证书
-const closeAddUserDialog = () => {
-    userForm.value.resetFields()
-    addUserDialog.value = false
-  }
-
 const addUserDialog = ref(false)
-
-const dialogFlag = ref('add')
-
-const addUser = () => {
-  dialogFlag.value = 'add'
-  addUserDialog.value = true
-}
-
-//培训证书
-const closeAddTrainingUserDialog = () => {
-    trainingUserForm.value.resetFields()
-    addTrainingUserDialog.value = false
-  }
-
+const trainingUserForm = ref(null)
 const addTrainingUserDialog = ref(false)
 
-const dialogTrainingFlag = ref('add')
-
-const addTrainingUser = () => {
-  dialogTrainingFlag.value = 'add'
-  addTrainingUserDialog.value = true
-}
-
-// 弹窗相关
-  const userInfo = ref({
-    name: '',
-    age: '',
-    sex: 1,
-    mingzhu: '汉族',
-    pic: '',
-    nativeplace: '',
-    bysj: '',
-    zhuanye:'',
-    certificatenumber2: '',
-    graduschool2: '北京长城学院',
-    editer:'student',
-  })
-
-  const nations = [
-  "汉族", "蒙古族", "回族", "藏族", "维吾尔族", "苗族", "彝族", "壮族", "布依族", "朝鲜族",
-  "满族", "侗族", "瑶族", "白族", "土家族", "哈尼族", "哈萨克族", "傣族", "黎族", "傈僳族",
-  "佤族", "畲族", "高山族", "拉祜族", "水族", "东乡族", "纳西族", "景颇族", "柯尔克孜族", "土族",
-  "达斡尔族", "仫佬族", "羌族", "布朗族", "撒拉族", "毛南族", "仡佬族", "锡伯族", "阿昌族", "普米族",
-  "塔吉克族", "怒族", "乌孜别克族", "俄罗斯族", "鄂温克族", "德昂族", "保安族", "裕固族", "京族", "塔塔尔族",
-  "独龙族", "鄂伦春族", "赫哲族", "门巴族", "珞巴族", "基诺族"
-]
-const nativeplaces = [
-  "北京", "上海", "天津", "重庆", "河北", "山西", "辽宁", "吉林", "黑龙江", "江苏", "浙江", "安徽",
-  "福建", "江西", "山东", "河南", "湖北", "湖南", "广东", "海南", "四川", "贵州", "云南", "陕西",
-  "甘肃", "青海", "台湾", "内蒙古", "广西", "西藏", "宁夏", "新疆", "香港", "澳门"
-]
+const nations = [/* 原数组省略 */]
+const nativeplaces = [/* 原数组省略 */]
 
 const certRules = ref({
-  name: [{ required: true, message: '请输入姓名', trigger: 'blur' } ,{ pattern: /^[\u4e00-\u9fa5]{2,10}$/, message: '请输入2-10位中文姓名', trigger: 'blur' }],
-  sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
-  age: [{ required: true, message: '请选择出生年月', trigger: 'change' }],
-  mingzhu: [{ required: true, message: '请选择民族', trigger: 'change' }],
-  certificatenumber2: [
-    { required: true, message: '请输入身份证号', trigger: 'blur' },
-    {
-      pattern: /^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\d{3}[\dXx]$/,
-      message: '请输入合法的18位身份证号码',
-      trigger: 'blur'
-    }
-  ],
-  pic: [{ required: true, message: '请上传证件照', trigger: 'change' }],
-  nativeplace: [{ required: true, message: '请选择籍贯', trigger: 'change' }],
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  certificatenumber2: [{ required: true, message: '请输入身份证号', trigger: 'blur' }],
   zhuanye: [{ required: true, message: '请输入专业', trigger: 'blur' }],
   bysj: [{ required: true, message: '请选择毕业时间', trigger: 'change' }]
 })
 
 const trainingRules = ref({
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
-  certificate_name: [{ required: true, message: '请输入培训名称', trigger: 'change' }],
-  certificate_id: [{ required: true, message: '请输入培训证书号', trigger: 'change' }],
-  id_card_number: [
-    { required: true, message: '请输入身份证号', trigger: 'blur' },
-    {
-      pattern: /^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\d{3}[\dXx]$/,
-      message: '请输入合法的18位身份证号码',
-      trigger: 'blur'
-    }
-  ],
-  issue_date: [{ required: true, message: '请输入发证日期', trigger: 'change' }],
-  grade: [{ required: true, message: '请输入成绩', trigger: 'change' }],
-  training_program: [{ required: true, message: '请输培训项目', trigger: 'blur' }],
-  extra_field1: [{ trigger: 'change' }]
-  })
-
-
-  //培训证书
-  const trainingUserInfo = ref({
-    name: '',
-    age: '',
-    sex: '',
-    mingzhu: '',
-    pic: '',
-    nativeplace: '',
-    bysj: '',
-    zhuanye:'',
-    certificatenumber2:'',
-    editer:'student',
-  })
-
-  const trainingUserForm = ref(null)
-
-// 模拟接口请求
-onMounted(async () => {
-  /*graduationCert.value = {
-    name: '本科毕业证书',
-    no: 'GRA-2023-001',
-    date: '2023-07-01'
-  }
-  completionCertList.value = [
-    { name: 'Java Web 开发结业证书', no: 'COM-2024-101', date: '2024-05-10' },
-    { name: 'Vue 前端进阶结业证书', no: 'COM-2024-202', date: '2024-06-20' }
-  ]*/
-
-  //const res1 = await studentStore.GetStudentInfo() 
-  //console.error('aaaa:',res1.data.userInfo.name)
-
- try {
- //1. 检查上一个页面是否更新了真实姓名和身份证号信息如果没有，
- if(studentStore.name === ''  || studentStore.id_card_number === '' ){
-  ElMessage.error('请先更新姓名和生份证号')
-  return
- }
-
-  const res = await getCertificateList()
-  if (res.code === 0 && res.data?.certicates) {
-    // 毕业证书
-    if (res.data.certicates.graduationCert) {
-      const grad = res.data.certicates.graduationCert
-      graduationCert.value = {
-        name: grad.major || '',
-        no: grad.certificateNum || '',
-        date: grad.date || '',
-        id:grad.id || 0,
-      }
-    }
-
-    // 结业证书（映射字段）
-    completionCertList.value = (res.data.certicates.completionCert || []).map(item => ({
-      name: item.name || '',
-      no: item.certificateNum || '',
-      date: item.date || '',
-      id: item.id || 0,
-    }))
-  } else {
-    ElMessage.error(res.msg || '获取学生信息失败')
-  }
- } catch (err) {
-  console.error('请求证书信息列表失败', err)
-  ElMessage.error('请求证书信息列表失败')
-}
+  id_card_number: [{ required: true, message: '请输入身份证号', trigger: 'blur' }],
+  certificate_name: [{ required: true, message: '请输入培训名称', trigger: 'blur' }],
+  training_program: [{ required: true, message: '请输入培训项目', trigger: 'blur' }],
+  issue_date: [{ required: true, message: '请选择结业日期', trigger: 'change' }]
 })
 
+const userInfo = ref({
+  name: '',
+  age: '',
+  sex: 1,
+  mingzhu: '汉族',
+  pic: '',
+  nativeplace: '',
+  bysj: '',
+  zhuanye:'',
+  certificatenumber2: '',
+  graduschool2: '北京长城学院',
+  editer:'student',
+})
+
+const trainingUserInfo = ref({
+  name: '',
+  gender: 1,
+  id_card_number: '',
+  certificate_name: '',
+  training_program: '',
+  issue_date: ''
+})
+
+onMounted(async () => {
+  // 获取学生信息
+  //await studentStore.GetStudentInfo()
+  //const stuRes = await getStudentInfo()
+  
+  let stuRes = {}
+  const infoRes = await getStudentInfo()
+  if (infoRes.code === 0 && infoRes.data?.userInfo) {
+      studentStore.setStudentInfo(infoRes.data.userInfo)
+      if (!infoRes.data.userInfo.name || !infoRes.data.userInfo.id_card_number) {
+        router.push('/student/info').then(() => {
+          location.reload()
+          ElMessage.error({
+            message: '请先更新姓名和身份证号',
+            duration: 5000
+          });
+        
+        return
+      })
+      
+    }
+    console.error("aaaaaa0:",infoRes.data.userInfo)
+    stuRes = infoRes.data.userInfo
+  } 
+  console.error("aaaaaa1:",stuRes.name)
+  // 填充表单默认值（不可编辑）
+  userInfo.value.name = stuRes.name
+  userInfo.value.certificatenumber2 = stuRes.id_card_number
+
+  trainingUserInfo.value.name = stuRes.name
+  trainingUserInfo.value.id_card_number = stuRes.id_card_number
+
+  // 获取证书信息
+  try {
+    const res = await getCertificateList()
+    if (res.code === 0 && res.data?.certicates) {
+      if (res.data.certicates.graduationCert) {
+        const grad = res.data.certicates.graduationCert
+        graduationCert.value = {
+          name: grad.major || '',
+          no: grad.certificateNum || '',
+          date: grad.date || '',
+          id:grad.id || 0,
+        }
+      }
+      completionCertList.value = (res.data.certicates.completionCert || []).map(item => ({
+        name: item.name || '',
+        no: item.certificateNum || '',
+        date: item.date || '',
+        id: item.id || 0,
+      }))
+    } else {
+      ElMessage.error(res.msg || '获取学生信息失败')
+    }
+  } catch (err) {
+    console.error('请求证书信息列表失败', err)
+    ElMessage.error('请求证书信息列表失败')
+  }
+})
+
+const closeAddUserDialog = () => {
+  userForm.value.resetFields()
+  addUserDialog.value = false
+}
+const addUser = () => { addUserDialog.value = true }
+
+const closeAddTrainingUserDialog = () => {
+  trainingUserForm.value.resetFields()
+  addTrainingUserDialog.value = false
+}
+const addTrainingUser = () => { addTrainingUserDialog.value = true }
+
 const enterAddUserDialog = async () => {
-    if(userInfo.value.name == ''){
-    ElMessage.error('请填写正确姓名')
-    return
-  }
-  if(userInfo.value.age == ''){
-    ElMessage.error('请填写正确出生年月日')
-    return
-  }
-  if(userInfo.value.pic == ''){
-    ElMessage.error('请先上传证件照信息')
-    return
-  }
-  if(userInfo.value.nativeplace == ''){
-    ElMessage.error('请选择您的籍贯')
-    return
-  }
-  if(userInfo.value.certificatenumber2 == ''){
-    ElMessage.error('请输入正确的身份证号')
-    return
-  }
-  if(userInfo.value.zhuanye == ''){
-    ElMessage.error('请输入专业信息')
-    return
-  }
-  if(userInfo.value.bysj == ''){
-    ElMessage.error('请输入正确的毕业时间')
-    return
-  }
   try {
     const res = await insertZhengshu(userInfo.value)
     if (res.code === 0) {
       ElMessage.success('创建成功')
-      resetUserFunc()
-      closeAddUserDialog();
+      closeAddUserDialog()
     }
-  } catch (error) {
+  } catch {
     ElMessage.error('提交失败，请重试')
   }
-}
-
-const resetUserFunc = () => {
-  Object.assign(userInfo.value, {
-    name: '',
-    sex: 1,
-    age: '',
-    mingzhu: '汉族',
-    pic: '',
-    nativeplace: '',
-    zzmm: '',
-    chengchi: '',
-    certificatenumber2: '',
-    zhuanye: '',
-    graduschool2: '北京长城学院',
-    bysj: '',
-    zwjd: '',
-    demo: ''
-  })
 }
 
 const enterAddTrainingUserDialog = async () => {
-    try {
+  try {
     const res = await insertTrainStu(trainingUserInfo.value)
     if (res.code === 0) {
       ElMessage.success('创建成功')
-      //resetUserFunc()
-      closeAddTrainingUserDialog();
+      closeAddTrainingUserDialog()
     }
-  } catch (error) {
+  } catch {
     ElMessage.error('提交失败，请重试')
   }
 }
 
-// 增加证书
-function addCertificate(type) {
-  ElMessage.success(`跳转到新增 ${type === 'graduation' ? '毕业证书' : '结业证书'} 页面`)
-  // router.push(...)
-}
-
-// 查看详情
 function viewDetails(type,id) {
-   ElMessage.success(`查看 ${type}- ${id}详情`)
-   if(type === 'certificate') {
-      //const TYPE_CERTIFICATE = 'certificate'
-      const queryParams = new URLSearchParams({
-        type:type,
-        id: id
-      }).toString()
-
-    const fullPath = `#/layout/business/certificate/certificateInfo?${queryParams}`
-    window.open(fullPath, '_blank')
-   } else if(type === 'train'){
-      const queryParams = new URLSearchParams({
-        type:type,
-        id: id
-      }).toString()
-
-    const fullPath = `#/layout/trainingBusiness/training/trainingInfo?${queryParams}`
-    window.open(fullPath, '_blank')
-   }
-   
-  // router.push(...)
+  const queryParams = new URLSearchParams({ type, id }).toString()
+  let fullPath = ''
+  if(type === 'certificate') {
+    fullPath = `#/layout/business/certificate/certificateInfo?${queryParams}`
+  } else if(type === 'train'){
+    fullPath = `#/layout/trainingBusiness/training/trainingInfo?${queryParams}`
+  }
+  window.open(fullPath, '_blank')
 }
 </script>
+
 
 <style scoped>
 .gva-card {

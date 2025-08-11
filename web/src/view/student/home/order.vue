@@ -6,7 +6,11 @@
       </div>
 
       <el-table :data="orderList" border style="width: 100%">
-        <el-table-column prop="orderSn" label="订单号" width="220" />
+        <el-table-column prop="orderSn" label="订单号" width="220" >
+          <template #default="{ row }">
+            {{ row.orderSn }}
+          </template>
+        </el-table-column>
         <el-table-column prop="CreatedAt" label="订单创建时间" width="180" >
           <template #default="{ row }">
             {{ this.formatDate(row.CreatedAt) }}
@@ -123,7 +127,13 @@ export default {
 
     async orderDetail(order) {
       this.currentOrder = order
+      const queryParams = new URLSearchParams({
+          sn:order.orderSn,
+          id: order.ID
+        }).toString()
 
+        const fullPath = `#/layout/student/home/detail?${queryParams}`
+        window.open(fullPath, '_blank')
     },
 
     async generateQRCode() {

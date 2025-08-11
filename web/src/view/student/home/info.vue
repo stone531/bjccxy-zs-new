@@ -106,11 +106,13 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, ref } from 'vue'
+import { reactive, computed, onMounted, ref,watch } from 'vue'
 import { useStudentStore } from '@/pinia/modules/student'
 import { ElMessage } from 'element-plus'
 import { getStudentInfo ,updateStudentField,changePassword} from '@/api/student'
 import MD5 from 'crypto-js/md5';
+import { useRoute } from 'vue-router'
+const route = useRoute()
 
 const studentStore = useStudentStore()
 const student = computed(() => studentStore.studentInfo)
@@ -252,8 +254,7 @@ const nameFormRef = ref()
 const emailFormRef = ref()
 const idCardFormRef = ref()
 
-// 初始化获取学生信息
-onMounted(async () => {
+const loadData = async () => {
   try {
     const res = await getStudentInfo()
     if (res.code === 0 && res.data?.userInfo) {
@@ -268,7 +269,20 @@ onMounted(async () => {
     console.error('请求学生信息失败', err)
     ElMessage.error('请求学生信息失败')
   }
+}
+// 初始化获取学生信息
+onMounted(async () => {
+  loadData()
 })
+
+// 监听路由变化（包括重新进入同一路由时）
+watch(
+  () => route.fullPath,
+  () => {
+    loadData()
+  }
+)
+
 </script>
 
 <style scoped>

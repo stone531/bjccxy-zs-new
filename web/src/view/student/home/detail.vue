@@ -15,18 +15,18 @@
         label-class-name="desc-label"
         content-class-name="desc-content"
       >
-        <el-descriptions-item label="订单号">{{ order.order_sn }}</el-descriptions-item>
-        <el-descriptions-item label="交易号">{{ order.transaction_id }}</el-descriptions-item>
-        <el-descriptions-item label="用户ID">{{ order.user_id }}</el-descriptions-item>
+        <el-descriptions-item label="订单号">{{ order.orderSn }}</el-descriptions-item>
+        <el-descriptions-item label="交易号">{{ order.transactionId }}</el-descriptions-item>
+        <el-descriptions-item label="用户ID">{{ order.userId }}</el-descriptions-item>
         <el-descriptions-item label="用户名">{{ order.user_name }}</el-descriptions-item>
-        <el-descriptions-item label="金额(元)">{{ (order.amount / 100).toFixed(2) }}</el-descriptions-item>
-        <el-descriptions-item label="支付方式">{{ order.pay_type }}</el-descriptions-item>
+        <el-descriptions-item label="金额(元)">{{ (order.totalFee / 100).toFixed(2) }}</el-descriptions-item>
+        <el-descriptions-item label="支付方式">{{ order.payType }}</el-descriptions-item>
         <el-descriptions-item label="订单状态">
           <el-tag :type="statusType(order.status)">{{ statusText(order.status) }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ order.created_at }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ order.createdAt }}</el-descriptions-item>
         <el-descriptions-item label="支付时间">{{ order.paid_at || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="备注">{{ order.remark || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="备注">{{ order.extra_field1 || '-' }}</el-descriptions-item>
       </el-descriptions>
     </el-card>
   </div>
@@ -43,16 +43,22 @@ const router = useRouter()
 
 const loading = ref(false)
 const order = ref({})
+const searchInfo = ref({
+  id: route.query.id || 0,  // 优先使用路由参数
+  sn: route.query.sn || ''
+})
 
 const fetchOrderDetail = async () => {
-  /*const orderSn = route.params.orderSn
+  const orderSn = searchInfo.value.sn
   if (!orderSn) {
     ElMessage.error('订单号缺失')
-    return router.push('/order')
+    return router.push('/student/order')
+    console.error("fetchOrderDetail:",orderSn)
+    return
   }
   loading.value = true
   try {
-    const res = await getOrderDetail({ order_sn: orderSn })
+    const res = await getOrderDetail(orderSn)
     if (res.code === 0) {
       order.value = res.data
     } else {
@@ -62,7 +68,7 @@ const fetchOrderDetail = async () => {
     ElMessage.error('请求失败')
   } finally {
     loading.value = false
-  }*/
+  }
 }
 
 const goBack = () => {
@@ -90,7 +96,14 @@ const statusType = (status) => {
 }
 
 onMounted(() => {
-  fetchOrderDetail()
+  if (Object.values(searchInfo.value).some(v => v)) {
+    console.error("detail:",searchInfo.value.id,searchInfo.value.sn)
+    fetchOrderDetail()
+  } else {
+    ElMessage.warning('缺少查询参数')
+  }
+
+  
 })
 </script>
 
