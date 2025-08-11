@@ -314,7 +314,7 @@ func (b *BsStudentApi) GetCertificateList(c *gin.Context) {
 	response.OkWithDetailed(gin.H{"certicates": res}, "获取成功", c)
 }
 
-// 订单相关
+
 // 获取当前用户待支付订单
 func (b *BsStudentApi) GetMyPendingOrder(c *gin.Context) {
 	id := utils.GetStudentID(c)
@@ -328,6 +328,25 @@ func (b *BsStudentApi) GetMyPendingOrder(c *gin.Context) {
 	}
 
 	response.OkWithDetailed(gin.H{"orders": orders}, "获取成功", c)
+}
+
+// 订单详情
+func (b *BsStudentApi) GetOrderDetail(c *gin.Context) {
+	orderSn := c.Param("orderSn") // 从URL路径取到 :orderSn
+	var err error
+	if orderSn == "" {
+		global.GVA_LOG.Error("GetOrderStatus 获取失败!", zap.Error(err))
+		response.FailWithMessage("订单号不能为空", c)
+	}
+
+	order, err := bsOrderService.OrderDetail(orderSn)
+	if err != nil {
+		global.GVA_LOG.Error("GetOrderDetail 获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	response.OkWithDetailed(gin.H{"order": order}, "获取成功", c)
 }
 
 // 创建微信支付二维码

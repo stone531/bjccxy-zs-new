@@ -32,5 +32,7 @@ func (e *BsStudentRouter) InitBsStudentsRouter(public *gin.RouterGroup, private 
 		BsStudentPrivateRouter.GET("order-status/:orderSn", BsStudentApi.GetOrderStatus)  // 获取订单状态
 		BsStudentPrivateRouter.POST("order-refresh/:orderSn", BsStudentApi.RefreshQRCode) // 刷新二维码
 
+		BsStudentPrivateRouter.GET("order-detail/:orderSn", BsStudentApi.GetOrderDetail) // 获取订单详情
+
 	}
 }

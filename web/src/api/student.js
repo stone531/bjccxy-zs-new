@@ -233,3 +233,11 @@ export const weChatPayNotify = (data) => {
     data
   })
 }
+
+//订单详情
+export const getOrderDetail = (orderSn) => {
+  return service({
+    url: `/student/order-detail/${orderSn}`,
+    method: "get"
+  })
+}

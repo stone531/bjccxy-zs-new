@@ -7,7 +7,13 @@
 
       <el-table :data="orderList" border style="width: 100%">
         <el-table-column prop="orderSn" label="订单号" width="220" />
-        <el-table-column prop="body" label="商品描述" />
+        <el-table-column prop="CreatedAt" label="订单创建时间" width="180" >
+          <template #default="{ row }">
+            {{ this.formatDate(row.CreatedAt) }}
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="body" label="商品描述" width="400"/>
         <el-table-column prop="totalFee" label="金额" width="100">
           <template #default="{ row }">{{ row.totalFee }} 元</template>
         </el-table-column>
@@ -28,9 +34,9 @@
             <el-button
               v-else
               type="success"
-              size="small"
-              disabled
-            >已完成</el-button>
+              size="small" 
+              @click="orderDetail(row)"
+            >订单详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -65,6 +71,7 @@
 <script>
 import { getMyPendingOrder, createWeChatPay, getOrderStatus } from '@/api/student'
 import QRCode from 'qrcode'
+ import dayjs from 'dayjs'
 
 export default {
   name: 'OrderPage',
@@ -76,7 +83,13 @@ export default {
       qrcodeUrl: '',
       qrcodeExpired: false,
       pollingTimer: null,
-      expireTimer: null
+      expireTimer: null,
+      // 添加重试计数器
+      retryCount: 0,
+      // 添加最大重试次数常量
+      MAX_RETRY_COUNT: 5,
+      // 添加重试定时器
+      retryTimer: null
     }
   },
   created() {
@@ -98,12 +111,19 @@ export default {
       this.currentOrder = order
       this.qrcodeUrl = ''
       this.qrcodeExpired = false
+      // 重置重试计数器
+      this.retryCount = 0
       this.payDialogVisible = true
       this.$nextTick(async () => {
         await this.generateQRCode()
         this.startPolling()
         this.startExpireTimer(order.expireTime || new Date(Date.now() + 5 * 60 * 1000))
       })
+    },
+
+    async orderDetail(order) {
+      this.currentOrder = order
+
     },
 
     async generateQRCode() {
@@ -122,16 +142,67 @@ export default {
           console.log("二维码Base64长度:", base64.length)
           this.qrcodeUrl = base64
           this.qrcodeExpired = false
+          // 重置重试计数器
+          this.retryCount = 0
         } else {
-          this.$message.error('生成二维码失败: ' + (res.msg || '未知错误'))
+          throw new Error(res.msg || '生成二维码失败')
         }
       } catch (err) {
         console.error("生成二维码异常:", err)
-        this.$message.error('生成二维码异常')
+        this.handleQRCodeError(err)
       }
+    },
+    
+    formatDate(dateStr) {
+      return dateStr ? dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss') : ''
+    },
+
+    // 新增：处理二维码生成错误
+    handleQRCodeError(err) {
+      // 增加重试计数器
+      this.retryCount++
+      
+      // 检查是否达到最大重试次数
+      if (this.retryCount >= this.MAX_RETRY_COUNT) {
+        this.$message.error('二维码生成失败，请稍后再试')
+        this.qrcodeExpired = true
+        this.stopPolling()
+        return
+      }
+      
+      // 显示重试提示
+      const remaining = this.MAX_RETRY_COUNT - this.retryCount
+      this.$message.warning(`二维码生成失败，${remaining}秒后重试 (${this.retryCount}/${this.MAX_RETRY_COUNT})`)
+      
+      // 设置延迟重试（指数退避策略）
+      const delay = Math.min(2000 * Math.pow(2, this.retryCount - 1), 10000)
+      
+      /*const formatDate = (dateStr) => {
+        return dateStr ? dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss') : ''
+      }*/
+
+      // 清除之前的重试定时器
+      if (this.retryTimer) clearTimeout(this.retryTimer)
+      
+      // 设置新的重试定时器
+      this.retryTimer = setTimeout(() => {
+        if (this.payDialogVisible) {
+          this.generateQRCode()
+        }
+      }, delay)
     },
 
     refreshQRCode() {
+      // 重置状态
+      this.qrcodeExpired = false
+      this.retryCount = 0
+      
+      // 清除之前的重试定时器
+      if (this.retryTimer) {
+        clearTimeout(this.retryTimer)
+        this.retryTimer = null
+      }
+      
       this.generateQRCode()
       this.startPolling()
       this.startExpireTimer(new Date(Date.now() + 5 * 60 * 1000))
@@ -143,30 +214,51 @@ export default {
 
       this.expireTimer = setTimeout(() => {
         this.qrcodeExpired = true
-        //this.stopPolling()
+        this.stopPolling()
       }, 5 * 60 * 1000)
     },
 
     startPolling() {
       if (this.pollingTimer) clearInterval(this.pollingTimer)
       this.pollingTimer = setInterval(async () => {
-        const res = await getOrderStatus({ orderSn: this.currentOrder.orderSn })
+        // 如果二维码已过期则停止轮询
+        if (this.qrcodeExpired) {
+          this.stopPolling()
+          return
+        }
+        
+        const res = await getOrderStatus(this.currentOrder.orderSn)
         if (res.code === 0 && res.data.status === 1) {
           this.$message.success('支付成功！')
-          this.stopPolling()
+          this.stopAllTimers()
           this.payDialogVisible = false
           this.loadOrders()
         }
       }, 3000)
     },
 
+    // 新增：停止所有定时器
+    stopAllTimers() {
+      this.stopPolling()
+      if (this.expireTimer) clearTimeout(this.expireTimer)
+      if (this.retryTimer) clearTimeout(this.retryTimer)
+    },
+    
     stopPolling() {
       if (this.pollingTimer) clearInterval(this.pollingTimer)
+      this.pollingTimer = null
     }
   },
   beforeDestroy() {
-    this.stopPolling()
-    if (this.expireTimer) clearTimeout(this.expireTimer)
+    this.stopAllTimers()
+  },
+  // 监听弹窗关闭事件
+  watch: {
+    payDialogVisible(newVal) {
+      if (!newVal) {
+        this.stopAllTimers()
+      }
+    }
   }
 }
 </script>

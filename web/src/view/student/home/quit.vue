@@ -1,84 +1,115 @@
 <template>
-  <div class="order-container">
-    <el-card class="box-card">
-      <div class="header">
-        <el-button type="primary" @click="getPayQrCode">获取二维码</el-button>
-      </div>
+  <div class="order-detail-container">
+    <el-card>
+      <template #header>
+        <div class="card-header">
+          <span>订单详情</span>
+          <el-button type="primary" size="small" @click="goBack">返回</el-button>
+        </div>
+      </template>
 
-      <div class="qrcode-box" v-if="qrCodeUrl">
-        <img :src="qrCodeUrl" alt="支付二维码" />
-        <p class="tip">请使用微信扫描二维码进行支付</p>
-      </div>
-
-      <div v-else class="placeholder">
-        <p>点击上方按钮生成二维码</p>
-      </div>
+      <el-descriptions
+        v-loading="loading"
+        :column="2"
+        border
+        label-class-name="desc-label"
+        content-class-name="desc-content"
+      >
+        <el-descriptions-item label="订单号">{{ order.order_sn }}</el-descriptions-item>
+        <el-descriptions-item label="交易号">{{ order.transaction_id }}</el-descriptions-item>
+        <el-descriptions-item label="用户ID">{{ order.user_id }}</el-descriptions-item>
+        <el-descriptions-item label="用户名">{{ order.user_name }}</el-descriptions-item>
+        <el-descriptions-item label="金额(元)">{{ (order.amount / 100).toFixed(2) }}</el-descriptions-item>
+        <el-descriptions-item label="支付方式">{{ order.pay_type }}</el-descriptions-item>
+        <el-descriptions-item label="订单状态">
+          <el-tag :type="statusType(order.status)">{{ statusText(order.status) }}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ order.created_at }}</el-descriptions-item>
+        <el-descriptions-item label="支付时间">{{ order.paid_at || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="备注">{{ order.remark || '-' }}</el-descriptions-item>
+      </el-descriptions>
     </el-card>
   </div>
 </template>
 
-<script>
-import QRCode from 'qrcode'
-import request from '@/utils/request' // gin-vue-admin 默认 axios 封装
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { getOrderDetail } from '@/api/student' // 你需要创建这个 API 方法
 
-export default {
-  name: 'Order',
-  data() {
-    return {
-      qrCodeUrl: '', // 生成的二维码图片 base64
+const route = useRoute()
+const router = useRouter()
+
+const loading = ref(false)
+const order = ref({})
+
+const fetchOrderDetail = async () => {
+  /*const orderSn = route.params.orderSn
+  if (!orderSn) {
+    ElMessage.error('订单号缺失')
+    return router.push('/order')
+  }
+  loading.value = true
+  try {
+    const res = await getOrderDetail({ order_sn: orderSn })
+    if (res.code === 0) {
+      order.value = res.data
+    } else {
+      ElMessage.error(res.msg || '获取订单详情失败')
     }
-  },
-  methods: {
-    async getPayQrCode() {
-      try {
-        const res = await request({
-          url: '/order/create-qrcode', // 你的后端二维码生成接口
-          method: 'get',
-        })
-        if (res.code === 0 && res.data?.payUrl) {
-          // 用 qrcode 生成 base64 图片
-          this.qrCodeUrl = await QRCode.toDataURL(res.data.payUrl, {
-            width: 200,
-            margin: 2,
-          })
-        } else {
-          this.$message.error(res.msg || '获取二维码失败')
-        }
-      } catch (err) {
-        console.error(err)
-        this.$message.error('接口请求失败')
-      }
-    },
-  },
+  } catch (err) {
+    ElMessage.error('请求失败')
+  } finally {
+    loading.value = false
+  }*/
 }
+
+const goBack = () => {
+  router.back()
+}
+
+const statusText = (status) => {
+  const map = {
+    0: '未支付',
+    1: '已支付',
+    2: '已取消',
+    3: '已退款'
+  }
+  return map[status] || '未知'
+}
+
+const statusType = (status) => {
+  const map = {
+    0: 'info',
+    1: 'success',
+    2: 'danger',
+    3: 'warning'
+  }
+  return map[status] || 'info'
+}
+
+onMounted(() => {
+  fetchOrderDetail()
+})
 </script>
 
 <style scoped>
-.order-container {
+.order-detail-container {
   padding: 20px;
 }
 
-.header {
-  margin-bottom: 20px;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.qrcode-box {
-  text-align: center;
+.desc-label {
+  font-weight: bold;
 }
 
-.qrcode-box img {
-  width: 200px;
-  height: 200px;
-}
-
-.tip {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #666;
-}
-
-.placeholder {
-  text-align: center;
-  color: #999;
+.desc-content {
+  color: #333;
 }
 </style>

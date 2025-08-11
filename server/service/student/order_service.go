@@ -33,8 +33,21 @@ var BsServiceApp = new(OrderService)
 
 func (s *OrderService) GetMyPendingOrder(userID int64) ([]mstud.BsOrders, error) {
 	var orders []mstud.BsOrders
-	err := global.GVA_DB.Where("user_id = ? AND status = ?", userID, 0).Find(&orders).Error
+	err := global.GVA_DB.Where("user_id = ? ", userID).Find(&orders).Error
+	
 	return orders, err
+}
+
+func (s *OrderService) OrderDetail(orderSn string) (mstud.BsOrders, error) {
+	var order mstud.BsOrders
+	err := global.GVA_DB.Where("order_sn = ?", orderSn).First(&order).Error
+	return order, err
+}
+
+func (s *OrderService) OrderDetailById(id uint) (mstud.BsOrders, error) {
+	var order mstud.BsOrders
+	err := global.GVA_DB.Where("id = ?", id).First(&order).Error
+	return order, err
 }
 
 func (s *OrderService) CreateWeChatPay(orderSn string) (string, error) {
