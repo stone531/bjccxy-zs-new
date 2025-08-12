@@ -112,7 +112,6 @@ import SelectImage from '@/components/upload/zsCommon.vue'
 import WarningBar from '@/components/warningBar/warningBar.vue'
 import { insertZhengshu } from '@/api/user.js'
 import { useUserStore } from '@/pinia/modules/user'
-import WarningBar from '@/components/warningBar/warningBar.vue'
 
 defineOptions({ name: 'certificateAdd' })
 

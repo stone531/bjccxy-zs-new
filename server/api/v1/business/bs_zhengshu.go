@@ -231,3 +231,4 @@ func (api *BsZhengShuApi) CheckIDCardExists(idCard string) (bool, error) {
 	}
 	return count > 0, nil
 }
+

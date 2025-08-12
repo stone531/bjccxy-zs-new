@@ -43,6 +43,8 @@
   "/src/view/layout/setting/title.vue": "layoutSettingTitle",
   "/src/view/layout/tabs/index.vue": "HistoryComponent",
   "/src/view/login/index.vue": "Login",
+  "/src/view/order/index.vue": "order",
+  "/src/view/order/orderManager/orderQuery.vue": "orderQuery",
   "/src/view/person/person.vue": "Person",
   "/src/view/routerHolder.vue": "RouterHolder",
   "/src/view/student/home/certificate.vue": "Certificate",

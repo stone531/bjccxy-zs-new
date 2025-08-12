@@ -273,3 +273,12 @@ export const setTrainStuInfo = (data) => {
     data: data
   })
 }
+
+//获取订单列表
+export const getOrderList = (data) => {
+  return service({
+    url: '/bszhengshu/getOrderList',
+    method: 'post',
+    data: data
+  })
+}

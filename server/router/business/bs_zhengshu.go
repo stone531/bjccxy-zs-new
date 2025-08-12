@@ -23,5 +23,8 @@ func (e *BsZhengshuRouter) InitBsZhengshuRouter(public *gin.RouterGroup, private
 		BsZhengshuPrivateRouter.POST("getZhengshuList", BsZhengShuApi.GetBsSearchZhengshuList) //查询多个证书信息
 		BsZhengshuPrivateRouter.DELETE("delZhengshuById", BsZhengShuApi.DelZhengshuById)       // 删除用户
 		BsZhengshuPrivateRouter.PUT("setZhengshuInfo", BsZhengShuApi.SetZhengshuInfo)          // 更新用户
+
+		//特例
+		BsZhengshuPrivateRouter.POST("getOrderList", BsZhengShuApi.GetBsOrderList) //查询多个订单列表
 	}
 }

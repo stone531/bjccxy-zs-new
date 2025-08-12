@@ -25,7 +25,7 @@
           <el-tag :type="statusType(order.status)">{{ statusText(order.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ order.createdAt }}</el-descriptions-item>
-        <el-descriptions-item label="支付时间">{{ order.paid_at || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="支付时间">{{ order.payTime || '-' }}</el-descriptions-item>
         <el-descriptions-item label="备注">{{ order.extra_field1 || '-' }}</el-descriptions-item>
       </el-descriptions>
     </el-card>
