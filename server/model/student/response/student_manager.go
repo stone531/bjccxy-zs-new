@@ -21,6 +21,7 @@ type GraduationInfo struct {
 	Major          string `json:"major"`
 	CertificateNum string `json:"certificateNum"`
 	Date           string `json:"date"`
+	Publish        string `json:"publish"`
 }
 
 type CompletionInfo struct {
@@ -28,6 +29,7 @@ type CompletionInfo struct {
 	Name           string `json:"name"`
 	CertificateNum string `json:"certificateNum"`
 	Date           string `json:"date"`
+	Publish        string `json:"publish"`
 }
 
 type BSCertificateRes struct {

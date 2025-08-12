@@ -23,8 +23,13 @@
             <div class="cert-item">
               <div class="cert-info">
                 <p>证书名称：{{ graduationCert.name }}</p>
-                <p>编号：{{ graduationCert.no }}</p>
-                <p>颁发日期：{{ graduationCert.date }}</p>
+                <p>证书编号：{{ graduationCert.no }}</p>
+                <p>颁发日期：{{ graduationCert.date }}</p>                
+                <p>
+                  是否发布：
+                  <el-tag type="success" v-if="graduationCert.publish === 'yes'">已发布</el-tag>
+                  <el-tag type="warning" v-else>未发布</el-tag>
+                </p>
               </div>
               <el-button
                 size="small"
@@ -61,9 +66,19 @@
               style="width: 100%"
             >
               <el-table-column prop="name" label="证书名称" min-width="160" />
-              <el-table-column prop="no" label="编号" min-width="120" />
-              <el-table-column prop="date" label="颁发日期" min-width="120" />
-              <el-table-column label="操作" width="120">
+              <el-table-column prop="no" label="证书编号" min-width="160" />
+              <el-table-column prop="date" label="颁发日期" min-width="80" />
+              
+              <el-table-column label="是否发布" min-width="80">
+                <template #default="{ row }">
+                  <el-tag
+                    :type="row.publish === 'yes' ? 'success' : 'warning'"
+                  >
+                    {{ row.publish === 'yes' ? '已发布' : '未发布' }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="60">
                 <template #default="{ row }">
                   <el-button
                     type="primary"
@@ -358,6 +373,7 @@ const fetchGraduationCert = async () => {
           name: grad.major || '',
           no: grad.certificateNum || '',
           date: grad.date || '',
+          publish: grad.publish || '',
           id:grad.id || 0,
         }
       }
@@ -365,6 +381,7 @@ const fetchGraduationCert = async () => {
         name: item.name || '',
         no: item.certificateNum || '',
         date: item.date || '',
+        publish: grad.publish || '',
         id: item.id || 0,
       }))
     } else {
@@ -402,10 +419,8 @@ onMounted(async () => {
       })
       
     }
-    console.error("aaaaaa0:",infoRes.data.userInfo)
     stuRes = infoRes.data.userInfo
   } 
-  console.error("aaaaaa1:",stuRes.name)
   // 填充表单默认值（不可编辑）
   userInfo.value.name = stuRes.name
   userInfo.value.certificatenumber2 = stuRes.id_card_number
@@ -495,11 +510,11 @@ function viewDetails(type,id) {
 .gva-card {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 10px;
 }
 .cert-card {
   flex: 1;
-  min-width: 450px;
+  min-width: 300px;
 }
 .card-header {
   display: flex;

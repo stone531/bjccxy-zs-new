@@ -150,6 +150,7 @@ func (api *BsStudentService) GetCertificateInfo(cardNum string) (response.BSCert
 			Major:          gradRecord.Zhuanye,
 			CertificateNum: gradRecord.Graduschool,
 			Date:           gradRecord.Bysj,
+			Publish:        gradRecord.Publish,
 		}
 	}
 
@@ -170,6 +171,7 @@ func (api *BsStudentService) GetCertificateInfo(cardNum string) (response.BSCert
 				Name:           rec.CertificateName,
 				CertificateNum: rec.CertificateID, // 如果表里有专门字段，就用它
 				Date:           rec.IssueDate,
+				Publish:        rec.ExtraField1,
 			})
 		}
 		res.GompletionCert = trainingList

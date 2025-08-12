@@ -4,16 +4,17 @@ import (
 	//"errors"
 	"fmt"
 	"time"
-	"go.uber.org/zap"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/gin-gonic/gin"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-//获取订单列表
+// 获取订单列表
 func (api *BsZhengShuApi) GetBsOrderList(c *gin.Context) {
 	var pageInfo request.GetOrderList
 
@@ -52,7 +53,7 @@ func (api *BsZhengShuApi) getOrderList(info request.GetOrderList) (list interfac
 	layout := "2006-01-02T15:04:05.000Z"
 	loc, _ := time.LoadLocation("Asia/Shanghai")
 
-	userId ,err := api.getStudentUserId(info)
+	userId, err := api.getStudentUserId(info)
 	if userId > 0 {
 		fmt.Println("GetBsOrderList03:", userId)
 		db = db.Where("user_id = ?", userId)
@@ -103,10 +104,10 @@ func (api *BsZhengShuApi) getStudentUserId(info request.GetOrderList) (userId in
 	}
 
 	if info.Name != "" {
-		db = db.Where("naem = ?", info.Name)
+		db = db.Where("name = ?", info.Name)
 	}
 	if info.Account != "" {
-		db = db.Where("usera_ccount = ?", info.Account)
+		db = db.Where("useraccount = ?", info.Account)
 	}
 	if info.IdCardNumber != "" {
 		db = db.Where("id_card_number = ?", info.IdCardNumber)
@@ -114,5 +115,5 @@ func (api *BsZhengShuApi) getStudentUserId(info request.GetOrderList) (userId in
 
 	err = db.Find(&studentUser).Error
 
-	return int64(studentUser.ID),err
+	return int64(studentUser.ID), err
 }

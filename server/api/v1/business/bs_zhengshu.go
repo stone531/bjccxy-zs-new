@@ -12,7 +12,6 @@ import (
 	//"gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/business/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	cReq "github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -43,10 +42,6 @@ func (api *BsZhengShuApi) CreateBsZhengshu(c *gin.Context) {
 	now := time.Now()
 	currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
-	public := "no"
-	if req.Editer != "student" {
-		public = "yes"
-	}
 	record := business.BsZhengshu{
 		Name:               req.Name,
 		Age:                req.Age,
@@ -65,20 +60,12 @@ func (api *BsZhengShuApi) CreateBsZhengshu(c *gin.Context) {
 		Demo:               req.Demo,
 		Editer:             req.Editer,
 		Date:               currentDate,
-		Publish:            public,
+		Publish:            "yes",
 	}
 
 	if err := global.GVA_DB.Create(&record).Error; err != nil {
 		response.FailWithMessage("create fail", c)
 		return
-	}
-
-	if req.Editer == "student" {
-		err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, record.ID, int(common.Graduschool_TotalFee))
-		if err != nil {
-			response.FailWithMessage("create order fail", c)
-			return
-		}
 	}
 
 	response.OkWithData(gin.H{"id": record.ID}, c)
@@ -231,4 +218,3 @@ func (api *BsZhengShuApi) CheckIDCardExists(idCard string) (bool, error) {
 	}
 	return count > 0, nil
 }
-

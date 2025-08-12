@@ -6,14 +6,12 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
 	//"gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/business/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	cReq "github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 
@@ -44,10 +42,6 @@ func (api *BsTrainingApi) CreateBsTraining(c *gin.Context) {
 
 	//now := time.Now()
 	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	public := "no"
-	if req.Editer != "student" {
-		public = "yes"
-	}
 	record := business.BsTrainingStudent{
 		Name:            req.Name,
 		Gender:          req.Gender,
@@ -58,22 +52,12 @@ func (api *BsTrainingApi) CreateBsTraining(c *gin.Context) {
 		TrainingProgram: req.TrainingProgram,
 		Grade:           req.Grade,
 		Editer:          req.Editer,
-		ExtraField1:     public,
+		ExtraField1:     "yes",
 	}
 
 	if err := global.GVA_DB.Create(&record).Error; err != nil {
 		response.FailWithMessage("create fail", c)
 		return
-	}
-
-	if req.Editer == "student" {
-		fmt.Println("student insert id:", utils.GetStudentID(c))
-		//是student的id
-		err := bsOrderService.CreateOrder(common.Training_ZhengShu, utils.GetStudentID(c), int(common.Training_TotalFee))
-		if err != nil {
-			response.FailWithMessage("create order fail", c)
-			return
-		}
 	}
 
 	response.OkWithData(gin.H{"id": record.ID}, c)

@@ -364,7 +364,7 @@ func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
 
 	fmt.Println("CreateWeChatPay01 sn:", orderSn)
 
-	payUrl, err := bsOrderService.CreateNativeOrder_test(orderSn, int(common.Graduschool_TotalFee), "毕业证书申请")
+	payUrl, err := bsOrderService.CreateNativeOrder(orderSn, int(common.Graduschool_TotalFee), "毕业证书申请")
 	if err != nil {
 		response.FailWithMessage("返回支付码失败", c)
 		return
@@ -409,10 +409,6 @@ func (api *BsStudentApi) CreateBsZhengshu(c *gin.Context) {
 	now := time.Now()
 	currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
-	public := "no"
-	if req.Editer != "student" {
-		public = "yes"
-	}
 	record := zsBusiness.BsZhengshu{
 		Name:               req.Name,
 		Age:                req.Age,
@@ -431,7 +427,7 @@ func (api *BsStudentApi) CreateBsZhengshu(c *gin.Context) {
 		Demo:               req.Demo,
 		Editer:             req.Editer,
 		Date:               currentDate,
-		Publish:            public,
+		Publish:            "no",
 	}
 
 	if err := global.GVA_DB.Create(&record).Error; err != nil {
@@ -439,12 +435,10 @@ func (api *BsStudentApi) CreateBsZhengshu(c *gin.Context) {
 		return
 	}
 
-	if req.Editer == "student" {
-		err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, record.ID, int(common.Graduschool_TotalFee))
-		if err != nil {
-			response.FailWithMessage("create order fail", c)
-			return
-		}
+	err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, record.ID, int(common.Graduschool_TotalFee))
+	if err != nil {
+		response.FailWithMessage("create order fail", c)
+		return
 	}
 
 	response.OkWithData(gin.H{"id": record.ID}, c)
@@ -467,10 +461,6 @@ func (api *BsStudentApi) CreateBsTraining(c *gin.Context) {
 
 	//now := time.Now()
 	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	public := "no"
-	if req.Editer != "student" {
-		public = "yes"
-	}
 	record := zsBusiness.BsTrainingStudent{
 		Name:            req.Name,
 		Gender:          req.Gender,
@@ -481,7 +471,7 @@ func (api *BsStudentApi) CreateBsTraining(c *gin.Context) {
 		TrainingProgram: req.TrainingProgram,
 		Grade:           req.Grade,
 		Editer:          req.Editer,
-		ExtraField1:     public,
+		ExtraField1:     "no",
 	}
 
 	if err := global.GVA_DB.Create(&record).Error; err != nil {
@@ -489,14 +479,12 @@ func (api *BsStudentApi) CreateBsTraining(c *gin.Context) {
 		return
 	}
 
-	if req.Editer == "student" {
-		fmt.Println("student insert id:", utils.GetStudentID(c))
-		//是student的id
-		err := bsOrderService.CreateOrder(common.Training_ZhengShu, utils.GetStudentID(c), int(common.Training_TotalFee))
-		if err != nil {
-			response.FailWithMessage("create order fail", c)
-			return
-		}
+	fmt.Println("student insert id:", utils.GetStudentID(c))
+	//是student的id
+	err := bsOrderService.CreateOrder(common.Training_ZhengShu, utils.GetStudentID(c), int(common.Training_TotalFee))
+	if err != nil {
+		response.FailWithMessage("create order fail", c)
+		return
 	}
 
 	response.OkWithData(gin.H{"id": record.ID}, c)

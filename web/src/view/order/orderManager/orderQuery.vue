@@ -48,8 +48,13 @@
           <el-form-item label="订单号">
             <el-input v-model="searchInfo.orderSn" placeholder="订单号" />
           </el-form-item>
-          <el-form-item label="订单类型">
-            <el-input v-model="searchInfo.certType" placeholder="订单类型" />
+
+          <el-form-item label="订单类型" prop="certType">
+            <el-select v-model="searchInfo.certType" placeholder="请选择订单类型" style="width: 130px">
+              <el-option label="请选择" value="" />
+              <el-option v-for="item in nations" :key="item.value" :label="item.label" :value="item.value" />
+
+            </el-select>
           </el-form-item>
   
           <el-form-item>
@@ -68,7 +73,7 @@
           <el-table-column
             align="left"
             label="订单号"
-            min-width="100"
+            min-width="220"
             prop="orderSn"
           />
           
@@ -82,19 +87,24 @@
           <el-table-column
             align="left"
             label="订单类型"
-            min-width="180"
+            min-width="100"
             prop="certType"
           />
           <el-table-column
             align="left"
             label="订单状态"
-            min-width="180"
+            min-width="100"
             prop="status"
-          />
+          >
+          <template #default="{ row }">
+            {{ statusText(row.status) }}
+          </template>
+          </el-table-column>
+
           <el-table-column
             align="left"
             label="创建时间"
-            min-width="100"
+            min-width="180"
             prop="CreatedAt"
           >
           <template #default="{ row }">
@@ -115,32 +125,23 @@
   
           <el-table-column
             align="left"
-            label="订单金额"
-            min-width="100"
+            label="金额(元)"
+            min-width="90"
             prop="totalFee"
-          />
+          >
+          <template #default="{ row }">
+              {{ (row.totalFee / 100).toFixed(2) }}
+            </template>
+          
+          </el-table-column>
   
-          <el-table-column label="操作" :min-width="appStore.operateMinWith" fixed="right">
+          <el-table-column label="操作" :min-width="90" fixed="right">
             <template #default="scope">
               <el-button
                 type="primary"
                 link
-                icon="delete"
-                @click="deleteUserFunc(scope.row)"
-                >删除</el-button
-              >
-              <el-button
-                type="primary"
-                link
-                icon="edit"
-                @click="openEdit(scope.row)"
-                >编辑</el-button
-              >
-              <el-button
-                type="primary"
-                link
                 icon="magic-stick"
-                @click="zhengshuDetailFunc(scope.row)"
+                @click="orderDetail(scope.row)"
                 >详情</el-button
               >
             </template>
@@ -178,13 +179,14 @@
     import { ElMessage, ElMessageBox } from 'element-plus'
     import { useAppStore } from "@/pinia";
     import { useRouter } from 'vue-router'
-      import dayjs from 'dayjs'
+    import dayjs from 'dayjs'
   
     defineOptions({
       name: 'orderQuery'
     })
 
-  
+    
+
     const appStore = useAppStore()
     const router = useRouter()
   
@@ -197,6 +199,21 @@
       sdate: '',
       edate: ''
     })
+
+    const nations = ref([
+      { label: '毕业订单', value: 'graduation' },
+      { label: '培训订单', value: 'training' }
+    ])
+
+    const statusText = (status) => {
+      const map = {
+        0: '未支付',
+        1: '已支付',
+        2: '已取消',
+        3: '已退款'
+      }
+      return map[status] || '未知'
+    }
     
     const onSubmit = () => {
       page.value = 1
@@ -312,23 +329,15 @@
    
     const userForm = ref(null)
 
-  
-    const zhengshuDetailFunc = (row) => {
-    /*router.push({
-      name: 'certificateInfo',  // 你注册的路由名称
-      query: { id: row.ID }     // 假设 row.ID 是证书主键
-    })*/
-    const TYPE_TRAIN = 'train'
-    const queryParams = new URLSearchParams({
-        type:TYPE_TRAIN,
-        id: row.ID
-        //name: row.name,
-        //idCard: row.certificatenumber2
-      }).toString()
-  
-      const fullPath = `#/layout/trainingBusiness/training/trainingInfo?${queryParams}`
-      window.open(fullPath, '_blank')
-  }
+  const orderDetail = (order) =>{
+      const queryParams = new URLSearchParams({
+          sn:order.orderSn,
+          id: order.ID
+        }).toString()
+
+        const fullPath = `#/layout/student/home/detail?${queryParams}`
+        window.open(fullPath, '_blank')
+    }
   
   const formatDate = (dateStr) => {
     return dateStr ? dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss') : ''
