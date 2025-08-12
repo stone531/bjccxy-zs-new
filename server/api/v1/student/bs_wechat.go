@@ -231,7 +231,7 @@ func (b *BsStudentApi) RefreshQRCode(c *gin.Context) {
     // 1. 先关闭原订单（防止重复订单号冲突）
     closeBM := make(gopay.BodyMap)
     closeBM.Set("mchid", cfg.MchID).Set("out_trade_no", orderSn)
-    _, err := client.V3TransactionClose(c, closeBM)
+    _, err := global.GVA_WECHAT.V3TransactionClose(c, closeBM)
     if err != nil {
         // 这里可以忽略已关闭/订单不存在的错误
         fmt.Println("关闭订单失败：", err)

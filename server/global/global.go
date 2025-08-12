@@ -42,7 +42,7 @@ var (
 	BlackCache              local_cache.Cache
 	lock                    sync.RWMutex
 
-	WechatClient *wechat.ClientV3
+	GVA_WECHAT *wechat.ClientV3
 )
 
 // GetGlobalDBByDBName 通过名称获取db list中的db

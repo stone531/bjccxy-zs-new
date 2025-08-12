@@ -3,8 +3,8 @@ package initialize
 
 import (
     "os"
-    "myapp/global"
-    "myapp/utils/wechat"
+    "github.com/flipped-aurora/gin-vue-admin/server/global"
+    "github.com/go-pay/gopay/wechat/v3"
     "go.uber.org/zap"
 )
 
@@ -23,5 +23,5 @@ func Wechat() {
         return
     }
 
-    global.WechatClient = client
+    global.GVA_WECHAT = client
 }
