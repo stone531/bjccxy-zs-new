@@ -121,7 +121,7 @@ export default {
       this.$nextTick(async () => {
         await this.generateQRCode()
         this.startPolling()
-        this.startExpireTimer(order.expireTime || new Date(Date.now() + 5 * 60 * 1000))
+        this.startExpireTimer(order.expireTime || new Date(Date.now() + 1 * 60 * 1000))
       })
     },
 
@@ -215,7 +215,7 @@ export default {
       
       this.generateQRCode()
       this.startPolling()
-      this.startExpireTimer(new Date(Date.now() + 5 * 60 * 1000))
+      this.startExpireTimer(new Date(Date.now() + 1 * 60 * 1000))
     },
 
     startExpireTimer(expireTime) {
@@ -225,7 +225,7 @@ export default {
       this.expireTimer = setTimeout(() => {
         this.qrcodeExpired = true
         this.stopPolling()
-      }, 5 * 60 * 1000)
+      }, 1 * 60 * 1000)
     },
 
     startPolling() {

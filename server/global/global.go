@@ -20,6 +20,8 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
+
+	"github.com/go-pay/gopay/wechat/v3"
 )
 
 var (
@@ -39,6 +41,8 @@ var (
 	GVA_MCP_SERVER          *server.MCPServer
 	BlackCache              local_cache.Cache
 	lock                    sync.RWMutex
+
+	WechatClient *wechat.ClientV3
 )
 
 // GetGlobalDBByDBName 通过名称获取db list中的db

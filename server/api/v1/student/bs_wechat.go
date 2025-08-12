@@ -222,25 +222,44 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 
 // 刷新二维码
 func (b *BsStudentApi) RefreshQRCode(c *gin.Context) {
-	cfg := global.GVA_CONFIG.WeChat
 
-	bm := make(gopay.BodyMap)
-	bm.Set("appid", "你的公众号/小程序 appid").
-		Set("mchid", cfg.MchID).
-		Set("description", "测试商品-刷新二维码").
-		Set("out_trade_no", utils.GenerateOrderNo()).
-		Set("notify_url", cfg.NotifyURL).
-		SetBodyMap("amount", func(b gopay.BodyMap) {
-			b.Set("total", 1) // 单位分
-		})
+	orderSn := c.Param("orderSn")
+	id := utils.GetStudentID(c)
 
-	wxRsp, err := client.V3TransactionNative(c, bm)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    cfg := global.GVA_CONFIG.WeChat
 
-	c.JSON(http.StatusOK, gin.H{
-		"code_url": wxRsp.Response.CodeUrl, // 用这个生成二维码
-	})
+    // 1. 先关闭原订单（防止重复订单号冲突）
+    closeBM := make(gopay.BodyMap)
+    closeBM.Set("mchid", cfg.MchID).Set("out_trade_no", orderSn)
+    _, err := client.V3TransactionClose(c, closeBM)
+    if err != nil {
+        // 这里可以忽略已关闭/订单不存在的错误
+        fmt.Println("关闭订单失败：", err)
+    }
+	
+    // 2. 生成新的订单号
+    newOrderSN := bsOrderService.GenerateOrderSN(id)
+
+    // 3. 重新下单
+    bm := make(gopay.BodyMap)
+    bm.Set("appid", cfg.AppID).
+        Set("mchid", cfg.MchID).
+        Set("description", "测试商品-刷新二维码").
+        Set("out_trade_no", newOrderSN).
+        Set("notify_url", cfg.NotifyURL).
+        SetBodyMap("amount", func(b gopay.BodyMap) {
+            b.Set("total", 1) // 单位分
+        })
+
+    wxRsp, err := client.V3TransactionNative(c, bm)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    // 4. 返回新的二维码和订单号
+    c.JSON(http.StatusOK, gin.H{
+        "order_sn": newOrderSN,
+        "code_url": wxRsp.Response.CodeUrl,
+    })
 }
