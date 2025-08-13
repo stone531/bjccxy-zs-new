@@ -364,7 +364,7 @@ func (b *BsStudentApi) CreateWeChatPay(c *gin.Context) {
 
 	fmt.Println("CreateWeChatPay01 sn:", orderSn)
 
-	payUrl, err := bsOrderService.CreateNativeOrder(orderSn, int(common.Graduschool_TotalFee), "毕业证书申请")
+	payUrl, err := bsOrderService.CreateNativeOrder(orderSn, order.TotalFee, order.Body)
 	if err != nil {
 		response.FailWithMessage("返回支付码失败", c)
 		return
@@ -452,12 +452,6 @@ func (api *BsStudentApi) CreateBsTraining(c *gin.Context) {
 		return
 	}
 
-	//check idcard
-	ok, _ := api.checkTrainingIDCardExists(req.IDCardNumber)
-	if ok {
-		response.FailWithMessage("exit the same CertificateNumber2 ", c)
-		return
-	}
 
 	//now := time.Now()
 	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
@@ -494,18 +488,6 @@ func (api *BsStudentApi) checkCertifityIDCardExists(idCard string) (bool, error)
 	var count int64
 	err := global.GVA_DB.Model(&zsBusiness.BsZhengshu{}).
 		Where("CertificateNumber2 = ?", idCard).
-		Count(&count).Error
-
-	if err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
-
-func (api *BsStudentApi) checkTrainingIDCardExists(idCard string) (bool, error) {
-	var count int64
-	err := global.GVA_DB.Model(&zsBusiness.BsTrainingStudent{}).
-		Where("id_card_number = ?", idCard).
 		Count(&count).Error
 
 	if err != nil {

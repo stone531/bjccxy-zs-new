@@ -373,7 +373,7 @@ const fetchGraduationCert = async () => {
           name: grad.major || '',
           no: grad.certificateNum || '',
           date: grad.date || '',
-          publish: grad.publish || '',
+          publish: grad.publish || 'no',
           id:grad.id || 0,
         }
       }
@@ -381,7 +381,7 @@ const fetchGraduationCert = async () => {
         name: item.name || '',
         no: item.certificateNum || '',
         date: item.date || '',
-        publish: grad.publish || '',
+        publish: item.publish || 'no',
         id: item.id || 0,
       }))
     } else {
