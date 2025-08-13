@@ -435,7 +435,7 @@ func (api *BsStudentApi) CreateBsZhengshu(c *gin.Context) {
 		return
 	}
 
-	err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, record.ID, int(common.Graduschool_TotalFee))
+	err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, utils.GetStudentID(c), int(common.Graduschool_TotalFee))
 	if err != nil {
 		response.FailWithMessage("create order fail", c)
 		return
@@ -451,7 +451,6 @@ func (api *BsStudentApi) CreateBsTraining(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
 
 	//now := time.Now()
 	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
