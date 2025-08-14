@@ -162,3 +162,39 @@ func (api *BsZhengshuService) GetNextGraduschoolNumber() string {
 	// 3. 转换回字符串
 	return strconv.FormatUint(nextNum, 10)
 }
+
+func (api *BsZhengshuService) GetNextTrainingGraduschoolNumber() string {
+	// 1. 查询最新的证书号
+	//var latestNumber string
+	//query := "SELECT CertificateNumber2 FROM your_table_name ORDER BY id DESC LIMIT 1" // 假设按id降序排列，根据你的实际表结构调整
+	db := global.GVA_DB.Model(&business.BsTrainingStudent{})
+	var userObj business.BsTrainingStudent //graduschool
+	err := db.Order("created_at desc").Limit(1).Find(&userObj).Error
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// 如果没有记录，可以从一个默认值开始
+			return "114158200206030001"
+		}
+		return ""
+	}
+
+	// 2. 将字符串转换为数字并加1
+	num, err := strconv.ParseUint(userObj.CertificateID, 10, 64)
+	if err != nil {
+		return ""
+	}
+	nextNum := num + 1
+
+	// 3. 转换回字符串
+	return strconv.FormatUint(nextNum, 10)
+}
+
+func (api *BsZhengshuService) UpdateZhengshuPublic(publish string, id uint) (bool, error) {
+	if err := global.GVA_DB.Model(&business.BsZhengshu{}).
+		Where("id = ?", id).
+		Update("publish", publish).Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

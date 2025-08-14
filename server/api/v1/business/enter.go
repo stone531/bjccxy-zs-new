@@ -9,4 +9,5 @@ type ApiGroup struct {
 
 var (
 	bsZhengshuService = service.ServiceGroupApp.BusinessServiceGroup.BsZhengshuService
+	bsOrderService    = service.ServiceGroupApp.StudentServiceGroup.OrderService
 )

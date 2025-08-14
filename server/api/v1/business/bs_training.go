@@ -42,17 +42,17 @@ func (api *BsTrainingApi) CreateBsTraining(c *gin.Context) {
 
 	//now := time.Now()
 	//currentDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-
 	record := business.BsTrainingStudent{
 		Name:            req.Name,
 		Gender:          req.Gender,
 		IDCardNumber:    req.IDCardNumber,
 		CertificateName: req.CertificateName,
-		CertificateID:   req.CertificateID,
+		CertificateID:   bsZhengshuService.GetNextTrainingGraduschoolNumber(),
 		IssueDate:       req.IssueDate,
 		TrainingProgram: req.TrainingProgram,
 		Grade:           req.Grade,
 		Editer:          req.Editer,
+		ExtraField1:     "yes",
 	}
 
 	if err := global.GVA_DB.Create(&record).Error; err != nil {

@@ -8,3 +8,4 @@ import (
 type BSZhengShuResponse struct {
 	ZhengShu business.BsZhengshu `json:"zhengShu"`
 }
+

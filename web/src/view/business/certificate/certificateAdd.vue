@@ -205,6 +205,7 @@ const addUserFunc = async () => {
     if (res.code === 0) {
       ElMessage.success('创建成功')
       resetUserFunc()
+      closeAddUserDialog()
     }
   } catch (error) {
     ElMessage.error('提交失败，请重试')

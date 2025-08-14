@@ -1,5 +1,6 @@
 import { useUserStore } from '@/pinia/modules/user'
 import { useRouterStore } from '@/pinia/modules/router'
+import { useStudentStore } from '@/pinia/modules/student'
 import getPageTitle from '@/utils/page'
 import router from '@/router'
 import Nprogress from 'nprogress'
@@ -66,7 +67,7 @@ const handleRedirect = (to, userStore) => {
 }
 
 // 路由守卫
-router.beforeEach(async (to, from) => {
+/*router.beforeEach(async (to, from) => {
   const userStore = useUserStore()
   const routerStore = useRouterStore()
   const token = userStore.token
@@ -133,6 +134,98 @@ router.beforeEach(async (to, from) => {
     query: {
       redirect: to.fullPath
     }
+  }
+})*/
+
+router.beforeEach(async (to, from) => {
+    // lrl 新增加的无需登录
+  if (to.meta?.noLogin) {
+    return true
+  }
+  const userStore = useUserStore()
+  const studentStore = useStudentStore()
+  const routerStore = useRouterStore()
+
+  const adminToken = userStore.token
+  const studentToken = studentStore.token
+
+  Nprogress.start()
+
+  // 处理元数据和缓存
+  to.meta.matched = [...to.matched]
+  await handleKeepAlive(to)
+
+  // 设置页面标题
+  document.title = getPageTitle(to.meta.title, to)
+
+  // 判断是否是学生路由
+  const isStudentRoute = to.path.startsWith('/student')
+
+  // 白名单（无需登录）
+  if (WHITE_LIST.includes(to.name) || to.meta?.noLogin) {
+    // 如果是 admin 登录状态访问白名单，直接进入
+    if (!isStudentRoute && adminToken) {
+      if (!routerStore.asyncRouterFlag) {
+        await setupRouter(userStore)
+      }
+      if (userStore.userInfo.authority.defaultRouter) {
+        return { name: userStore.userInfo.authority.defaultRouter }
+      }
+    }
+    // 如果是学生端且已登录
+    if (isStudentRoute && studentToken) {
+      return true
+    }
+    return true
+  }
+
+  // -------------------------
+  // 学生端路由守卫
+  // -------------------------
+  if (isStudentRoute) {
+    if (studentToken) {
+      return true
+    } else {
+      return {
+        name: 'StudentLogin', // 这里要在路由里给学生登录页起 name
+        query: { redirect: to.fullPath }
+      }
+    }
+  }
+
+  // -------------------------
+  // 管理端路由守卫
+  // -------------------------
+  if (adminToken) {
+    // 如果需要跳首页
+    if (sessionStorage.getItem('needToHome') === 'true') {
+      sessionStorage.removeItem('needToHome')
+      return { path: '/' }
+    }
+
+    // 异步路由处理
+    if (!routerStore.asyncRouterFlag && !WHITE_LIST.includes(from.name)) {
+      const setupSuccess = await setupRouter(userStore)
+
+      if (setupSuccess && userStore.token) {
+        return handleRedirect(to, userStore)
+      }
+
+      return {
+        name: 'Login',
+        query: { redirect: to.fullPath }
+      }
+    }
+
+    return to.matched.length ? true : { path: '/layout/404' }
+  }
+
+  // -------------------------
+  // 未登录（admin）
+  // -------------------------
+  return {
+    name: 'Login',
+    query: { redirect: to.fullPath }
   }
 })
 

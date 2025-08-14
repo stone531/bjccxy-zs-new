@@ -78,6 +78,7 @@ func send(to []string, subject string, body string) error {
 	e.Subject = subject
 	e.HTML = []byte(body)
 	var err error
+
 	hostAddr := fmt.Sprintf("%s:%d", host, port)
 	if isSSL {
 		err = e.SendWithTLS(hostAddr, auth, &tls.Config{ServerName: host})

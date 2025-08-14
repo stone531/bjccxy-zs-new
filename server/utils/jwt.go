@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	jwt "github.com/golang-jwt/jwt/v5"
 )
@@ -85,6 +86,19 @@ func (j *JWT) ParseToken(tokenString string) (*request.CustomClaims, error) {
 		}
 	}
 	return nil, TokenValid
+}
+
+func (j *JWT) ParseStudentToken(tokenString string) (*student.StudentClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &student.StudentClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(global.GVA_CONFIG.JWT.SigningKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(*student.StudentClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, errors.New("invalid token")
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)

@@ -6,13 +6,25 @@ import (
 
 type BsZhengshuRouter struct{}
 
-func (e *BsZhengshuRouter) InitBsZhengshuRouter(Router *gin.RouterGroup) {
-	BsZhengshuRouter := Router.Group("bszhengshu")
+
+func (e *BsZhengshuRouter) InitBsZhengshuRouter(public *gin.RouterGroup, private *gin.RouterGroup) {
+	
+
+	// 公共路由
+	BsZhengshuPublicRouter := public.Group("bszhengshu")
 	{
-		BsZhengshuRouter.POST("create", BsZhengShuApi.CreateBsZhengshu)                 //创建证书
-		BsZhengshuRouter.POST("getZhengshuList", BsZhengShuApi.GetBsSearchZhengshuList) //查询多个证书信息
-		BsZhengshuRouter.DELETE("delZhengshuById", BsZhengShuApi.DelZhengshuById)       // 删除用户
-		BsZhengshuRouter.PUT("setZhengshuInfo", BsZhengShuApi.SetZhengshuInfo)          // 更新用户
-		BsZhengshuRouter.POST("getOneZhengshu", BsZhengShuApi.GetOneBsZhengshu)         //查询一个证书信息
+		BsZhengshuPublicRouter.POST("getOneZhengshu", BsZhengShuApi.GetOneBsZhengshu)         //查询一个证书信息
+	}
+
+	// 私有路由
+	BsZhengshuPrivateRouter := private.Group("bszhengshu")
+	{
+		BsZhengshuPrivateRouter.POST("create", BsZhengShuApi.CreateBsZhengshu)                 //创建证书
+		BsZhengshuPrivateRouter.POST("getZhengshuList", BsZhengShuApi.GetBsSearchZhengshuList) //查询多个证书信息
+		BsZhengshuPrivateRouter.DELETE("delZhengshuById", BsZhengShuApi.DelZhengshuById)       // 删除用户
+		BsZhengshuPrivateRouter.PUT("setZhengshuInfo", BsZhengShuApi.SetZhengshuInfo)          // 更新用户
+
+		//特例
+		BsZhengshuPrivateRouter.POST("getOrderList", BsZhengShuApi.GetBsOrderList) //查询多个订单列表
 	}
 }

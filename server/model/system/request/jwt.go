@@ -19,3 +19,11 @@ type BaseClaims struct {
 	NickName    string
 	AuthorityId uint
 }
+
+
+// StudentClaims 学生 token 的 claims
+type StudentClaims struct {
+	BaseClaims
+	BufferTime int64 `json:"bufferTime"`
+	jwt.RegisteredClaims
+}

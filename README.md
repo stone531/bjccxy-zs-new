@@ -381,3 +381,6 @@ fmt.Println(decodeBytes, err)
 
 请严格遵守Apache 2.0协议并保留作品声明，商业用途请务必[获取授权](https://www.gin-vue-admin.com/empower/)  
 未授权商用将依法追究法律责任
+
+## 11.新增加包
+npm install crypto-js

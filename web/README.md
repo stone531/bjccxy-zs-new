@@ -103,4 +103,7 @@ web
  ├── vite.config.js             -- vite 配置文件
  └── yarn.lock
 
+
+ npm install qrcode
+ npm install @chenfengyuan/vue-qrcode
 ```

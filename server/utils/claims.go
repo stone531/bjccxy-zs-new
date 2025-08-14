@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net"
 	"time"
 
@@ -46,6 +47,7 @@ func GetToken(c *gin.Context) string {
 		token, _ = c.Cookie("x-token")
 		claims, err := j.ParseToken(token)
 		if err != nil {
+			fmt.Println(err)
 			global.GVA_LOG.Error("重新写入cookie token失败,未能成功解析token,请检查请求头是否存在x-token且claims是否为规定结构")
 			return token
 		}

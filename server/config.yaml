@@ -67,11 +67,11 @@ db-list:
 disk-list:
     - mount-point: /
 email:
-    to: xxx@qq.com
-    from: xxx@163.com
+    to: seek@qq.com
+    from: bjccyxxy@163.com
     host: smtp.163.com
-    secret: xxx
-    nickname: test
+    secret: JXrQYDEXu3sH7UZz
+    nickname: bjccxy
     port: 465
     is-ssl: true
     is-loginauth: false
@@ -246,3 +246,12 @@ zap:
     show-line: true
     log-in-console: true
     retention-day: -1
+wechat:
+  app_id: "wxcfd778de260fadf6"
+  mch_id: "1724488999"
+  mch_key: "4AC906C150066F67C07D9537F01121150DD37288"
+  mch_key1: "wxcfd778de260fadf6bjccxy20250810"
+  cert_path: "./wechatCerts/apiclient_cert.pem"
+  key_path: "./wechatCerts/apiclient_key.pem"
+  rootca_path: "./wechatCerts/pub_key.pem"
+  notify_url: "https://zs.bjccxy.com/student/order-wechat-notify"
