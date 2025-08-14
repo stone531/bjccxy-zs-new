@@ -31,7 +31,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		c.String(http.StatusBadRequest, "FAIL")
 		return
 	}
-	global.GVA_LOG.Info("WeChatPayNotify 002")
+	global.GVA_LOG.Info("WeChatPayNotify 002:", zap.Any("rawBody", string(rawBody)))
 	// 恢复请求体，供 V3ParseNotify 使用
 	c.Request.Body = io.NopCloser(bytes.NewReader(rawBody))
 
