@@ -18,26 +18,11 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
-// type BsStudentApi struct{}
-
-// 初始化微信支付客户端
-func InitWeChatClient() {
-	var err error
-	//cfg := global.GVA_CONFIG.WeChat
-
-	// 自动获取平台证书并启用自动验签
-	err = global.GVA_WECHAT.AutoVerifySign()
-	if err != nil {
-		panic(fmt.Errorf("auto verify sign error: %v", err))
-	}
-
-	fmt.Println("WeChatPay Client 初始化成功")
-}
-
 // WeChatPayNotify 微信支付回调（适配 gopay v1.5.114）
 func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 	cfg := global.GVA_CONFIG.WeChat
 
+	global.GVA_LOG.Info("WeChatPayNotify 001")
 	// 1. 读取并备份原始 body（V3ParseNotify 会再次读取 Request.Body）
 	rawBody, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -46,43 +31,20 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		c.String(http.StatusBadRequest, "FAIL")
 		return
 	}
+	global.GVA_LOG.Info("WeChatPayNotify 002")
 	// 恢复请求体，供 V3ParseNotify 使用
 	c.Request.Body = io.NopCloser(bytes.NewReader(rawBody))
 
-	// 2. 初始化微信 V3 客户端（示例：使用 apiclient_key.pem 的内容作为 privateKey）
-	//    请确保 cfg.SerialNo 已配置（商户 API 证书序列号），否则验签/上报可能失败
-	/*privateKeyContent := cfg.KeyPath // 优先从配置中读私钥字符串
-	if privateKeyContent == "" && cfg.KeyPath != "" {
-		bs, rerr := os.ReadFile(cfg.KeyPath)
-		if rerr != nil {
-			xlog.Errorf("read private key file err: %v", rerr)
-			c.String(http.StatusInternalServerError, "FAIL")
-			return
-		}
-		privateKeyContent = string(bs)
-	}
-
-	serialNo, err := bsOrderService.GetSerialNumber()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("商户证书序列号:", serialNo)
-
-	client, err := wechat.NewClientV3(cfg.MchID, serialNo, cfg.MchKey, privateKeyContent)
-	if err != nil {
-		xlog.Errorf("wechat.NewClientV3 err: %v", err)
-		c.String(http.StatusInternalServerError, "FAIL")
-		return
-	}*/
-
 	// 3. 尝试自动同步平台证书并启用自动验签（推荐）
 	//    如果这个步骤失败，也可以通过 client.GetAndSelectNewestCert()/WxPublicKeyMap() 手动获取公钥
+	global.GVA_LOG.Info("WeChatPayNotify 003")
 	if err := global.GVA_WECHAT.AutoVerifySign(); err != nil {
 		// 不一定直接 fatal，有可能是配置问题（比如 apiV3Key 长度问题），记录日志并继续尝试手动流程
 		//xlog.Warnf("client.AutoVerifySign warning: %v", err)
 		global.GVA_LOG.Error("WeChatPayNotify client.AutoVerifySign warning：", zap.Error(err))
 	}
 
+	global.GVA_LOG.Info("WeChatPayNotify 004")
 	// 4. 解析回调内容 -> 得到 *wechat.V3NotifyReq
 	notifyReq, err := wechat.V3ParseNotify(c.Request)
 	if err != nil {
@@ -93,6 +55,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		return
 	}
 
+	global.GVA_LOG.Info("WeChatPayNotify 005")
 	// 5. 获取微信平台公钥 map（AutoVerifySign() 成功时该 map 会被填充）
 	certMap := global.GVA_WECHAT.WxPublicKeyMap()
 	if len(certMap) == 0 {
@@ -104,6 +67,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 			certMap = global.GVA_WECHAT.WxPublicKeyMap()
 		}
 	}
+	global.GVA_LOG.Info("WeChatPayNotify 006")
 	// 6. 验签：使用 notifyReq 提供的方法并传入证书 Map 自动匹配证书验证
 	if err := notifyReq.VerifySignByPKMap(certMap); err != nil {
 		//xlog.Errorf("notifyReq.VerifySignByPKMap err: %v", err)
@@ -113,6 +77,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 	}
 
 	// 7. 解密 resource.ciphertext -> 填充到自定义结构体
+	global.GVA_LOG.Info("WeChatPayNotify 007")
 	var decryptData struct {
 		OutTradeNo    string `json:"out_trade_no"`
 		TransactionId string `json:"transaction_id"`
@@ -126,7 +91,6 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": "FAIL", "message": "解密失败"})
 		return
 	}
-
 	global.GVA_LOG.Info("wechat notify decrypt result: ", zap.Any("decryptData:", decryptData))
 
 	// 8. 幂等 & 更新订单状态
@@ -136,6 +100,8 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": "FAIL", "message": "订单号为空"})
 		return
 	}
+
+	global.GVA_LOG.Info("WeChatPayNotify 008")
 
 	db := global.GVA_DB
 	var order mstud.BsOrders
@@ -152,6 +118,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "FAIL")
 		return
 	}
+	global.GVA_LOG.Info("WeChatPayNotify 009")
 
 	// 如果已经是支付成功，直接返回 SUCCESS（幂等）
 	if order.Status == 1 {
@@ -159,6 +126,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		return
 	}
 
+	global.GVA_LOG.Info("WeChatPayNotify 010")
 	// 仅在微信通知 trade_state == "SUCCESS" 时认定支付成功
 	if decryptData.TradeState == "SUCCESS" {
 		payTime := time.Now()
@@ -184,6 +152,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		// TODO: 在这里触发你的业务（发放课程、发通知等），建议异步执行
 		// go service.HandleSuccessfulPayment(order.ID)
 	}
+	global.GVA_LOG.Info("WeChatPayNotify 011")
 
 	// 9. 返回微信成功应答（注意微信要求的 JSON 格式）
 	c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "成功"})

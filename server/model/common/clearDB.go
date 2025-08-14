@@ -16,6 +16,6 @@ const (
 type WeiChatPay_TotalFee int
 
 const (
-	Graduschool_TotalFee WeiChatPay_TotalFee = 500
-	Training_TotalFee    WeiChatPay_TotalFee = 200
+	Graduschool_TotalFee WeiChatPay_TotalFee = 5
+	Training_TotalFee    WeiChatPay_TotalFee = 2
 )
