@@ -6,157 +6,205 @@ import (
 	"io"
 	"net/http"
 	"time"
+	"errors"
+	"strings"
+	"reflect"
+	"os"
+	"crypto/rsa"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-pay/gopay"
 	"github.com/go-pay/gopay/wechat/v3"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"crypto/x509"
+	"encoding/pem"
+
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	mstud "github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
-// WeChatPayNotify 微信支付回调（适配 gopay v1.5.114）
 func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 	cfg := global.GVA_CONFIG.WeChat
+	logger := global.GVA_LOG
 
-	global.GVA_LOG.Info("WeChatPayNotify 001")
-	// 1. 读取并备份原始 body（V3ParseNotify 会再次读取 Request.Body）
+	// 1. 接收原始回调数据
 	rawBody, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		//xlog.Errorf("read notify body err: %v", err)
-		global.GVA_LOG.Error("WeChatPayNotify read notify body err：", zap.Error(err))
+		logger.Error("读取回调Body失败", zap.Error(err))
 		c.String(http.StatusBadRequest, "FAIL")
 		return
 	}
-	global.GVA_LOG.Info("WeChatPayNotify 002:", zap.Any("rawBody", string(rawBody)))
-	// 恢复请求体，供 V3ParseNotify 使用
-	c.Request.Body = io.NopCloser(bytes.NewReader(rawBody))
+	defer c.Request.Body.Close()
+	c.Request.Body = io.NopCloser(bytes.NewReader(rawBody)) // 重置Body供后续解析
 
-	// 3. 尝试自动同步平台证书并启用自动验签（推荐）
-	//    如果这个步骤失败，也可以通过 client.GetAndSelectNewestCert()/WxPublicKeyMap() 手动获取公钥
-	global.GVA_LOG.Info("WeChatPayNotify 003")
-	if err := global.GVA_WECHAT.AutoVerifySign(); err != nil {
-		// 不一定直接 fatal，有可能是配置问题（比如 apiV3Key 长度问题），记录日志并继续尝试手动流程
-		//xlog.Warnf("client.AutoVerifySign warning: %v", err)
-		global.GVA_LOG.Error("WeChatPayNotify client.AutoVerifySign warning：", zap.Error(err))
-	}
+	// 获取关键请求头（用于动态验签）
+	serial := c.GetHeader("Wechatpay-Serial")
+	signature := c.GetHeader("Wechatpay-Signature")
+	logger.Info("微信支付回调原始数据",
+		zap.String("rawBody", string(rawBody)),
+		zap.String("Wechatpay-Serial", serial),
+		zap.String("Wechatpay-Signature", signature),
+	)
 
-	global.GVA_LOG.Info("WeChatPayNotify 004")
-	// 4. 解析回调内容 -> 得到 *wechat.V3NotifyReq
+	// 2. 解析回调通知
 	notifyReq, err := wechat.V3ParseNotify(c.Request)
 	if err != nil {
-		//xlog.Errorf("wechat.V3ParseNotify err: %v, rawBody: %s", err, string(rawBody))
-		// 返回微信指定格式（也可直接返回 plain SUCCESS/FAIL）
-		global.GVA_LOG.Error("WeChatPayNotify wechat.V3ParseNotify err:", zap.Error(err), zap.String("rawBody", string(rawBody)))
-		c.JSON(http.StatusOK, &wechat.V3NotifyRsp{Code: gopay.FAIL, Message: "回调内容异常"})
+		logger.Error("解析回调结构失败", zap.Error(err))
+		c.JSON(http.StatusOK, &wechat.V3NotifyRsp{Code: gopay.FAIL, Message: "回调解析异常"})
 		return
 	}
 
-	global.GVA_LOG.Info("WeChatPayNotify 005")
-	// 5. 获取微信平台公钥 map（AutoVerifySign() 成功时该 map 会被填充）
-	certMap := global.GVA_WECHAT.WxPublicKeyMap()
-	if len(certMap) == 0 {
-		// 若为空，尝试主动拉取并选择最新证书（会自动填充 SnCertMap / WxPublicKeyMap）
-		if _, _, gerr := global.GVA_WECHAT.GetAndSelectNewestCert(); gerr != nil {
-			global.GVA_LOG.Warn("WeChatPayNotify GetAndSelectNewestCert err:", zap.Error(gerr))
-			//xlog.Warnf("GetAndSelectNewestCert warn: %v", gerr)
-		} else {
-			certMap = global.GVA_WECHAT.WxPublicKeyMap()
-		}
+	// 3. 处理签名探测流量（微信测试请求）
+	if strings.HasPrefix(signature, "WECHATPAY-SIGNATURE-TEST") {
+		logger.Info("收到微信签名探测流量，直接返回成功")
+		c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "签名探测已处理"})
+		return
 	}
-	global.GVA_LOG.Info("WeChatPayNotify 006")
-	// 6. 验签：使用 notifyReq 提供的方法并传入证书 Map 自动匹配证书验证
+
+	// 4. 加载并解析微信支付平台公钥
+	pubKeyBytes, err := os.ReadFile(cfg.RootCA)
+	if err != nil {
+		logger.Error("读取公钥文件失败", zap.String("path", cfg.RootCA), zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"code": "FAIL", "message": "公钥读取失败"})
+		return
+	}
+	logger.Info("公钥文件内容摘要", zap.String("pubKeyPrefix", string(pubKeyBytes[:16])))
+
+	block, _ := pem.Decode(pubKeyBytes)
+	if block == nil || block.Type != "PUBLIC KEY" {
+		logger.Error("公钥格式错误", zap.String("blockType", block.Type))
+		c.JSON(http.StatusInternalServerError, gin.H{"code": "FAIL", "message": "无效的公钥格式"})
+		return
+	}
+
+	pubKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		logger.Error("解析公钥失败", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"code": "FAIL", "message": "公钥解析异常"})
+		return
+	}
+
+	rsaPubKey, ok := pubKey.(*rsa.PublicKey)
+	if !ok {
+		logger.Error("非RSA公钥类型", zap.Any("pubKeyType", reflect.TypeOf(pubKey)))
+		c.JSON(http.StatusInternalServerError, gin.H{"code": "FAIL", "message": "公钥类型错误"})
+		return
+	}
+
+	// 5. 动态构建公钥映射（关键修复点）[3](@ref)
+	certMap := map[string]*rsa.PublicKey{
+		serial: rsaPubKey, // 动态使用回调头中的公钥ID
+	}
+	logger.Info("构建验签公钥映射", 
+		zap.String("publicKeyID", serial),
+		zap.Int("keySize", rsaPubKey.Size()*8),
+	)
+
+	// 6. 验签（修复验签逻辑）[2](@ref)
 	if err := notifyReq.VerifySignByPKMap(certMap); err != nil {
-		//xlog.Errorf("notifyReq.VerifySignByPKMap err: %v", err)
-		global.GVA_LOG.Warn("WeChatPayNotify notifyReq.VerifySignByPKMap err:", zap.Error(err))
+		logger.Warn("验签失败",
+			zap.Error(err),
+			zap.String("serial", serial),
+			zap.String("signature", signature),
+		)
 		c.JSON(http.StatusUnauthorized, gin.H{"code": "FAIL", "message": "签名验证失败"})
 		return
 	}
+	logger.Info("验签成功")
 
-	// 7. 解密 resource.ciphertext -> 填充到自定义结构体
-	global.GVA_LOG.Info("WeChatPayNotify 007")
+	// 7. 解密回调数据（需确保APIv3密钥正确）[4](@ref)
 	var decryptData struct {
 		OutTradeNo    string `json:"out_trade_no"`
 		TransactionId string `json:"transaction_id"`
 		TradeState    string `json:"trade_state"`
 		SuccessTime   string `json:"success_time"`
-		// 你需要的其它字段可以继续加
 	}
-	if err := notifyReq.DecryptCipherTextToStruct(cfg.MchKey, &decryptData); err != nil {
-		//xlog.Errorf("notifyReq.DecryptCipherTextToStruct err: %v", err)
-		global.GVA_LOG.Warn("WeChatPayNotify notifyReq.DecryptCipherTextToStruct err:", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"code": "FAIL", "message": "解密失败"})
+	if err := notifyReq.DecryptCipherTextToStruct(cfg.APIV3Key, &decryptData); err != nil {
+		logger.Warn("数据解密失败", 
+			zap.Error(err),
+			zap.String("apiV3KeyPrefix", cfg.APIV3Key[:4]+"***"), // 避免日志泄露完整密钥
+		)
+		c.JSON(http.StatusBadRequest, gin.H{"code": "FAIL", "message": "解密异常"})
 		return
 	}
-	global.GVA_LOG.Info("wechat notify decrypt result: ", zap.Any("decryptData:", decryptData))
+	logger.Info("回调解密成功", zap.Any("decryptData", decryptData))
 
-	// 8. 幂等 & 更新订单状态
-	if decryptData.OutTradeNo == "" {
-		//xlog.Error("empty out_trade_no in notify")
-		global.GVA_LOG.Error("WeChatPayNotify empty out_trade_no in notify")
-		c.JSON(http.StatusBadRequest, gin.H{"code": "FAIL", "message": "订单号为空"})
-		return
-	}
-
-	global.GVA_LOG.Info("WeChatPayNotify 008")
-
+	// 8. 业务处理（幂等设计）
 	db := global.GVA_DB
 	var order mstud.BsOrders
-	if err := db.Where("order_sn = ?", decryptData.OutTradeNo).First(&order).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			// 订单不存在：记录日志并返回 SUCCESS（避免微信无限重试），或按你业务选择返回 FAIL 让微信重试
-			//xlog.Warnf("order not found: %s", decryptData.OutTradeNo)
-			global.GVA_LOG.Warn("WeChatPayNotify order not found:", zap.String("OutTradeNo:", decryptData.OutTradeNo))
-			c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "处理完毕"})
+	result := db.Where("order_sn = ?", decryptData.OutTradeNo).First(&order)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			logger.Warn("订单不存在", zap.String("outTradeNo", decryptData.OutTradeNo))
+			c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "订单不存在"})
 			return
 		}
-		//xlog.Errorf("db query order err: %v", err)
-		global.GVA_LOG.Error("WeChatPayNotify db query order err:", zap.Error(err))
+		logger.Error("查询订单失败", zap.Error(result.Error))
 		c.String(http.StatusInternalServerError, "FAIL")
 		return
 	}
-	global.GVA_LOG.Info("WeChatPayNotify 009")
 
-	// 如果已经是支付成功，直接返回 SUCCESS（幂等）
+	// 8.1 检查订单状态避免重复处理
 	if order.Status == 1 {
-		c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "成功"})
+		logger.Info("订单已处理，直接返回成功", zap.String("orderSn", order.OrderSN))
+		c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "重复通知已忽略"})
 		return
 	}
 
-	global.GVA_LOG.Info("WeChatPayNotify 010")
-	// 仅在微信通知 trade_state == "SUCCESS" 时认定支付成功
+	// 8.2 处理支付成功逻辑
 	if decryptData.TradeState == "SUCCESS" {
 		payTime := time.Now()
 		if decryptData.SuccessTime != "" {
 			if t, terr := time.Parse(time.RFC3339, decryptData.SuccessTime); terr == nil {
 				payTime = t
+			} else {
+				logger.Warn("解析支付时间失败", zap.String("successTime", decryptData.SuccessTime), zap.Error(terr))
 			}
 		}
+
+		updateData := map[string]interface{}{
+			"status":         1,
+			"transaction_id": decryptData.TransactionId,
+			"pay_time":       payTime,
+			"notify_data":    string(rawBody),
+		}
+
 		if err := db.Model(&mstud.BsOrders{}).
-			Where("order_sn = ?", decryptData.OutTradeNo).
-			Updates(map[string]interface{}{
-				"status":         1,
-				"transaction_id": decryptData.TransactionId,
-				"pay_time":       payTime,
-				"notify_data":    string(rawBody),
-			}).Error; err != nil {
-			global.GVA_LOG.Error("update order failed:", zap.Error(err))
-			//xlog.Errorf("update order failed: %v", err)
+			Where("id = ?", order.ID).
+			Updates(updateData).Error; err != nil {
+			logger.Error("更新订单状态失败",
+				zap.Uint("orderID", order.ID),
+				zap.Any("updateData", updateData),
+				zap.Error(err),
+			)
 			c.String(http.StatusInternalServerError, "FAIL")
 			return
 		}
 
-		// TODO: 在这里触发你的业务（发放课程、发通知等），建议异步执行
-		// go service.HandleSuccessfulPayment(order.ID)
-	}
-	global.GVA_LOG.Info("WeChatPayNotify 011")
+		logger.Info("订单支付状态更新成功",
+			zap.String("orderSn", order.OrderSN),
+			zap.String("transactionID", decryptData.TransactionId),
+		)
 
-	// 9. 返回微信成功应答（注意微信要求的 JSON 格式）
-	c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "成功"})
+		// 异步处理业务逻辑（例：发放课程）
+		go func(orderID uint) {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Error("异步处理异常", zap.Any("recover", r))
+				}
+			}()
+			// service.HandleSuccessfulPayment(orderID) // 实际业务逻辑
+			logger.Info("异步业务处理完成", zap.Uint("orderID", orderID))
+		}(order.ID)
+	}
+
+	// 9. 返回成功响应
+	c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "处理成功"})
 }
+
 
 // 刷新二维码
 func (b *BsStudentApi) RefreshQRCode(c *gin.Context) {

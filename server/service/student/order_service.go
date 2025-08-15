@@ -170,23 +170,6 @@ func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uin
 func (w *OrderService) CreateNativeOrder(orderSN string, totalFee int, description string) (string, error) {
 	cfg := global.GVA_CONFIG.WeChat
 
-	/*fmt.Println("CreateNativeOrder sn:", orderSN, cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
-	// 初始化微信支付客户端
-
-	keyBytes, err := os.ReadFile(cfg.KeyPath)
-	if err != nil {
-		global.GVA_LOG.Error("读取私钥失败", zap.Error(err))
-		return "", err
-	}
-
-	//client, err := wechat.NewClientV3(cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
-
-	client, err := wechat.NewClientV3(cfg.MchID, cfg.MchKey, cfg.CertPath, string(keyBytes))
-	if err != nil {
-		global.GVA_LOG.Error("NewClientV3 创建失败", zap.Error(err))
-		return "", err
-	}*/
-
 	fmt.Println("CreateNativeOrder client ok")
 	// 构造请求参数
 	bm := make(gopay.BodyMap)
