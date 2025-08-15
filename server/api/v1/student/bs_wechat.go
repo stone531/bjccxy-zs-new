@@ -43,11 +43,6 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 	// 获取关键请求头（用于动态验签）
 	serial := c.GetHeader("Wechatpay-Serial")
 	signature := c.GetHeader("Wechatpay-Signature")
-	logger.Info("微信支付回调原始数据",
-		zap.String("rawBody", string(rawBody)),
-		zap.String("Wechatpay-Serial", serial),
-		zap.String("Wechatpay-Signature", signature),
-	)
 
 	// 2. 解析回调通知
 	notifyReq, err := wechat.V3ParseNotify(c.Request)
