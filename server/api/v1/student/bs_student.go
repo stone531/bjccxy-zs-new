@@ -435,7 +435,7 @@ func (api *BsStudentApi) CreateBsZhengshu(c *gin.Context) {
 		return
 	}
 
-	err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, utils.GetStudentID(c), int(common.Graduschool_TotalFee))
+	err := bsOrderService.CreateOrder(common.Graduschool_ZhengShu, utils.GetStudentID(c), int(common.Graduschool_TotalFee), record.ID)
 	if err != nil {
 		response.FailWithMessage("create order fail", c)
 		return
@@ -474,7 +474,7 @@ func (api *BsStudentApi) CreateBsTraining(c *gin.Context) {
 
 	fmt.Println("student insert id:", utils.GetStudentID(c))
 	//是student的id
-	err := bsOrderService.CreateOrder(common.Training_ZhengShu, utils.GetStudentID(c), int(common.Training_TotalFee))
+	err := bsOrderService.CreateOrder(common.Training_ZhengShu, utils.GetStudentID(c), int(common.Training_TotalFee), record.ID)
 	if err != nil {
 		response.FailWithMessage("create order fail", c)
 		return

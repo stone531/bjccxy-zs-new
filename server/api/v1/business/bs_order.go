@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	cReq "github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/student/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 // 获取订单列表
@@ -23,13 +25,13 @@ func (api *BsZhengShuApi) GetBsOrderList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Println("GetBsOrderList01:", pageInfo)
+	//fmt.Println("GetBsOrderList01:", pageInfo)
 	err = utils.Verify(pageInfo, utils.PageInfoVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Println("GetBsOrderList02:", pageInfo)
+	//fmt.Println("GetBsOrderList02:", pageInfo)
 
 	list, total, err := api.getOrderList(pageInfo)
 	if err != nil {
@@ -116,4 +118,33 @@ func (api *BsZhengShuApi) getStudentUserId(info request.GetOrderList) (userId in
 	err = db.Find(&studentUser).Error
 
 	return int64(studentUser.ID), err
+}
+
+func (api *BsZhengShuApi) DelOrderById(c *gin.Context) {
+	var reqId cReq.GetById
+	fmt.Println("enter DelOrderById:")
+	err := c.ShouldBindJSON(&reqId)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	fmt.Println("DelOrderById id:%d:", reqId.ID)
+
+	err = api.deleteUser(reqId.ID)
+	if err != nil {
+		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败", c)
+		return
+	}
+	response.OkWithMessage("删除成功", c)
+}
+
+func (bzs *BsZhengShuApi) deleteUser(id int) (err error) {
+	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("ID = ?", id).Delete(&student.BsOrders{}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
 }

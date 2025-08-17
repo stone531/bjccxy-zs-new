@@ -131,7 +131,7 @@ func (s *OrderService) randomString(n int) string {
 	return string(bytes)
 }
 
-func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uint, totalFee int) error {
+func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userId uint, totalFee int, goodsId uint) error {
 	var (
 		body     string
 		detail   string
@@ -149,8 +149,8 @@ func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uin
 	}
 
 	order := &mstud.BsOrders{
-		UserID:     int64(userID),
-		OrderSN:    s.GenerateOrderSN(userID),
+		UserID:     int64(userId),
+		OrderSN:    s.GenerateOrderSN(userId),
 		TotalFee:   totalFee,
 		FeeType:    "CNY",
 		CertType:   certType,
@@ -158,6 +158,7 @@ func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uin
 		Detail:     detail,
 		Status:     0, // 待支付
 		PayType:    "NATIVE",
+		GoodsID:    int64(goodsId),
 		ExpireTime: time.Now().Add(15 * time.Minute), // 默认15分钟过期
 	}
 

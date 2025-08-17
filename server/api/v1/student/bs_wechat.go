@@ -2,24 +2,24 @@ package student
 
 import (
 	"bytes"
+	"crypto/rsa"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"time"
-	"errors"
-	"strings"
-	"reflect"
 	"os"
-	"crypto/rsa"
+	"reflect"
+	"strings"
+	"time"
+
+	"crypto/x509"
+	"encoding/pem"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-pay/gopay"
 	"github.com/go-pay/gopay/wechat/v3"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"crypto/x509"
-	"encoding/pem"
-
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	mstud "github.com/flipped-aurora/gin-vue-admin/server/model/student"
@@ -93,7 +93,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 	certMap := map[string]*rsa.PublicKey{
 		serial: rsaPubKey, // 动态使用回调头中的公钥ID
 	}
-	logger.Info("构建验签公钥映射", 
+	logger.Info("构建验签公钥映射",
 		zap.String("publicKeyID", serial),
 		zap.Int("keySize", rsaPubKey.Size()*8),
 	)
@@ -118,7 +118,7 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 		SuccessTime   string `json:"success_time"`
 	}
 	if err := notifyReq.DecryptCipherTextToStruct(cfg.APIV3Key, &decryptData); err != nil {
-		logger.Warn("数据解密失败", 
+		logger.Warn("数据解密失败",
 			zap.Error(err),
 			zap.String("apiV3KeyPrefix", cfg.APIV3Key[:4]+"***"), // 避免日志泄露完整密钥
 		)
@@ -184,6 +184,12 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 			zap.String("transactionID", decryptData.TransactionId),
 		)
 
+		if order.CertType == "training" {
+			bsZhengshuService.UpdateTrainingPublic(uint(order.GoodsID))
+		} else if order.CertType == "graduation" {
+			bsZhengshuService.UpdateZhengshuPublic(uint(order.GoodsID))
+		}
+
 		// 异步处理业务逻辑（例：发放课程）
 		go func(orderID uint) {
 			defer func() {
@@ -199,7 +205,6 @@ func (b *BsStudentApi) WeChatPayNotify(c *gin.Context) {
 	// 9. 返回成功响应
 	c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "处理成功"})
 }
-
 
 // 刷新二维码
 func (b *BsStudentApi) RefreshQRCode(c *gin.Context) {

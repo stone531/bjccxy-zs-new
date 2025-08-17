@@ -282,3 +282,11 @@ export const getOrderList = (data) => {
     data: data
   })
 }
+
+export const delOrderById = (data) => {
+  return service({
+    url: '/bszhengshu/delOrderById',
+    method: 'delete',
+    data: data
+  })
+}
