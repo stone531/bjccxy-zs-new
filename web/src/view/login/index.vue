@@ -20,7 +20,7 @@
                 {{ $GIN_VUE_ADMIN.appName }}
               </p>
               <p class="text-center text-sm font-normal text-gray-500 mt-2.5">
-                A management platform using Golang and Vue
+                证书后台管理系统
               </p>
             </div>
             <el-form
@@ -97,7 +97,7 @@
       <div class="hidden md:block w-1/2 h-full float-right bg-[#194bfb]">
         <img
           class="h-full"
-          src="@/assets/login_right_banner.jpg"
+          src="@/assets/login_right_banner_admin.jpg"
           alt="banner"
         />
       </div>
