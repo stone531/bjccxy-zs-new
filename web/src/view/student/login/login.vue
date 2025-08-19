@@ -14,10 +14,10 @@
           <div>
             
             <div class="flex items-center justify-center">
-              <img class="w-24" :src="$GIN_VUE_ADMIN.appLogo" alt />
+              <img class="w-[500px] h-[200px] object-contain" :src="myLogo" alt="logo" />
             </div>
             <div class="mb-9">
-              <p class="text-center text-4xl font-bold">
+              <p class="text-center text-3xl font-bold">
                 {{ $GIN_VUE_ADMIN.appName }} 
               </p>
               <p class="text-center text-sm font-normal text-gray-500 mt-2.5">
@@ -147,6 +147,7 @@
   import { useStudentStore } from '@/pinia/modules/student'
   //import { login } from '@/api/student'
   import MD5 from 'crypto-js/md5';
+  import myLogo from '@/assets/logo.png'
 
   defineOptions({
     name: 'StudentLogin'
