@@ -6,14 +6,12 @@ import (
 
 type BsZhengshuRouter struct{}
 
-
 func (e *BsZhengshuRouter) InitBsZhengshuRouter(public *gin.RouterGroup, private *gin.RouterGroup) {
-	
 
 	// 公共路由
 	BsZhengshuPublicRouter := public.Group("bszhengshu")
 	{
-		BsZhengshuPublicRouter.POST("getOneZhengshu", BsZhengShuApi.GetOneBsZhengshu)         //查询一个证书信息
+		BsZhengshuPublicRouter.POST("getOneZhengshu", BsZhengShuApi.GetOneBsZhengshu) //查询一个证书信息
 	}
 
 	// 私有路由
@@ -26,5 +24,6 @@ func (e *BsZhengshuRouter) InitBsZhengshuRouter(public *gin.RouterGroup, private
 
 		//特例
 		BsZhengshuPrivateRouter.POST("getOrderList", BsZhengShuApi.GetBsOrderList) //查询多个订单列表
+		BsZhengshuPrivateRouter.DELETE("delOrderById", BsZhengShuApi.DelOrderById)
 	}
 }

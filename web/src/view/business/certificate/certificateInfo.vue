@@ -1,8 +1,9 @@
 <template>
   <div class="student-detail-container">
     <div class="title-box">
-      <p class="main-title">为方便用人单位核实毕业证，我院推出电子注册毕业证查询系统。</p>
-      <p class="sub-title">请认真填写下面的各项内容，查询系统将按照您填写的资料进行数据库搜索。</p>
+      <p class="big-title">北京长城研修学院</p>
+      <p class="main-title">毕业信息核实系统</p>
+      <p class="sub-title">为方便用人单位核实毕业证，我院推出电子注册毕业证查询系统。查询系统将按您写的资料进行数据库搜索</p>
     </div>
 
     <el-row justify="center" class="info-box">
@@ -126,6 +127,13 @@ defineOptions({
   padding: 15px;
   background: #f8f9fa;
   border-radius: 4px;
+}
+
+.big-title {
+  font-size: 30px;
+  color: #e53935;
+  font-weight: bold;
+  margin: 10px 0;
 }
 
 .main-title {

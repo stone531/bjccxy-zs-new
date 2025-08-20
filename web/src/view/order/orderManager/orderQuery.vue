@@ -135,8 +135,16 @@
           
           </el-table-column>
   
-          <el-table-column label="操作" :min-width="90" fixed="right">
+          <el-table-column label="操作" :min-width="150" fixed="right">
             <template #default="scope">
+              <el-button
+              type="primary"
+              link
+              icon="delete"
+              @click="deleteOrderFunc(scope.row)"
+              >删除</el-button
+            >
+
               <el-button
                 type="primary"
                 link
@@ -172,7 +180,7 @@
     } from '@/api/user'
   
     import { getAuthorityList } from '@/api/authority'
-    import { setUserInfo, getOrderList } from '@/api/user.js'
+    import { setUserInfo, getOrderList ,delOrderById} from '@/api/user.js'
   
     //import zhengshuInfo from '@/view/business/certificate/certificateInfo.vue'
     import { nextTick, ref, watch } from 'vue'
@@ -195,7 +203,7 @@
       useraccount: '',
       orderSn: '',
       certType: '',
-      //status: 0,
+      status: -1,
       sdate: '',
       edate: ''
     })
@@ -226,7 +234,7 @@
         useraccount: '',
         orderSn: '',
         certType: '',
-        //status: 0,
+        status: -1,
         sdate: '',
         edate: ''
       }
@@ -312,14 +320,13 @@
     }
     
     // 确认重置密码
-  
-    const deleteUserFunc = async (row) => {
+    const deleteOrderFunc = async (row) => {
       ElMessageBox.confirm('确定要删除吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
-        const res = await delTrainStuById({ id: row.ID })
+        const res = await delOrderById({ id: row.ID })
         if (res.code === 0) {
           ElMessage.success('删除成功')
           await getTableData()

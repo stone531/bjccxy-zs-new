@@ -13,14 +13,14 @@
         >
           <div>
             <div class="flex items-center justify-center">
-              <img class="w-24" :src="$GIN_VUE_ADMIN.appLogo" alt />
+              <img class="w-[300px] h-[300px] object-contain" :src="myLogo" alt="logo" />
             </div>
             <div class="mb-9">
-              <p class="text-center text-4xl font-bold">
+              <p class="text-center text-3xl font-bold">
                 {{ $GIN_VUE_ADMIN.appName }}
               </p>
               <p class="text-center text-sm font-normal text-gray-500 mt-2.5">
-                A management platform using Golang and Vue
+                证书后台管理系统
               </p>
             </div>
             <el-form
@@ -97,7 +97,7 @@
       <div class="hidden md:block w-1/2 h-full float-right bg-[#194bfb]">
         <img
           class="h-full"
-          src="@/assets/login_right_banner.jpg"
+          src="@/assets/login_right_banner_admin.jpg"
           alt="banner"
         />
       </div>
@@ -135,6 +135,7 @@
   import { ElMessage } from 'element-plus'
   import { useRouter } from 'vue-router'
   import { useUserStore } from '@/pinia/modules/user'
+  import myLogo from '@/assets/logo.jpg'
 
   defineOptions({
     name: 'Login'

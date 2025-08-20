@@ -153,13 +153,11 @@ func (api *BsZhengShuApi) GetOneBsZhengshu(c *gin.Context) {
 
 func (api *BsZhengShuApi) DelZhengshuById(c *gin.Context) {
 	var reqId cReq.GetById
-	fmt.Println("enter DelZhengshuById:")
 	err := c.ShouldBindJSON(&reqId)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Println("DelZhengshuById id:%d:", reqId.ID)
 
 	err = bsZhengshuService.DeleteUser(reqId.ID)
 	if err != nil {

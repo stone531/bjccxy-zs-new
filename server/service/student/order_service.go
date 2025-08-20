@@ -131,7 +131,7 @@ func (s *OrderService) randomString(n int) string {
 	return string(bytes)
 }
 
-func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uint, totalFee int) error {
+func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userId uint, totalFee int, goodsId uint) error {
 	var (
 		body     string
 		detail   string
@@ -149,8 +149,8 @@ func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uin
 	}
 
 	order := &mstud.BsOrders{
-		UserID:     int64(userID),
-		OrderSN:    s.GenerateOrderSN(userID),
+		UserID:     int64(userId),
+		OrderSN:    s.GenerateOrderSN(userId),
 		TotalFee:   totalFee,
 		FeeType:    "CNY",
 		CertType:   certType,
@@ -158,6 +158,7 @@ func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uin
 		Detail:     detail,
 		Status:     0, // 待支付
 		PayType:    "NATIVE",
+		GoodsID:    int64(goodsId),
 		ExpireTime: time.Now().Add(15 * time.Minute), // 默认15分钟过期
 	}
 
@@ -169,23 +170,6 @@ func (s *OrderService) CreateOrder(orderType common.WeiChatType_Type, userID uin
 
 func (w *OrderService) CreateNativeOrder(orderSN string, totalFee int, description string) (string, error) {
 	cfg := global.GVA_CONFIG.WeChat
-
-	/*fmt.Println("CreateNativeOrder sn:", orderSN, cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
-	// 初始化微信支付客户端
-
-	keyBytes, err := os.ReadFile(cfg.KeyPath)
-	if err != nil {
-		global.GVA_LOG.Error("读取私钥失败", zap.Error(err))
-		return "", err
-	}
-
-	//client, err := wechat.NewClientV3(cfg.MchID, cfg.MchKey, cfg.CertPath, cfg.KeyPath)
-
-	client, err := wechat.NewClientV3(cfg.MchID, cfg.MchKey, cfg.CertPath, string(keyBytes))
-	if err != nil {
-		global.GVA_LOG.Error("NewClientV3 创建失败", zap.Error(err))
-		return "", err
-	}*/
 
 	fmt.Println("CreateNativeOrder client ok")
 	// 构造请求参数

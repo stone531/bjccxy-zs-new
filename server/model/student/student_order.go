@@ -33,6 +33,7 @@ type BsOrders struct {
 	NotifyData    string    `gorm:"column:notify_data;type:text;comment:支付结果通知完整内容" json:"notifyData"`
 	RefundFee     int       `gorm:"column:refund_fee;default:0;comment:退款金额（分）" json:"refundFree"`
 	//IsDeleted     int8      `gorm:"column:is_deleted;type:tinyint;default:0;comment:是否删除（0-未删除，1-已删除）"`
+	GoodsID int64 `gorm:"column:goods_id;default:0;comment:商品ID(毕业证书，培训证书关联商品ID)" json:"goodId"`
 
 	ExtraField1 string `gorm:"column:extra_field1;type:varchar(255)" json:"extra_field1"` // 扩展字段
 }

@@ -189,10 +189,20 @@ func (api *BsZhengshuService) GetNextTrainingGraduschoolNumber() string {
 	return strconv.FormatUint(nextNum, 10)
 }
 
-func (api *BsZhengshuService) UpdateZhengshuPublic(publish string, id uint) (bool, error) {
+func (api *BsZhengshuService) UpdateZhengshuPublic(id uint) (bool, error) {
 	if err := global.GVA_DB.Model(&business.BsZhengshu{}).
 		Where("id = ?", id).
-		Update("publish", publish).Error; err != nil {
+		Update("publish", "yes").Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (api *BsZhengshuService) UpdateTrainingPublic(id uint) (bool, error) {
+	if err := global.GVA_DB.Model(&business.BsTrainingStudent{}).
+		Where("id = ?", id).
+		Update("extra_field1", "yes").Error; err != nil {
 		return false, err
 	}
 
