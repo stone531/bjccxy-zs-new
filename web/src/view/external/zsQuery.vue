@@ -1,98 +1,91 @@
 <template>
   <div id="userLayout" class="w-full h-full relative">
     <div
-      class="rounded-lg flex items-center justify-evenly w-full h-full md:w-screen md:h-screen md:bg-[#194bfb] bg-white"
+      class="rounded-lg flex items-center justify-center md:justify-end w-full h-full md:w-screen md:h-screen md:bg-[#194bfb] bg-white"
     >
-       <!-- class="h-full" -->
-      <div class="min-h-screen bg-cover bg-center bg-no-repeat">
+      <!-- 背景图 -->
+      <div class="absolute inset-0">
         <img
-          
-          class="absolute inset-0 w-full h-full object-cover object-top mt-0"
-          
+          class="w-full h-full object-cover object-top"
           src="@/assets/bjccxy/banner.jpg"
           alt="banner"
         />
       </div>
 
-       <div class="md:w-full w-10/12 h-full flex items-center justify-evenly relative">
-    <div class="h-0 w-32 bg-white dark:bg-slate-900 absolute -ml-8" />
-
-    <div
-      class="fixed right-[10rem] top-1/2 -translate-y-1/2 z-[999] w-[30rem] rounded-lg flex flex-col justify-between bg-white dark:bg-slate-800 p-6 shadow-lg"
-    >
-      <!-- Tab 标签页 -->
-      <el-tabs v-model="activeTab" type="card" class="mb-4">
-        <el-tab-pane label="证书查询" name="certificate" />
-        <el-tab-pane label="学籍查询" name="school" />
-        <el-tab-pane label="培训证书查询" name="train" />
-      </el-tabs>
-
-      <el-form
-        ref="queryForm"
-        :model="formData"
-        :rules="rules"
-        label-width="100px"
+      <!-- 表单容器 -->
+      <div
+        class="relative z-[999] w-11/12 sm:w-8/12 md:w-[30rem] rounded-lg flex flex-col justify-between bg-white dark:bg-slate-800 p-6 shadow-lg
+               md:mr-[10rem]" 
       >
-        <!-- 姓名 -->
-        <el-form-item label="姓名：" prop="name" class="mb-6">
-          <el-input
-            v-model="formData.name"
-            size="large"
-            placeholder="请输入姓名"
-          />
-        </el-form-item>
+        <!-- Tab 标签页 -->
+        <el-tabs v-model="activeTab" type="card" class="mb-4">
+          <el-tab-pane label="证书查询" name="certificate" />
+          <el-tab-pane label="学籍查询" name="school" />
+          <el-tab-pane label="培训证书查询" name="train" />
+        </el-tabs>
 
-        <!-- 根据 tab 控制显示字段 -->
-        <!-- 证书号：只在 certificate 页显示 -->
-        <el-form-item
-          v-if="activeTab === 'certificate'"
-          label="证书号："
-          prop="number"
-          class="mb-6"
+        <el-form
+          ref="queryForm"
+          :model="formData"
+          :rules="rules"
+          label-width="100px"
         >
-          <el-input
-            v-model="formData.number"
-            size="large"
-            placeholder="请输入证书号"
-          />
-        </el-form-item>
+          <!-- 姓名 -->
+          <el-form-item label="姓名：" prop="name" class="mb-6">
+            <el-input
+              v-model="formData.name"
+              size="large"
+              placeholder="请输入姓名"
+            />
+          </el-form-item>
 
-        <!-- 身份证号：在 school / train 页显示 -->
-        <el-form-item
-          v-if="activeTab !== 'certificate'"
-          label="身份证号："
-          prop="idcard"
-          class="mb-6"
-        >
-          <el-input
-            v-model="formData.idcard"
-            size="large"
-            placeholder="请输入身份证号"
-          />
-        </el-form-item>
-
-        <!-- 查询按钮 -->
-        <el-form-item class="mb-6">
-          <el-button
-            class="shadow shadow-active h-11 w-full"
-            type="primary"
-            size="large"
-            @click="submitQuery"
+          <!-- 证书号 -->
+          <el-form-item
+            v-if="activeTab === 'certificate'"
+            label="证书号："
+            prop="number"
+            class="mb-6"
           >
-            {{ tabButtonText[activeTab] }}
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-  </div>
-      
+            <el-input
+              v-model="formData.number"
+              size="large"
+              placeholder="请输入证书号"
+            />
+          </el-form-item>
+
+          <!-- 身份证号 -->
+          <el-form-item
+            v-if="activeTab !== 'certificate'"
+            label="身份证号："
+            prop="idcard"
+            class="mb-6"
+          >
+            <el-input
+              v-model="formData.idcard"
+              size="large"
+              placeholder="请输入身份证号"
+            />
+          </el-form-item>
+
+          <!-- 查询按钮 -->
+          <el-form-item class="mb-6">
+            <el-button
+              class="shadow shadow-active h-11 w-full"
+              type="primary"
+              size="large"
+              @click="submitQuery"
+            >
+              {{ tabButtonText[activeTab] }}
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
     </div>
 
-    <BottomInfo class="left-0 right-0 absolute bottom-3 mx-auto w-full z-20">
-      
-    </BottomInfo>
+    <BottomInfo class="absolute bottom-3 left-0 right-0 mx-auto w-full z-20" />
   </div>
 </template>
+
 
 
 
