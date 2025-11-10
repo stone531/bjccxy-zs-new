@@ -140,6 +140,11 @@ func (api *BsTrainingApi) GetOneBsTraining(c *gin.Context) {
 		return
 	}
 
+	if record.ExtraField1 != "yes" {
+		response.FailWithMessage("请您及时支付", c)
+		return
+	}
+
 	response.OkWithData(record, c)
 }
 

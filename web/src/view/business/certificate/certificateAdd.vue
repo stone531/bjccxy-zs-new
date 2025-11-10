@@ -81,12 +81,20 @@
           />
         </el-form-item>
 
+        <el-form-item label="证书编号" prop="graduschool">
+          <el-input v-model="userInfo.graduschool" style="width: 200px" />
+        </el-form-item>
+
         <el-form-item label="自我鉴定" prop="zwjd">
           <el-input v-model="userInfo.zwjd" style="width: 300px" />
         </el-form-item>
 
         <el-form-item label="备注" prop="demo">
           <el-input v-model="userInfo.demo" style="width: 300px" />
+        </el-form-item>
+
+        <el-form-item label="回执文件" prop="documentary" label-width="80px">
+          <SelectOneFile v-model="userInfo.documentary" />
         </el-form-item>
 
         <el-form-item>
@@ -112,6 +120,7 @@ import SelectImage from '@/components/upload/zsCommon.vue'
 import WarningBar from '@/components/warningBar/warningBar.vue'
 import { insertZhengshu } from '@/api/user.js'
 import { useUserStore } from '@/pinia/modules/user'
+import SelectOneFile from '@/components/selectOneFile/selectOneFile.vue'
 
 defineOptions({ name: 'certificateAdd' })
 
@@ -132,7 +141,9 @@ const userInfo = ref({
   bysj: '',
   zwjd: '',
   demo: '',
-  editer:userStore.userInfo.userName
+  editer:userStore.userInfo.userName,
+  documentary: '',
+  graduschool: '',
 })
 
 const nations = [
@@ -165,6 +176,7 @@ const rules = ref({
   pic: [{ required: true, message: '请上传证件照', trigger: 'change' }],
   nativeplace: [{ required: true, message: '请选择籍贯', trigger: 'change' }],
   zhuanye: [{ required: true, message: '请输入专业', trigger: 'blur' }],
+  graduschool: [{ required: true, message: '请输入毕业编号', trigger: 'blur' }],
   bysj: [{ required: true, message: '请选择毕业时间', trigger: 'change' }]
 })
 
@@ -200,14 +212,19 @@ const addUserFunc = async () => {
     ElMessage.error('请输入正确的毕业时间')
     return
   }
+  if(userInfo.value.graduschool == ''){
+    ElMessage.error('请输入毕业编号')
+    return
+  }
   try {
     const res = await insertZhengshu(userInfo.value)
     if (res.code === 0) {
       ElMessage.success('创建成功')
       resetUserFunc()
-      closeAddUserDialog()
+      //closeAddUserDialog()
     }
   } catch (error) {
+    console.error('提交失败，请重试:', error)
     ElMessage.error('提交失败，请重试')
   }
 }
@@ -227,7 +244,9 @@ const resetUserFunc = () => {
     graduschool2: '北京长城学院',
     bysj: '',
     zwjd: '',
-    demo: ''
+    demo: '',
+    documentary:'',
+    graduschool: '',
   })
 }
 

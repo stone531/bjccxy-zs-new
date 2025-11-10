@@ -137,6 +137,11 @@ service.interceptors.response.use(
     if (response.headers['new-token']) {
       userStore.setToken(response.headers['new-token'])
     }
+
+    if (response.config.responseType === 'blob') {
+      return response
+    }
+    
     if (response.data.code === 0 || response.headers.success === 'true') {
       if (response.headers.msg) {
         response.data.msg = decodeURI(response.headers.msg)
@@ -250,7 +255,8 @@ service.interceptors.response.use(
         break
     }
 
-    return error
+    return Promise.reject(error)
+    //return error
   }
 )
 export default service

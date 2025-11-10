@@ -53,7 +53,7 @@ func (api *BsZhengShuApi) CreateBsZhengshu(c *gin.Context) {
 		Chengchi:           req.Chengchi,
 		CertificateNumber2: req.CertificateNumber2,
 		Zhuanye:            req.Zhuanye,
-		Graduschool:        bsZhengshuService.GetNextGraduschoolNumber(),
+		Graduschool:        req.Graduschool,
 		Graduschool2:       req.Graduschool2,
 		Bysj:               req.Bysj,
 		Zwjd:               req.Zwjd,
@@ -61,6 +61,7 @@ func (api *BsZhengShuApi) CreateBsZhengshu(c *gin.Context) {
 		Editer:             req.Editer,
 		Date:               currentDate,
 		Publish:            "yes",
+		Documentary:         req.Documentary,
 	}
 
 	if err := global.GVA_DB.Create(&record).Error; err != nil {
@@ -196,6 +197,8 @@ func (api *BsZhengShuApi) SetZhengshuInfo(c *gin.Context) {
 		NativePlace:        user.NativePlace,
 		Zhuanye:            user.Zhuanye,
 		CertificateNumber2: user.CertificateNumber2,
+		Documentary:        user.Documentary,
+		Graduschool:        user.Graduschool,
 	})
 	if err != nil {
 		global.GVA_LOG.Error("设置失败!", zap.Error(err))
