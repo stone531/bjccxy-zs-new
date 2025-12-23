@@ -29,6 +29,7 @@ type BsZhengshu struct {
 	Date               time.Time `gorm:"column:date;type:date;not null;default:'0000-00-00'" json:"date"`
 	Publish            string    `gorm:"column:publish;type:varchar(10);default:'yes'" json:"publish"`
 	Operation          string    `gorm:"column:operation;type:varchar(256)" json:"operation"`
+	Documentary        string    `gorm:"column:documentary;type:varchar(200)" json:"documentary"` // 证明文件路径
 }
 
 type Zhengshu interface {

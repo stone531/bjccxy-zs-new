@@ -113,6 +113,7 @@ func (b *BsStudentApi) TokenNext(c *gin.Context, user student.BsStudents) {
 			Token:     token,
 			ExpiresAt: claims.RegisteredClaims.ExpiresAt.Unix() * 1000,
 		}, "登录成功", c)
+		global.GVA_LOG.Info("login 学生用户登录成功!", zap.String("name", user.UserAccount))
 		return
 	}
 

@@ -89,6 +89,7 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 			Token:     token,
 			ExpiresAt: claims.RegisteredClaims.ExpiresAt.Unix() * 1000,
 		}, "登录成功", c)
+		global.GVA_LOG.Info("login 管理用户登录成功!", zap.String("name", user.Username))
 		return
 	}
 

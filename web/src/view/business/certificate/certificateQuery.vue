@@ -49,6 +49,9 @@
         <el-form-item label="录入人员">
           <el-input v-model="searchInfo.editer" placeholder="录入人员" />
         </el-form-item>
+        <el-form-item label="回执文件">
+          <el-input v-model="searchInfo.editer" placeholder="回执文件" />
+        </el-form-item>
 
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">
@@ -114,7 +117,7 @@
         <el-table-column
           align="left"
           label="录入人员"
-          min-width="180"
+          min-width="120"
           prop="editer"
         />
 
@@ -124,6 +127,24 @@
           min-width="80"
           prop="publish"
         />
+
+        <el-table-column
+          align="left"
+          label="回执文件"
+          min-width="100"
+          prop="documentary"
+        >
+        <template #default="{ row }">
+          <el-button
+            v-if="row.documentary"
+            type="primary"
+            link
+            @click="downloadFile(row.documentary)"
+          >
+            下载
+          </el-button>
+        </template>
+        </el-table-column>
 
         <el-table-column label="操作" :min-width="appStore.operateMinWith" fixed="right">
           <template #default="scope">
@@ -249,6 +270,11 @@
             value-format="YYYY-MM"
           />
         </el-form-item>
+
+        <el-form-item label="证书编号" prop="graduschool">
+          <el-input v-model="userInfo.graduschool" style="width: 200px" />
+        </el-form-item>
+        
       </el-form>  
 
     </el-drawer>
@@ -261,6 +287,7 @@
     delZhengshuById,
     setZhengshuInfo
   } from '@/api/user'
+  import axios from 'axios' // 引入axios
 
   import { getAuthorityList } from '@/api/authority'
   import { setUserInfo, resetPassword } from '@/api/user.js'
@@ -270,6 +297,7 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { useAppStore } from "@/pinia";
   import { useRouter } from 'vue-router'
+  import { getBaseUrl } from '@/utils/format'
   import dayjs from 'dayjs'
 
   defineOptions({
@@ -416,7 +444,8 @@
     nativeplace: '',
     bysj: '',
     zhuanye:'',
-    certificatenumber2:''
+    certificatenumber2:'',
+    graduschool: '',
   })
 
   const nations = [
@@ -582,6 +611,77 @@ const nativeplaces = [
 const formatDate = (dateStr) => {
   return dateStr ? dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss') : ''
 }
+
+const downloadFileEx = (path) => {
+  if (!path) return ElMessage.warning('文件地址不存在')
+  const fullUrl = path.startsWith('http') ? path : `${getBaseUrl()}${path}`
+  console.log('download response 00：',fullUrl)
+  const a = document.createElement('a')
+  a.href = fullUrl
+  a.download = ''
+  a.target = '_blank'
+  document.body.appendChild(a)
+  a.click()
+  console.log('download response 01')
+  document.body.removeChild(a)
+}
+
+const service = axios.create({
+  baseURL: import.meta.env.VITE_BASE_API,
+  timeout: 99999
+})
+const downloadFile = async (path) => {
+  if (!path) {
+    ElMessage.warning('文件地址不存在')
+    return
+  }
+
+  try {
+    const baseUrl = getBaseUrl().replace(/\/api$/, '')
+    const fixedPath = path.startsWith('/api') ? path : `/${path}`
+
+    const fullUrl = path.startsWith('http')
+      ? path
+      : `${baseUrl}${fixedPath}`
+
+    const res = await service.get(fullUrl, {
+      responseType: 'blob'
+    })
+    //const res = await axios.get(fullUrl, { responseType: 'blob' })
+
+    const contentType = res.headers['content-type']
+
+    if (contentType && contentType.includes('text/html')) {
+      ElMessage.error('文件下载失败（无权限或文件不存在）')
+      return
+    }
+
+    const blob = new Blob([res.data], { type: contentType })
+    const fileName = path.split('/').pop() || 'download'
+
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    console.log('download response 02')
+
+  } catch (err) {
+    const msg = err?.response?.data?.message 
+    || err?.message 
+    || '未知错误';
+  
+    ElMessage.error({
+      message: `下载失败：${msg}`,
+      duration: 5000, // 延长显示时间
+      showClose: true // 允许用户手动关闭
+    });
+  }
+}
+
 </script>
 
 <style lang="scss">

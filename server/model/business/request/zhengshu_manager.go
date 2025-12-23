@@ -26,6 +26,7 @@ type AddUser struct {
 	Editer             string `json:"editer"`
 	//Date               time.Time `json:"date"`
 	Publish string `json:"publish"`
+	Documentary string `json:"documentary"`
 }
 
 /*type GetUserList struct {
@@ -73,4 +74,6 @@ type ChangeZhengShuInfo struct {
 	Bysj               string `gorm:"column:bysj;type:varchar(100);default:'0'" json:"bysj"` // 用户侧边主题
 	Zhuanye            string `gorm:"column:zhuanye;type:varchar(100);default:'0'" json:"zhuanye"`
 	CertificateNumber2 string `gorm:"column:certificatenumber2;type:varchar(200);not null;default:'1212'" json:"certificatenumber2"`
+	Documentary 	   string `gorm:"column:documentary;type:varchar(200)" json:"documentary"`
+	Graduschool        string `gorm:"column:graduschool;type:varchar(200);not null;default:'114'" json:"graduschool"`
 }

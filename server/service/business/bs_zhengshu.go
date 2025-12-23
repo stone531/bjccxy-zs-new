@@ -121,7 +121,7 @@ func (userService *BsZhengshuService) GetUserInfoList(info systemReq.GetUserList
 
 func (userService *BsZhengshuService) SetZhengShuInfo(req systemReq.ChangeZhengShuInfo) error {
 	return global.GVA_DB.Model(&business.BsZhengshu{}).
-		Select("updated_at", "name", "age", "sex", "mingzhu", "pic", "nativeplace", "bysj", "zhuanye", "certificatenumber2").
+		Select("updated_at", "name", "age", "sex", "mingzhu", "pic", "nativeplace", "bysj", "zhuanye", "certificatenumber2","documentary","graduschool").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
 			"updated_at":         time.Now(),
@@ -134,6 +134,9 @@ func (userService *BsZhengshuService) SetZhengShuInfo(req systemReq.ChangeZhengS
 			"bysj":               req.Bysj,
 			"zhuanye":            req.Zhuanye,
 			"certificatenumber2": req.CertificateNumber2,
+			"documentary":        req.Documentary,
+			"graduschool":        req.Graduschool,
+
 		}).Error
 }
 
