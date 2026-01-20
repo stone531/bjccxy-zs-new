@@ -49,9 +49,6 @@
         <el-form-item label="录入人员">
           <el-input v-model="searchInfo.editer" placeholder="录入人员" />
         </el-form-item>
-        <el-form-item label="回执文件">
-          <el-input v-model="searchInfo.editer" placeholder="回执文件" />
-        </el-form-item>
 
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">

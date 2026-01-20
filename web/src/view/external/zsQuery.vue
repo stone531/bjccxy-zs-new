@@ -18,7 +18,7 @@
     <div class="h-0 w-32 bg-white dark:bg-slate-900 absolute -ml-8" />
 
     <div
-      class="fixed right-[10rem] top-1/2 -translate-y-1/2 z-[999] w-[30rem] rounded-lg flex flex-col justify-between bg-white dark:bg-slate-800 p-6 shadow-lg"
+     class="fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-[999] md:w-[30rem] w-[calc(100%-2rem)] rounded-lg flex flex-col justify-between bg-white dark:bg-slate-800 p-6 shadow-lg max-h-[90vh] overflow-y-auto"
     >
       <!-- Tab 标签页 -->
       <el-tabs v-model="activeTab" type="card" class="mb-4">
